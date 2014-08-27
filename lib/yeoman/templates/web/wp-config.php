@@ -1,7 +1,7 @@
 <?php
 
-/* Include Genesis to use with WordPress */
-require_once(dirname(__FILE__) . '/../bower_components/genesis-wordpress/lib/wordpress/Genesis.php');
+/* Include Evolution to use with WordPress */
+require_once(dirname(__FILE__) . '/../bower_components/evolution-wordpress/lib/wordpress/Evolution.php');
 <%= wpConfigFile
   // Already started PHP
   .replace('<?php', '')
@@ -10,13 +10,13 @@ require_once(dirname(__FILE__) . '/../bower_components/genesis-wordpress/lib/wor
   .replace(/(\$table_prefix\s*=\s*['"]).+(["'])/, '$1' + props.prefix + '$2')
 
   // Replace DB_*
-  .replace("'database_name_here'","Genesis::getDbName('" + props.DB_NAME + "')")
+  .replace("'database_name_here'","Evolution::getDbName('" + props.DB_NAME + "')")
   .replace('username_here',       props.DB_USER)
   .replace('password_here',       props.DB_PASSWORD)
   .replace('localhost',           props.DB_HOST)
 
   // Replace WP_DEBUG
-  .replace(/define\('WP_DEBUG'.+\);/, "define('WP_DEBUG', Genesis::getEnv() === 'local');")
+  .replace(/define\('WP_DEBUG'.+\);/, "define('WP_DEBUG', Evolution::getEnv() === 'local');")
 
   // Replace salts
   .replace(/(\/\*\*#@\+(?:.|[\r\n])+?\*\/[\r\n]+)(?:.|[\r\n])+?([\r\n]+\/\*\*#@-\*\/)/m, '$1__GENERATED_SALTS_PLACEHOLDER__$2')
@@ -36,7 +36,7 @@ require_once(dirname(__FILE__) . '/../bower_components/genesis-wordpress/lib/wor
       "define('WP_AUTO_UPDATE_CORE', false);",
       "define('WP_CONTENT_DIR', dirname(__FILE__) . CONTENT_DIR);",
       "define('WP_CONTENT_URL', CONTENT_DIR);",
-      "define('WP_ENV', Genesis::getEnv());",
+      "define('WP_ENV', Evolution::getEnv());",
       "define('WP_HOME', '/');",
       "define('WP_POST_REVISIONS', 5);",
       "define('WP_SITEURL', '/wp');",

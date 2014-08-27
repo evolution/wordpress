@@ -1,4 +1,4 @@
-namespace :genesis do
+namespace :evolve do
   desc "Provisions remote machine via Ansible"
   task :provision do
     run_locally do

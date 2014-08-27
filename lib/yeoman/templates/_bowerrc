@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "postinstall": "./bower_components/genesis-wordpress/lib/yeoman/bin/postinstall"
+    "postinstall": "./bower_components/evolution-wordpress/lib/yeoman/bin/postinstall"
   }
 }

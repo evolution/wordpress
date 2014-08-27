@@ -1,9 +1,9 @@
 {
-    "name":         "CollegeDegrees/EDUDirect",
-    "description":  "EDUDirect",
+    "name":         "evolution/wordpress",
+    "description":  "",
     "autoload": {
         "psr-0": {
-            "Genesis": "lib/wordpress"
+            "Evolution": "lib/wordpress"
         }
     },
     "require-dev": {

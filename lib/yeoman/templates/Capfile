@@ -24,8 +24,8 @@ require 'capistrano/deploy'
 # require 'capistrano/rails/assets'
 # require 'capistrano/rails/migrations'
 
-# Load Genesis WordPress' tasks
-load File.expand_path(File.dirname(__FILE__)) + '/bower_components/genesis-wordpress/lib/capistrano/bootstrap.rake'
+# Load Evolution WordPress' tasks
+load File.expand_path(File.dirname(__FILE__)) + '/bower_components/evolution-wordpress/lib/capistrano/bootstrap.rake'
 
 # Loads custom tasks from `lib/capistrano/tasks' if you have any defined.
 Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }

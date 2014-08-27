@@ -10,7 +10,7 @@
   sudo:           yes
 
 - name:           Create deploy user
-  user:           name=deploy append=yes groups=www-data shell=/bin/bash comment="Created by Genesis WordPress"
+  user:           name=deploy append=yes groups=www-data shell=/bin/bash comment="Created by Evolution WordPress"
   sudo:           yes
 
 - name:           Grant sudo access to deploy user

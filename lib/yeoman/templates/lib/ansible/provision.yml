@@ -3,8 +3,8 @@
   gather_facts:         yes           # Host specs required for templates
 
   pre_tasks:
-    - name:             Stop any existing genesis services
-      command:          /etc/init.d/genesis-wordpress stop removes=/etc/init.d/genesis-wordpress
+    - name:             Stop any existing evolution services
+      command:          /etc/init.d/evolution-wordpress stop removes=/etc/init.d/evolution-wordpress
       sudo:             yes
 
   roles:
@@ -22,6 +22,6 @@
     - debug             # (Optional) Tools to monitor processes & debug when SSH'd in
 
   post_tasks:
-    - name:             Generate init.d for installed genesis services
-      template:         src=templates/genesis-init-d dest=/etc/init.d/genesis-wordpress mode=0755
+    - name:             Generate init.d for installed evolution services
+      template:         src=templates/evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
       sudo:             yes

@@ -65,7 +65,7 @@ case "$1" in
         status_services
         ;;
     version)
-        log_success_msg "Genesis Wordpress" "<%= props.genesis %>"
+        log_success_msg "Evolution Wordpress" "<%= props.evolution %>"
         ;;
     *)
         log_success_msg "Usage $0 {start|stop|restart|status}"

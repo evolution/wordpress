@@ -23,8 +23,8 @@ helpers.testDirectory(outputDir, function(err) {
     'cd ' + outputDir,
     'git rm -rf .',
   ].join(' && '), function(err, stdout, stderr) {
-    var app = helpers.createGenerator('genesis-wordpress:app', [
-      [require('../lib/yeoman'), 'genesis-wordpress:app']
+    var app = helpers.createGenerator('evolution-wordpress:app', [
+      [require('../lib/yeoman'), 'evolution-wordpress:app']
     ]);
 
     app.options['skip-install'] = true;
@@ -39,7 +39,7 @@ helpers.testDirectory(outputDir, function(err) {
       DB_PASSWORD:  'example',
       DB_HOST:      '127.0.0.1',
       prefix:       'wp_',
-      genesis:      '~1.0.0',
+      evolution:    '~1.0.0',
     });
 
     app.run(function() {

@@ -1,8 +1,8 @@
-namespace :genesis do
+namespace :evolve do
   task :confirm, :message do |task, args|
     # interpret env values of blank, "false", or "0" as falsey
-    if ENV.has_key?('genesis_non_interactive')
-      do_prompt = !! (ENV['genesis_non_interactive'] =~ /^(false|0)?$/i)
+    if ENV.has_key?('evolution_non_interactive')
+      do_prompt = !! (ENV['evolution_non_interactive'] =~ /^(false|0)?$/i)
     else
       do_prompt = true
     end
@@ -25,7 +25,7 @@ WARN
         exit
       end
 
-      Rake::Task['genesis:confirm'].reenable
+      Rake::Task['evolve:confirm'].reenable
     end
   end
 end

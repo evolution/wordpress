@@ -1,4 +1,4 @@
-namespace :genesis do
+namespace :evolve do
   desc "SSH into remote machine"
   task :ssh do |host|
     key = fetch(:ssh_options)[:keys].last

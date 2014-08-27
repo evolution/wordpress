@@ -1,6 +1,6 @@
 <?php
 
-class Genesis
+class Evolution
 {
     public static function getDbName($name)
     {
@@ -21,7 +21,7 @@ class Genesis
     {
         // Set environment to the last sub-domain (e.g. foo.staging.site.com => 'staging')
         if (!defined('WP_ENV')) {
-            define('WP_ENV', Genesis::getEnv());
+            define('WP_ENV', Evolution::getEnv());
         }
 
         return WP_ENV;

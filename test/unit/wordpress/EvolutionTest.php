@@ -1,12 +1,12 @@
 <?php
 
-class GenesisTest extends PHPUnit_Framework_TestCase
+class EvolutionTest extends PHPUnit_Framework_TestCase
 {
     public function testGetDbName()
     {
         $_SERVER['HTTP_HOST'] = 'local.example.com';
 
-        $this->assertEquals('test_local', Genesis::getDbName('test'));
+        $this->assertEquals('test_local', Evolution::getDbName('test'));
     }
 
     /**
@@ -16,7 +16,7 @@ class GenesisTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['HTTP_HOST'] = $host;
 
-        $this->assertEquals($expected, Genesis::getEnv());
+        $this->assertEquals($expected, Evolution::getEnv());
     }
 
     /**
@@ -26,9 +26,9 @@ class GenesisTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['HTTP_HOST'] = $host;
 
-        Genesis::initEnv();
+        Evolution::initEnv();
 
-        $this->assertTrue(defined('WP_ENV'), '`Genesis::initEnv()` should define `WP_ENV`');
+        $this->assertTrue(defined('WP_ENV'), '`Evolution::initEnv()` should define `WP_ENV`');
         $this->assertEquals($expected, WP_ENV);
     }
 

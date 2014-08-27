@@ -14,7 +14,7 @@ describe('Mock site', function() {
       .then(function() {
         if (browser.button('Install WordPress')) {
           browser
-            .fill('Site Title',       'Genesis WordPress Test')
+            .fill('Site Title',       'Evolution WordPress Test')
             .fill('Username',         'test')
             .fill('admin_password',   'test')
             .fill('admin_password2',  'test')

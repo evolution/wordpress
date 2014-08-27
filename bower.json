@@ -1,7 +1,7 @@
 {
-  "name": "genesis-wordpress",
-  "version": "0.2.55",
-  "homepage": "https://github.com/genesis/wordpress",
+  "name": "evolution-wordpress",
+  "version": "1.0.0",
+  "homepage": "https://github.com/evolution/wordpress",
   "authors": [
     "Eric Clemmons <eric@smarterspam.com>"
   ],
@@ -10,6 +10,7 @@
     "vagrant",
     "wordpress",
     "genesis",
+    "evolution",
     "cap",
     "capistrano",
     "deploy"

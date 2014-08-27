@@ -3,11 +3,11 @@
 var assert  = require('assert');
 var exec    = require('child_process').exec;
 
-describe('cap production genesis:provision', function(done) {
+describe('cap production evolve:provision', function(done) {
   it('should not fail', function(done) {
     this.timeout(60 * 1000);
 
-    exec('bundle exec cap production genesis:provision', {
+    exec('bundle exec cap production evolve:provision', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
       assert.ifError(err);

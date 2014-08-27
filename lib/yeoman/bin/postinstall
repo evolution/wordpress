@@ -8,7 +8,7 @@ var cwd   = process.cwd();
 var from  = path.join(cwd, 'bower_components', 'wordpress');
 var to    = path.join(cwd, 'web', 'wp');
 
-console.log('Genesis WordPress - Bower `postinstall` Script\n');
+console.log('Evolution WordPress - Bower `postinstall` Script\n');
 
 // Ensure `bower_components/wordpress` has been installed
 if (!fs.existsSync(from)) {

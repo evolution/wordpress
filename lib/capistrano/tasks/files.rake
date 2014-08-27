@@ -1,4 +1,4 @@
-namespace :genesis do
+namespace :evolve do
   namespace :files do
     task :prepare, :key_file, :path_from, :path_to do |task, args|
       run_locally do
@@ -26,7 +26,7 @@ namespace :genesis do
         end
 
         on roles(:web) do |host|
-          invoke "genesis:files:prepare", key, "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
+          invoke "evolve:files:prepare", key, "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
           run_locally do
             execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
           end
@@ -38,7 +38,7 @@ namespace :genesis do
 
     desc "Uploads local uploads to remote"
     task :up do
-      invoke "genesis:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
+      invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
 
       local_uploads = "/vagrant/web/wp-content/uploads"
       remote_uploads = "#{release_path}/web/wp-content/uploads"
@@ -53,7 +53,7 @@ namespace :genesis do
         key = fetch(:ssh_options)[:keys].last
 
         on roles(:web) do |host|
-          invoke "genesis:files:prepare", key, local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
+          invoke "evolve:files:prepare", key, local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
           run_locally do
             execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
           end

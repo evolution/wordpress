@@ -1,4 +1,4 @@
-namespace :genesis do
+namespace :evolve do
   namespace :db do
     task :prepare do
       set :db_backup_file, DateTime.now.strftime("#{fetch(:wp_config)['name']}.%Y-%m-%d.%H%M%S.sql")
@@ -7,7 +7,7 @@ namespace :genesis do
 
     desc "Download remote DB to local"
     task :backup do
-      invoke "genesis:db:prepare"
+      invoke "evolve:db:prepare"
 
       on release_roles(:db) do
         within "/tmp" do
@@ -25,7 +25,7 @@ namespace :genesis do
 
     desc "Import remote DB to local"
     task :down do
-      invoke "genesis:db:backup"
+      invoke "evolve:db:backup"
 
       run_locally do
         execute :vagrant, :up
@@ -36,8 +36,8 @@ namespace :genesis do
 
     desc "Export local DB to remote"
     task :up do
-      invoke "genesis:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
-      invoke "genesis:db:prepare"
+      invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
+      invoke "evolve:db:prepare"
 
       run_locally do
         execute :vagrant, :up

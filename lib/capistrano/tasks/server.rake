@@ -1,28 +1,28 @@
-namespace :genesis do
+namespace :evolve do
   task :service, :action do |task, args|
     on release_roles(:web) do
-      execute :sudo, "/etc/init.d/genesis-wordpress #{args[:action]}"
+      execute :sudo, "/etc/init.d/evolution-wordpress #{args[:action]}"
     end
   end
 
-  desc "Stop installed genesis web services"
+  desc "Stop installed evolution web services"
   task :stop do
-    invoke "genesis:service", "stop"
+    invoke "evolve:service", "stop"
   end
 
-  desc "Start installed genesis web services"
+  desc "Start installed evolution web services"
   task :start do
-    invoke "genesis:service", "start"
+    invoke "evolve:service", "start"
   end
 
-  desc "Restart installed genesis web services"
+  desc "Restart installed evolution web services"
   task :restart do
-    invoke "genesis:service", "restart"
+    invoke "evolve:service", "restart"
   end
 
-  desc "Return provisioned genesis version"
+  desc "Return provisioned evolution version"
   task :version do
-    invoke "genesis:service", "version"
+    invoke "evolve:service", "version"
   end
 
   namespace :logs do
@@ -35,12 +35,12 @@ namespace :genesis do
 
       desc "Tail apache access log"
       task :access do
-        invoke "genesis:logs:apache:tail", "access"
+        invoke "evolve:logs:apache:tail", "access"
       end
 
       desc "Tail apache error log"
       task :error do
-        invoke "genesis:logs:apache:tail", "error"
+        invoke "evolve:logs:apache:tail", "error"
       end
     end
 
@@ -71,7 +71,7 @@ namespace :genesis do
 
   desc "Remove remote deployments"
   task :teardown do
-    invoke "genesis:confirm", "You are about to permanently remove everything within #{deploy_to}"
+    invoke "evolve:confirm", "You are about to permanently remove everything within #{deploy_to}"
 
     on release_roles(:web) do
       execute :sudo, "rm -rf #{deploy_to}"

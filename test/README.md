@@ -1,4 +1,4 @@
-# Testing Genesis WordPress
+# Testing Evolution WordPress
 
 ### Dependencies
 
