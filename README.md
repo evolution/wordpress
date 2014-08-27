@@ -1,4 +1,4 @@
-# Evolution [WordPress]
+# Evolution WordPress
 
 [![Build Status](https://travis-ci.org/evolution/wordpress.svg)](https://travis-ci.org/evolution/wordpress)
 [![Dependencies](https://david-dm.org/evolution/wordpress.svg)](https://david-dm.org/evolution/wordpress)
