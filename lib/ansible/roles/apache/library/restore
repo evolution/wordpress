@@ -33,6 +33,12 @@ options:
     required: true
     description:
       - The file to restore from backup.
+  fail_on_missing:
+    required: false
+    default: "yes"
+    choices: [ "yes", "no" ]
+    description:
+      - Causes failure if target file does not exist
   backup:
     required: false
     default: "no"
@@ -60,6 +66,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             path=dict(required=True),
+            fail_on_missing=dict(default=True, type='bool'),
             backup=dict(default=False, type='bool'),
             which=dict(required=False, default='oldest', choices=[ 'oldest', 'newest'], type='str'),
         ),
@@ -68,11 +75,16 @@ def main():
     )
 
     path   = os.path.expanduser(module.params['path'])
+    fom    = module.params['fail_on_missing']
     backup = module.params['backup']
     which  = module.params['which']
 
     if not os.path.exists(path):
-        module.fail_json(msg="Path %s does not exist" % (path))
+        msg = "Path %s does not exist" % (path)
+        if fom:
+            module.fail_json(msg=msg)
+        else:
+            module.exit_json(changed=False, msg=msg)
     if not os.access(path, os.R_OK):
         module.fail_json(msg="Path %s not readable" % (path))
 

@@ -21,16 +21,22 @@
   sudo:           yes
 
 - name:           Ensure pristine mpm_prefork directives
-  restore:        path=/etc/apache2/mods-available/mpm_prefork.conf which=oldest backup=no
+  restore:        path=/etc/apache2/mods-available/mpm_prefork.conf which=oldest backup=no fail_on_missing=no
   sudo:           yes
 
 - name:           Change ownership of /var/www to deploy
   file:           path=/var/www state=directory owner=deploy group=deploy
   sudo:           yes
 
+- shell:          (cd /etc/apache2/sites-enabled/ && ls -1 000-default*)
+  register:       apache_default_vhost
+  ignore_errors:  true
+  sudo:           yes
+
 - name:           Disable default apache site
-  command:        a2dissite 000-default removes=/etc/apache2/sites-enabled/000-default.conf
+  command:        a2dissite {{ apache_default_vhost.stdout }} removes=/etc/apache2/sites-enabled/{{ apache_default_vhost.stdout }}
   notify:         restart apache
+  when:           apache_default_vhost.stdout != ''
   sudo:           yes
 
 - name:           Create apache vhosts
@@ -40,7 +46,7 @@
   sudo:           true
 
 - name:           Enable apache vhosts
-  command:        a2ensite {{ item }}.{{ domain }}
+  command:        a2ensite {{ item }}.{{ domain }}.conf
   with_items:     apache_vhosts
   notify:         restart apache
   sudo:           true
