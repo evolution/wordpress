@@ -25,7 +25,7 @@ helpers.testDirectory(outputDir, function(err) {
   ];
 
   if (process.env.CI || process.env.TRAVIS) {
-    prep = ['echo "Detected CI..'];
+    prep = ['echo "Detected CI.."'];
   }
 
   exec(prep.join(' && '), function(err, stdout, stderr) {
