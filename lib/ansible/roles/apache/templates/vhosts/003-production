@@ -14,7 +14,12 @@
     <Directory /var/www/{{ domain }}/production/master/current/web/>
         Options Indexes FollowSymLinks MultiViews
         AllowOverride All
+{% if apache_version.stdout == '2.2' %}
+        Order allow,deny
+        Allow from all
+{% elif apache_version.stdout == '2.4' %}
         Require all granted
+{% endif %}
     </Directory>
 
     LogLevel warn

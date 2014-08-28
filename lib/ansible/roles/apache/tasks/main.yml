@@ -1,4 +1,10 @@
 ---
+- name:           Register Apache major/minor version
+  shell:          "apache2 -v | grep -i apache | perl -pe 's|^.*apache/([0-9]+[.][0-9]+)[.].*$|$1|i'"
+  register:       apache_version
+
+- debug:          msg={{ apache_version.stdout }}
+
 - name:           Install Apache packages
   apt:            pkg={{ item }} state=present
   with_items:     apache_packages
@@ -9,6 +15,12 @@
   with_items:     apache_modules
   sudo:           yes
   notify:         restart apache
+
+- name:           Ensure Apache `NameVirtualHost` is 80 (2.2)
+  lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:80' dest=/etc/apache2/ports.conf backup=yes
+  notify:         restart apache
+  when:           apache_version.stdout == '2.2'
+  sudo:           yes
 
 - name:           Ensure Apache `Listen` is 80
   lineinfile:     regexp='^Listen' line='Listen 80' dest=/etc/apache2/ports.conf backup=yes
@@ -22,6 +34,7 @@
 
 - name:           Ensure pristine mpm_prefork directives
   restore:        path=/etc/apache2/mods-available/mpm_prefork.conf which=oldest backup=no fail_on_missing=no
+  when:           apache_version.stdout == '2.4'
   sudo:           yes
 
 - name:           Change ownership of /var/www to deploy
