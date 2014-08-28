@@ -18,11 +18,21 @@ helpers.testDirectory(outputDir, function(err) {
     throw err;
   }
 
-  exec([
+  var prep = [
     'git clone git@github.com:evolution/wordpress-example.git ' + outputDir,
     'cd ' + outputDir,
     'git rm -rf .',
-  ].join(' && '), function(err, stdout, stderr) {
+  ];
+
+  if (process.env.CI || process.env.TRAVIS) {
+    prep = ['echo "Detected CI..'];
+  }
+
+  exec(prep.join(' && '), function(err, stdout, stderr) {
+    if (err) {
+      throw err;
+    }
+
     var app = helpers.createGenerator('evolution-wordpress:app', [
       [require('../lib/yeoman'), 'evolution-wordpress:app']
     ]);
