@@ -20,6 +20,7 @@ before_install:
   - sudo cp -R $PWD /vagrant/bower_components/evolution-wordpress/
   - echo "Provision server"
   - sudo $PWD/temp/bin/provision -e stage=local
+  - sudo chown -Rf $USER:$USER $HOME/.ansible
   - curl -sS https://getcomposer.org/installer | php
 install:
   - echo "Install Composer dependencies"
