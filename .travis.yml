@@ -19,7 +19,7 @@ before_install:
   - sudo rm -rf /vagrant/bower_components/evolution-wordpress
   - sudo cp -R $PWD /vagrant/bower_components/evolution-wordpress/
   - echo "Provision server"
-  - sudo $PWD/temp/bin/provision -e stage=localhost
+  - sudo $PWD/temp/bin/provision -e stage=local
   - curl -sS https://getcomposer.org/installer | php
 install:
   - echo "Install Composer dependencies"

@@ -1,10 +1,4 @@
 ---
-- name:           Register Apache major/minor version
-  shell:          "apache2 -v | grep -i apache | perl -pe 's|^.*apache/([0-9]+[.][0-9]+)[.].*$|$1|i'"
-  register:       apache_version
-
-- debug:          msg={{ apache_version.stdout }}
-
 - name:           Install Apache packages
   apt:            pkg={{ item }} state=present
   with_items:     apache_packages
@@ -15,6 +9,12 @@
   with_items:     apache_modules
   sudo:           yes
   notify:         restart apache
+
+- name:           Register Apache major/minor version
+  shell:          "apache2 -v | grep -i apache | perl -pe 's|^.*apache/([0-9]+[.][0-9]+)[.].*$|$1|i'"
+  register:       apache_version
+
+- debug:          msg={{ apache_version.stdout }}
 
 - name:           Ensure Apache `NameVirtualHost` is 80 (2.2)
   lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:80' dest=/etc/apache2/ports.conf backup=yes
