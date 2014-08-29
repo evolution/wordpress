@@ -5,6 +5,8 @@ addons:
   hosts:
     - example.com
     - local.example.com
+    - production.example.com
+    - www.example.com
 before_install:
   - rvm use 1.9.3
   - gem install bundler
@@ -21,6 +23,7 @@ before_install:
   - echo "Provision server"
   - sudo $PWD/temp/bin/provision -e stage=local
   - sudo chown -Rf $USER:$USER $HOME/.ansible
+  - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - curl -sS https://getcomposer.org/installer | php
 install:
   - echo "Install Composer dependencies"
