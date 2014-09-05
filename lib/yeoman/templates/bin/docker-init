@@ -1,0 +1,14 @@
+#!/bin/sh
+
+PWD=/vagrant
+SU_USR=deploy
+
+cd ${PWD}
+
+chown -LR ${SU_USR}:${SU_USR} ${PWD}
+sudo su ${SU_USR} -c "bower install --config.interactive=false"
+
+service mysql stop && service mysql start
+service evolution-wordpress stop && service evolution-wordpress start
+
+exec /bin/bash -il

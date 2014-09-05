@@ -14,7 +14,10 @@ EXPOSE 22 80 443 3306
 WORKDIR /vagrant/lib/ansible
 RUN ansible-playbook provision.yml --connection=local -e stage=local
 
-WORKDIR /vagrant
+RUN chmod +x /vagrant/bin/docker-init
+ENTRYPOINT ["/vagrant/bin/docker-init"]
 
-CMD ["/bin/bash", "-i"]
-
+## TODO: Minor issues...
+# Varnish init script ulimit warnings
+#   /etc/init.d/varnish: 36: ulimit: error setting limit (Operation not permitted)
+# Mysql - add to evo init script?
