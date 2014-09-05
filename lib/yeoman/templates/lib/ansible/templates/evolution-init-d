@@ -4,6 +4,9 @@
 . /lib/lsb/init-functions
 
 start_services() {
+{% if role_mysql is defined %}
+    /etc/init.d/mysql start
+{% endif %}
 {% if role_apache is defined %}
     /etc/init.d/apache2 start
 {% endif %}
@@ -16,6 +19,9 @@ start_services() {
 }
 
 stop_services() {
+{% if role_mysql is defined %}
+    /etc/init.d/mysql stop
+{% endif %}
 {% if role_apache is defined %}
     /etc/init.d/apache2 stop
 {% endif %}
@@ -28,6 +34,9 @@ stop_services() {
 }
 
 restart_services() {
+{% if role_mysql is defined %}
+    /etc/init.d/mysql restart
+{% endif %}
 {% if role_apache is defined %}
     /etc/init.d/apache2 graceful
 {% endif %}
@@ -40,6 +49,9 @@ restart_services() {
 }
 
 status_services() {
+{% if role_mysql is defined %}
+    /etc/init.d/mysql status
+{% endif %}
 {% if role_apache is defined %}
     /etc/init.d/apache2 status
 {% endif %}
