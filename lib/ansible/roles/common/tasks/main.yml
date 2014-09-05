@@ -20,9 +20,9 @@
 - name:           Update `hostname`
   hostname:       name="{{ new_hostname }}"
   sudo:           yes
-  when:           old_hostname != new_hostname
+  when:           lookup('env','DOCKER') == '' and old_hostname != new_hostname
 
 - name:           Update /etc/hosts
   replace:        dest=/etc/hosts backup=yes regexp={{ old_hostname | replace(".", "[.]") }} replace={{ new_hostname }}
   sudo:           yes
-  when:           old_hostname != new_hostname
+  when:           lookup('env','DOCKER') == '' and old_hostname != new_hostname

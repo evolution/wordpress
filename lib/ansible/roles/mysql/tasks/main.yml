@@ -8,6 +8,11 @@
   lineinfile:     dest=/etc/mysql/my.cnf backup=yes regexp=^bind-address line='bind-address = 0.0.0.0'
   sudo:           yes
 
+- name:           Restart MySQL service if necessary
+  service:        name=mysql state=restarted
+  sudo:           yes
+  when:           lookup('env','DOCKER') != ''
+
 - name:           Create MySQL database
   mysql_db:       name="{{ mysql.name }}_{{ stage }}"
   sudo:           yes
