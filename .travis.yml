@@ -15,14 +15,18 @@ before_install:
   - npm install
   - echo "Mock test project"
   - $PWD/bin/mock
-  - echo "Copy mock project to /vagrant for end-user tests"
-  - sudo cp -R $PWD/temp /vagrant
-  - echo "Symlinking local Evolution WordPress as dependency"
-  - sudo rm -rf /vagrant/bower_components/evolution-wordpress
-  - sudo cp -R $PWD /vagrant/bower_components/evolution-wordpress/
+  - echo "Move mock project to /vagrant for end-user tests"
+  - sudo mv $PWD/temp /vagrant
+  - ln -s /vagrant $PWD/temp
+  - echo "Copying local Evolution WordPress as dependency"
+  - rm -rf /vagrant/bower_components/evolution-wordpress
+  - cp -RP $PWD /vagrant/bower_components/evolution-wordpress/
   - echo "Provision server"
   - sudo $PWD/temp/bin/provision -e stage=local
   - sudo chown -Rf $USER:$USER $HOME/.ansible
+  - echo "Mocking vagrant binary"
+  - sudo cp $PWD/.travis.vagrant.bin /bin/vagrant
+  - sudo chmod +x /bin/vagrant
   - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - curl -sS https://getcomposer.org/installer | php
 install:

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+TRIGGERED=
+
+for ARG in "$@"; do
+  if [[ ! -z "${TRIGGERED}" ]]; then
+    eval ${ARG}
+    exit $?
+  fi
+
+  if [[ "${ARG}" == '-c' ]]; then
+    TRIGGERED=1
+  fi
+done
+
+exit 0
