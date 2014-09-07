@@ -16,6 +16,29 @@ describe('cap production evolve:db:up', function(done) {
     });
   });
 
+  it('should tell us WHY the very next test is failing', function(done) {
+    this.timeout(300 * 1000);
+    exec(
+      [
+        'echo "......Local web dir"; ls -al /vagrant/web/',
+        'echo ".......Prod web dir"; ls -al /var/www/example.com/production/master/current/web/',
+        'echo "..........All sites"; ls -al /etc/apache2/sites-*/*',
+        'echo "..........Databases"; mysql -u root -e "show databases;"',
+        'echo "......Root prod url"; curl -vv http://production.example.com/',
+        'echo "......Catchall errs"; sudo cat /var/log/apache2/error.log',
+        'echo "..........Prod errs"; sudo cat /var/log/apache2/production.example.com-error.log',
+        'echo "....Catchall access"; sudo cat /var/log/apache2/access.log',
+        'echo "........Prod access"; sudo cat /var/log/apache2/production.example.com-access.log',
+        'echo "RESTART EVERYTHING!"; bundle exec cap production evolve:restart'
+      ].join('; '), {
+      cwd: process.cwd() + '/temp'
+    }, function(err, stdout, stderr) {
+      process.stdout.write(stdout);
+      process.stdout.write(stderr);
+      done();
+    });
+  });
+
   it('should be installed', function(done) {
     var browser = new Browser();
 

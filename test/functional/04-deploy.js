@@ -10,6 +10,8 @@ describe('cap production deploy', function(done) {
     exec('bundle exec cap production deploy', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
+      process.stdout.write(stdout);
+      process.stdout.write(stderr);
       assert.ifError(err);
       done();
     });
