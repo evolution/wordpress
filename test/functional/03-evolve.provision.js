@@ -10,8 +10,6 @@ describe('cap production evolve:provision', function(done) {
     exec('bundle exec cap production evolve:provision', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
-      process.stdout.write(stdout);
-      process.stdout.write(stderr);
       assert.ifError(err);
       done();
     });
