@@ -57,6 +57,13 @@ namespace :evolve do
         execute :sudo, "tail -f /var/log/syslog | grep --line-buffered 'pound:'"
       end
     end
+
+    desc "Tail evolution log"
+    task :evolution do
+      on release_roles(:web) do
+        execute :sudo, "tail -f /var/log/evolution/wordpress.log"
+      end
+    end
   end
 
   desc "Fix remote filesystem permissions"
@@ -70,11 +77,17 @@ namespace :evolve do
   end
 
   desc "Remove remote deployments"
-  task :teardown do
-    invoke "evolve:confirm", "You are about to permanently remove everything within #{deploy_to}"
+  task :teardown do |task|
+    begin
+      invoke "evolve:confirm", "You are about to permanently remove everything within #{deploy_to}"
 
-    on release_roles(:web) do
-      execute :sudo, "rm -rf #{deploy_to}"
+      on release_roles(:web) do
+        execute :sudo, "rm -rf #{deploy_to}"
+      end
+
+      success=true
+    ensure
+      invoke "evolve:log", success, task.name
     end
   end
 end

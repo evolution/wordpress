@@ -24,40 +24,52 @@ namespace :evolve do
     end
 
     desc "Import remote DB to local"
-    task :down do
-      invoke "evolve:db:backup"
+    task :down do |task|
+      begin
+        invoke "evolve:db:backup"
 
-      run_locally do
-        execute :vagrant, :up
-        execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
-        execute :rm, fetch(:db_backup_file)
+        run_locally do
+          execute :vagrant, :up
+          execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
+          execute :rm, fetch(:db_backup_file)
+        end
+
+        success=true
+      ensure
+        invoke "evolve:log", success, task.name
       end
     end
 
     desc "Export local DB to remote"
-    task :up do
-      invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
-      invoke "evolve:db:prepare"
+    task :up do |task|
+      begin
+        invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
+        invoke "evolve:db:prepare"
 
-      run_locally do
-        execute :vagrant, :up
-        execute :vagrant, :ssh, :local, "-c 'cd /vagrant && mysqldump -uroot --opt \"#{fetch(:wp_config)['name']}_local\" > #{fetch(:db_backup_file)}'"
-        execute :gzip, fetch(:db_backup_file)
-      end
-
-      on release_roles(:db) do
-        upload! fetch(:db_gzip_file), "/tmp/#{fetch(:db_gzip_file)}"
-        execute :gzip, "-d", "/tmp/#{fetch(:db_gzip_file)}"
-
-        within fetch(:wp_path) do
-          execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+        run_locally do
+          execute :vagrant, :up
+          execute :vagrant, :ssh, :local, "-c 'cd /vagrant && mysqldump -uroot --opt \"#{fetch(:wp_config)['name']}_local\" > #{fetch(:db_backup_file)}'"
+          execute :gzip, fetch(:db_backup_file)
         end
 
-        execute :rm, "/tmp/#{fetch(:db_backup_file)}"
-      end
+        on release_roles(:db) do
+          upload! fetch(:db_gzip_file), "/tmp/#{fetch(:db_gzip_file)}"
+          execute :gzip, "-d", "/tmp/#{fetch(:db_gzip_file)}"
 
-      run_locally do
-        execute :rm, fetch(:db_gzip_file)
+          within fetch(:wp_path) do
+            execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+          end
+
+          execute :rm, "/tmp/#{fetch(:db_backup_file)}"
+        end
+
+        run_locally do
+          execute :rm, fetch(:db_gzip_file)
+        end
+
+        success=true
+      ensure
+        invoke "evolve:log", success, task.name
       end
     end
   end

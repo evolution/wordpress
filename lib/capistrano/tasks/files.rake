@@ -9,57 +9,69 @@ namespace :evolve do
     end
 
     desc "Download remote uploads to Vagrant"
-    task :down do
-      local_uploads = "/vagrant/web/wp-content/uploads"
-      remote_uploads = "#{release_path}/web/wp-content/uploads"
-      uploads_exist = false
-
-      on roles(:web) do |host|
-        uploads_exist = test "[ -d #{remote_uploads} ]"
-      end
-
-      if uploads_exist
-        key = fetch(:ssh_options)[:keys].last
-
-        run_locally do
-          execute :vagrant, :up
-        end
+    task :down do |task|
+      begin
+        local_uploads = "/vagrant/web/wp-content/uploads"
+        remote_uploads = "#{release_path}/web/wp-content/uploads"
+        uploads_exist = false
 
         on roles(:web) do |host|
-          invoke "evolve:files:prepare", key, "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
-          run_locally do
-            execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
-          end
+          uploads_exist = test "[ -d #{remote_uploads} ]"
         end
-      else
-        warn "!! No remote uploads to sync...skipping"
+
+        if uploads_exist
+          key = fetch(:ssh_options)[:keys].last
+
+          run_locally do
+            execute :vagrant, :up
+          end
+
+          on roles(:web) do |host|
+            invoke "evolve:files:prepare", key, "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
+            run_locally do
+              execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
+            end
+          end
+        else
+          warn "!! No remote uploads to sync...skipping"
+        end
+
+        success=true
+      ensure
+        invoke "evolve:log", success, task.name
       end
     end
 
     desc "Uploads local uploads to remote"
-    task :up do
-      invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
+    task :up do |task|
+      begin
+        invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
 
-      local_uploads = "/vagrant/web/wp-content/uploads"
-      remote_uploads = "#{release_path}/web/wp-content/uploads"
-      uploads_exist = false
+        local_uploads = "/vagrant/web/wp-content/uploads"
+        remote_uploads = "#{release_path}/web/wp-content/uploads"
+        uploads_exist = false
 
-      run_locally do
-        execute :vagrant, :up
-        uploads_exist = test :vagrant, :ssh, :local, "-c '[ -d #{local_uploads} ]'"
-      end
-
-      if uploads_exist
-        key = fetch(:ssh_options)[:keys].last
-
-        on roles(:web) do |host|
-          invoke "evolve:files:prepare", key, local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
-          run_locally do
-            execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
-          end
+        run_locally do
+          execute :vagrant, :up
+          uploads_exist = test :vagrant, :ssh, :local, "-c '[ -d #{local_uploads} ]'"
         end
-      else
-        warn "!! No local uploads to sync...skipping"
+
+        if uploads_exist
+          key = fetch(:ssh_options)[:keys].last
+
+          on roles(:web) do |host|
+            invoke "evolve:files:prepare", key, local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
+            run_locally do
+              execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
+            end
+          end
+        else
+          warn "!! No local uploads to sync...skipping"
+        end
+
+        success=true
+      ensure
+        invoke "evolve:log", success, task.name
       end
     end
   end
