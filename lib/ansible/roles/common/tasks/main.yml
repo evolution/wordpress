@@ -26,3 +26,7 @@
   replace:        dest=/etc/hosts backup=yes regexp={{ old_hostname | replace(".", "[.]") }} replace={{ new_hostname }}
   sudo:           yes
   when:           old_hostname != new_hostname
+
+- name:           Configure logrotate for evolution logs
+  copy:           src=logrotate dest=/etc/logrotate.d/evolution mode=0644
+  sudo:           yes

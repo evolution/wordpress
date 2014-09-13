@@ -44,7 +44,7 @@ WARN
     message  = [ stamp, user, args[:message], status ].join("\t")
 
     on roles(:web) do |host|
-      unless test "[ -f #{logfile} ] && [ $(stat -c %U #{logfile}) == 'deploy' ]"
+      unless test "[ -f #{logfile} ] && [ $(stat -c %U #{logfile}) == '#{fetch(:user)}' ]"
         execute :sudo, :mkdir, '-p', logdir
         execute :sudo, :chown, '-R', fetch(:user), logdir
         execute :touch, '-a', logfile

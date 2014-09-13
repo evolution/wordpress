@@ -1,0 +1,7 @@
+/var/log/evolution/*.log {
+	rotate 10
+	size 1M
+	missingok
+	notifempty
+	compress
+}
