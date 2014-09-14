@@ -1,6 +1,6 @@
 ---
 - name:           Install firewall packages
-  apt:            pkg={{ item }} state=present
+  apt:            pkg={{ item }} state=present update_cache=yes
   with_items:     firewall_packages
   sudo:           yes
 
