@@ -22,3 +22,13 @@ apache_settings:
 
 mail:
   postmaster: no-reply@<%= props.domain %>
+
+iptables:
+  # ipv6: 0
+
+fail2ban:
+  # whitelist:
+  #   - 127.0.0.1/8
+  # ban_time: 600
+  # notification_email: root@localhost
+  # notify_on_ban: 0

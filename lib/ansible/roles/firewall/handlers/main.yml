@@ -1,0 +1,4 @@
+---
+- name:     restart firewall
+  command:  /etc/init.d/iptables-persistent restart
+  sudo:     yes

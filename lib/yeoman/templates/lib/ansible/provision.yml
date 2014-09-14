@@ -19,6 +19,7 @@
     - pound             # (Optional) SSL support & decryption
     - wp-cli            # (Optional) CLI for managing WordPress
     - mail              # (Optional) Ability to send e-mails from the server (i.e. PHP)
+    - firewall          # (Optional) Simple intrusion protection via Fail2ban + iptables
     - debug             # (Optional) Tools to monitor processes & debug when SSH'd in
 
   post_tasks:

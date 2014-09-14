@@ -1,0 +1,25 @@
+---
+- name:           Install firewall packages
+  apt:            pkg={{ item }} state=present
+  with_items:     firewall_packages
+  sudo:           yes
+
+- name:           Install iptables init script + rulesets
+  copy:           src={{ item }} dest=/etc/{{ item }} mode=0644 backup=yes
+  sudo:           yes
+  with_items:
+    - init.d/iptables-persistent
+    - iptables/rules.v4
+    - iptables/rules.v6
+
+- name:           Create iptables + fail2ban configs
+  template:       src={{ item }} dest=/etc/{{ item }} mode=0644
+  sudo:           yes
+  with_items:
+    - default/iptables-persistent.conf
+    - fail2ban/jail.local
+
+- name:           Ensure iptables init script is executable
+  file:           path=/etc/init.d/iptables-persistent mode=0755
+  notify:         restart firewall
+  sudo:           yes
