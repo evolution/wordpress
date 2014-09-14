@@ -1,6 +1,18 @@
 ---
+- name:           Attempt to install vanilla iptables-persistent
+  apt:            pkg=iptables-persistent state=latest update_cache=yes
+  register:       iptables_attempted
+  ignore_errors:  yes
+  sudo:           yes
+
+# See https://forum.linode.com/viewtopic.php?t=9070&p=58732
+- name:           Postinst workaround for iptables-persistent
+  replace:        dest=/var/lib/dpkg/info/iptables-persistent.postinst regexp='^(\s*?modprobe -q ip6?table_filter\s*?)$' replace='\1 || true'
+  when:           iptables_attempted | failed
+  sudo:           yes
+
 - name:           Install firewall packages
-  apt:            pkg={{ item }} state=present update_cache=yes
+  apt:            pkg={{ item }} state=present
   with_items:     firewall_packages
   sudo:           yes
 
