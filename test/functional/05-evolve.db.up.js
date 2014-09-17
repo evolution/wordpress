@@ -26,5 +26,15 @@ describe('cap production evolve:db:up', function(done) {
       })
       .then(done, done)
     ;
-  })
+  });
+
+  it('should have remote db backup', function(done) {
+    exec('vagrant ssh local -c "ls -A /var/www/example.com/production/master/backups/example_db.*.gz"', {
+      cwd: process.cwd() + '/temp'
+    }, function(err, stdout, stderr) {
+      assert.ifError(err);
+      assert.notEqual(stdout, '')
+      done();
+    });
+  });
 });
