@@ -2,7 +2,7 @@
   "name": "<%= props.name %>",
   "version": "1.0.0",
   "dependencies": {
-    "evolution-wordpress": "<%= props.evolution %>",
+    "evolution-wordpress": "<%= options.dev ? 'master' : '^' + props.evolution %>",
     "wordpress": "<%= props.wordpress %>"
   }
 }
