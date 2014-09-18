@@ -15,7 +15,8 @@
     - php               # (Required) PHP 5.3
     - node              # (Required) Tools for deployment (e.g. `bower`)
     - wp-cli            # (Required) CLI for managing WordPress
-    - pound             # (Optional) SSL support & decryption
+<% if (props.ssl) { %>    - pound             # (Optional) SSL support & decryption<% } %>
+    # Optional Features
 <% props.roles.map(function(role) { %>
     <%= role.checked ? '-' : '#' %> <%= role.value %><% }) %>
 
