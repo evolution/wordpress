@@ -77,7 +77,7 @@ case "$1" in
         status_services
         ;;
     version)
-        log_success_msg "Evolution Wordpress" "<%= pkg.evolution %>"
+        log_success_msg "Evolution Wordpress" "<%= pkg.version %>"
         ;;
     *)
         log_success_msg "Usage $0 {start|stop|restart|status}"
