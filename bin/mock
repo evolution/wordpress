@@ -45,7 +45,7 @@ helpers.testDirectory(outputDir, function(err) {
     helpers.mockPrompt(app, {
       name:         'Example.com',
       domain:       'example.com',
-      roles:        WordpressGenerator.roles,
+      roles:        WordpressGenerator.roles.map(function(role) { return role.value; }),
       ip:           '192.168.137.137',
       DB_NAME:      'example_db',
       DB_USER:      'example_user',
