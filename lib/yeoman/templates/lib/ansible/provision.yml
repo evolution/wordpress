@@ -14,13 +14,10 @@
     - mysql             # (Required) Database server (Soon: Maria)
     - php               # (Required) PHP 5.3
     - node              # (Required) Tools for deployment (e.g. `bower`)
-    - apache-prefork    # (Optional) Dynamic Apache performance tuning
-    - varnish           # (Optional) High-performance reverse-proxy cache
-    - pound             # (Optional) SSL support & decryption
-    - wp-cli            # (Optional) CLI for managing WordPress
-    - mail              # (Optional) Ability to send e-mails from the server (i.e. PHP)
-    - firewall          # (Optional) Simple intrusion protection via Fail2ban + iptables
-    - debug             # (Optional) Tools to monitor processes & debug when SSH'd in
+    - wp-cli            # (Required) CLI for managing WordPress
+<% if (props.ssl) { %>    - pound             # (Optional) SSL support & decryption<% } %>
+    # Optional Features<% props.roles.map(function(role) { %>
+    <%= role.checked ? '-' : '#' %> <%= role.value %><% }) %>
 
   post_tasks:
     - name:             Generate init.d for installed evolution services

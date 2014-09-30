@@ -13,6 +13,8 @@ var publicKey     = fs.existsSync(publicPath) ? fs.readFileSync(publicPath) : nu
 var certPath      = path.join(outputDir, '/lib/ansible/files/ssl/example.com.pem');
 var cert          = fs.existsSync(certPath) ? fs.readFileSync(certPath) : null;
 
+var WordpressGenerator = require('../lib/yeoman');
+
 helpers.testDirectory(outputDir, function(err) {
   if (err) {
     throw err;
@@ -34,22 +36,24 @@ helpers.testDirectory(outputDir, function(err) {
     }
 
     var app = helpers.createGenerator('evolution-wordpress:app', [
-      [require('../lib/yeoman'), 'evolution-wordpress:app']
+      [WordpressGenerator, 'evolution-wordpress:app']
     ]);
 
     app.options['skip-install'] = true;
     app.options['dev'] = true;
 
     helpers.mockPrompt(app, {
+      private:      false,
+      ssl:          true,
       name:         'Example.com',
       domain:       'example.com',
+      roles:        WordpressGenerator.roles.map(function(role) { return role.value; }),
       ip:           '192.168.137.137',
       DB_NAME:      'example_db',
       DB_USER:      'example_user',
       DB_PASSWORD:  'example',
       DB_HOST:      '127.0.0.1',
       prefix:       'wp_',
-      evolution:    '~1.0.0',
     });
 
     app.run(function() {

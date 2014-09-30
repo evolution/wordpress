@@ -1,8 +1,9 @@
 {
+  "private": <%= props.private ? 'true' : 'false' %>,
   "name": "<%= props.name %>",
   "version": "1.0.0",
   "dependencies": {
-    "evolution-wordpress": "<%= props.evolution %>",
+    "evolution-wordpress": "<%= options.dev ? 'master' : '^' + pkg.version %>",
     "wordpress": "<%= props.wordpress %>"
   }
 }
