@@ -1,0 +1,6 @@
+---
+role_firewall: true
+
+firewall_packages:
+  - iptables-persistent
+  - fail2ban

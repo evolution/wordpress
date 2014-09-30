@@ -1,0 +1,37 @@
+---
+- name:           Attempt to install vanilla iptables-persistent
+  apt:            pkg=iptables-persistent state=latest update_cache=yes
+  register:       iptables_attempted
+  ignore_errors:  yes
+  sudo:           yes
+
+# See https://forum.linode.com/viewtopic.php?t=9070&p=58732
+- name:           Postinst workaround for iptables-persistent
+  replace:        dest=/var/lib/dpkg/info/iptables-persistent.postinst regexp='^(\s*?modprobe -q ip6?table_filter\s*?)$' replace='\1 || true'
+  when:           iptables_attempted | failed
+  sudo:           yes
+
+- name:           Install firewall packages
+  apt:            pkg={{ item }} state=present
+  with_items:     firewall_packages
+  sudo:           yes
+
+- name:           Install iptables init script + rulesets
+  copy:           src={{ item }} dest=/etc/{{ item }} mode=0644 backup=yes
+  sudo:           yes
+  with_items:
+    - init.d/iptables-persistent
+    - iptables/rules.v4
+    - iptables/rules.v6
+
+- name:           Create iptables + fail2ban configs
+  template:       src={{ item }} dest=/etc/{{ item }} mode=0644
+  sudo:           yes
+  with_items:
+    - default/iptables-persistent.conf
+    - fail2ban/jail.local
+
+- name:           Ensure iptables init script is executable
+  file:           path=/etc/init.d/iptables-persistent mode=0755
+  notify:         restart firewall
+  sudo:           yes
