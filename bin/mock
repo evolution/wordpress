@@ -44,7 +44,7 @@ helpers.testDirectory(outputDir, function(err) {
 
     helpers.mockPrompt(app, {
       private:      false,
-      ssl:          false,
+      ssl:          true,
       name:         'Example.com',
       domain:       'example.com',
       roles:        WordpressGenerator.roles.map(function(role) { return role.value; }),
