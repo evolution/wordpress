@@ -9,7 +9,7 @@ class Evolution
 
     public static function getEnv()
     {
-        preg_match('/(?:([\w-]+)\.)?[\w-]+\.co(?:m|\.uk)/', $_SERVER['HTTP_HOST'], $matches);
+        preg_match('/(?:([\w-]+)\.)?[\w-]+\.(?:(?:co(?:m|\.uk))|net|org)/', $_SERVER['HTTP_HOST'], $matches);
 
         $match  = array_pop($matches) ?: 'production';
         $known  = array('local', 'staging', 'production');

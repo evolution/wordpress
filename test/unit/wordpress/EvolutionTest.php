@@ -36,14 +36,24 @@ class EvolutionTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('example.com',              'production'),
+            array('example.net',              'production'),
+            array('example.org',              'production'),
             array('example.co.uk',            'production'),
             array('www.example.com',          'production'),
+            array('www.example.org',          'production'),
+            array('www.example.net',          'production'),
             array('www.example.co.uk',        'production'),
             array('local.example.com',        'local'),
+            array('local.example.net',        'local'),
+            array('local.example.org',        'local'),
             array('local.example.co.uk',      'local'),
             array('staging.example.com',      'staging'),
+            array('staging.example.net',      'staging'),
+            array('staging.example.org',      'staging'),
             array('staging.example.co.uk',    'staging'),
             array('production.example.com',   'production'),
+            array('production.example.net',   'production'),
+            array('production.example.org',   'production'),
             array('production.example.co.uk', 'production'),
         );
     }
