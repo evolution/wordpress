@@ -15,7 +15,7 @@ namespace :evolve do
 
           puts "password:"
 
-          system("cd #{ansible_path} && #{provision} --user=#{fetch(:user)} --ask-pass")
+          system("cd #{ansible_path} && #{provision} --user=#{fetch(:user)} --ask-pass --ask-sudo-pass")
         end
       end
 
