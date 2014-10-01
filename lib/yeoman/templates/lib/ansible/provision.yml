@@ -9,7 +9,6 @@
 
   roles:
     - common            # (Required) Base configuration
-    - user              # (Required) User for SSH/Ansible/Capistrano auth
     - apache            # (Required) Web server (Soon: Nginx)
     - mysql             # (Required) Database server (Soon: Maria)
     - php               # (Required) PHP 5.3

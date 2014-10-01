@@ -1,0 +1,6 @@
+---
+- hosts:                "{{ stage }}" # Easy execution via: `ansible-playbook provision.yml -e stage=local`
+  gather_facts:         yes
+
+  roles:
+    - user              # (Required) User for SSH/Ansible/Capistrano auth
