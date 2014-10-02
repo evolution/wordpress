@@ -4,4 +4,13 @@ namespace :evolve do
     invoke "evolve:db:up"
     invoke "evolve:files:up"
   end
+
+  namespace :up do
+    task :db do
+      invoke "evolve:db:up"
+    end
+    task :files do
+      invoke "evolve:files:up"
+    end
+  end
 end
