@@ -88,6 +88,9 @@ case "$1" in
     status)
         status_services
         ;;
+    reboot)
+        reboot
+        ;;
     version)
         log_success_msg "Evolution Wordpress" "<%= pkg.version %>"
         ;;

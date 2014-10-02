@@ -20,6 +20,11 @@ namespace :evolve do
     invoke "evolve:service", "restart"
   end
 
+  desc "Reboot provisioned server"
+  task :reboot do
+    invoke "evolve:service", "reboot"
+  end
+
   desc "Return provisioned evolution version"
   task :version do
     invoke "evolve:service", "version"
