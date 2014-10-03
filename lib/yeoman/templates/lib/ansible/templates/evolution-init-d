@@ -5,73 +5,73 @@
 
 start_services() {
 {% if role_mysql is defined %}
-    /etc/init.d/mysql start
+    service mysql start
 {% endif %}
 {% if role_apache is defined %}
-    /etc/init.d/apache2 start
+    service apache2 start
 {% endif %}
 {% if role_varnish is defined %}
-    /etc/init.d/varnish start
+    service varnish start
 {% endif %}
 {% if role_pound is defined %}
-    /etc/init.d/pound start
+    service pound start
 {% endif %}
 {% if role_firewall is defined %}
-    /etc/init.d/iptables-persistent start
+    service iptables-persistent start
 {% endif %}
 }
 
 stop_services() {
 {% if role_mysql is defined %}
-    /etc/init.d/mysql stop
+    service mysql stop
 {% endif %}
 {% if role_apache is defined %}
-    /etc/init.d/apache2 stop
+    service apache2 stop
 {% endif %}
 {% if role_varnish is defined %}
-    /etc/init.d/varnish stop
+    service varnish stop
 {% endif %}
 {% if role_pound is defined %}
-    /etc/init.d/pound stop
+    service pound stop
 {% endif %}
 {% if role_firewall is defined %}
-    /etc/init.d/iptables-persistent stop
+    service iptables-persistent stop
 {% endif %}
 }
 
 restart_services() {
 {% if role_mysql is defined %}
-    /etc/init.d/mysql restart
+    service mysql restart
 {% endif %}
 {% if role_apache is defined %}
-    /etc/init.d/apache2 graceful
+    service apache2 graceful
 {% endif %}
 {% if role_varnish is defined %}
-    /etc/init.d/varnish restart
+    service varnish restart
 {% endif %}
 {% if role_pound is defined %}
-    /etc/init.d/pound restart
+    service pound restart
 {% endif %}
 {% if role_firewall is defined %}
-    /etc/init.d/iptables-persistent restart
+    service iptables-persistent restart
 {% endif %}
 }
 
 status_services() {
 {% if role_mysql is defined %}
-    /etc/init.d/mysql status
+    service mysql status
 {% endif %}
 {% if role_apache is defined %}
-    /etc/init.d/apache2 status
+    service apache2 status
 {% endif %}
 {% if role_varnish is defined %}
-    /etc/init.d/varnish status
+    service varnish status
 {% endif %}
 {% if role_pound is defined %}
-    /etc/init.d/pound status
+    service pound status
 {% endif %}
 {% if role_firewall is defined %}
-    /etc/init.d/iptables-persistent status
+    service iptables-persistent status
 {% endif %}
 }
 

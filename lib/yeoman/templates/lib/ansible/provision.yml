@@ -4,7 +4,7 @@
 
   pre_tasks:
     - name:             Stop any existing evolution services
-      command:          /etc/init.d/evolution-wordpress stop removes=/etc/init.d/evolution-wordpress
+      command:          service evolution-wordpress stop removes=/etc/init.d/evolution-wordpress
       sudo:             yes
 
   roles:
