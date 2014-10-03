@@ -2,12 +2,9 @@
 - hosts:                "{{ stage }}" # Easy execution via: `ansible-playbook provision.yml -e stage=local`
   gather_facts:         yes           # Host specs required for templates
 
-  pre_tasks:
-    - name:             Stop any existing evolution services
-      command:          /etc/init.d/evolution-wordpress stop removes=/etc/init.d/evolution-wordpress
-      sudo:             yes
-
   roles:
+    - prepare           # (Required) Stop any existing evolution services
+
     - common            # (Required) Base configuration
     - user              # (Required) User for SSH/Ansible/Capistrano auth
     - apache            # (Required) Web server (Soon: Nginx)
@@ -19,8 +16,6 @@
     # Optional Features
     <% if (props.ssl) { %>- pound             # (Optional) SSL support & decryption<% } %><% props.roles.map(function(role) { %>
     <%= role.checked ? '-' : '#' %> <%= role.value %><% }) %>
+    # /Optional Features
 
-  post_tasks:
-    - name:             Generate init.d for installed evolution services
-      template:         src=templates/evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
-      sudo:             yes
+    - cleanup           # (Required) Generate init.d for installed evolution services

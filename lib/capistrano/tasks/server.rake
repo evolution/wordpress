@@ -1,7 +1,7 @@
 namespace :evolve do
   task :service, :action do |task, args|
     on release_roles(:web) do
-      execute :sudo, "/etc/init.d/evolution-wordpress #{args[:action]}"
+      execute :sudo, "service evolution-wordpress #{args[:action]}"
     end
   end
 
