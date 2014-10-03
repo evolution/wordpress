@@ -1,5 +1,15 @@
 # Changelog
 
+- v1.0.10 - Fix init.d calls, add `reboot`, fix branch inference for deployment
+- v1.0.9 - Restore user role in full provisioning
+- v1.0.8 - Add explicit creation of deploy user, before full provisioning
+- v1.0.7 - Add --ask-sudo-pass
+- v1.0.6 - Fix Evolution handling of top level domains
+- v1.0.5 - Fix bower.json version
+- v1.0.4 - Add firewall role, fix formatting of provision.yml
+- v1.0.3 - Fix pkg.version in init script
+- v1.0.2 - Add SSL and private/public prompts to generator
+- v1.0.1 - Clean up bower postinstall and yeoman generator, add role prompts
 - v1.0.0 - Initial release as **Evolution Wordpress**
     - Ubuntu upgrade from 12.04 precise to 14.04 trusty
         - Apache upgrade from [2.2 to 2.4](http://httpd.apache.org/docs/2.4/upgrading.html)
