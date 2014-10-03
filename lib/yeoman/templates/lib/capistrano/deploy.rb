@@ -1,6 +1,14 @@
 # config valid only for Capistrano 3.2.1
 lock '3.2.1'
 
+# Infer branch (unless specified via env var) from current repo
+if ENV.has_key?('branch')
+  set :branch, ENV['branch']
+else
+  matches = proc { `git branch`.match(/\* (\S+)\s/m) }
+  set :branch, (matches.call ? matches.call[1] : "master")
+end
+
 # Repository name
 set :application,   "<%= props.name %>"
 set :domain,        "<%= props.domain %>"
