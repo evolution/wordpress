@@ -1,4 +1,5 @@
 ---
+evolve_version: <%= pkg.version %>
 domain:         <%= props.domain %>
 
 mysql:

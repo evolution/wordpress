@@ -92,10 +92,10 @@ case "$1" in
         reboot
         ;;
     version)
-        log_success_msg "Evolution Wordpress" "<%= pkg.version %>"
+        log_success_msg "Evolution Wordpress" "{{ evolve_version }}"
         ;;
     *)
-        log_success_msg "Usage $0 {start|stop|restart|status}"
+        log_success_msg "Usage $0 {start|stop|restart|status|reboot|version}"
         exit 1
         ;;
 esac

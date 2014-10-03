@@ -1,0 +1,4 @@
+---
+- name:         Generate init.d for installed evolution services
+  template:     src=evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
+  sudo:         yes
