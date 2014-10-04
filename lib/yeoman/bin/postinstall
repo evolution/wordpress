@@ -3,6 +3,7 @@
 var fs    = require('fs');
 var path  = require('path');
 var util  = require('util');
+var words = require('in-words').en;
 
 var cwd   = process.cwd();
 var from  = path.join(cwd, 'bower_components', 'wordpress');
@@ -36,8 +37,28 @@ var existingThemes = fs.readdirSync(toThemeDir).filter(function(node) {
 // If no themes exist, copy over default theme
 if (!existingThemes.length) {
   var fromThemeDir  = path.join(from, 'wp-content', 'themes');
-  var fromTheme     = path.join(fromThemeDir, 'twentyfourteen');
-  var toTheme       = path.join(toThemeDir, 'twentyfourteen');
+  var currentYear   = new Date().getFullYear();
+
+  for (var i = 0; i < 5; i++) {
+    var testYear = (currentYear - i) + '';
+    var testName = words(testYear.substr(0,2)) + words(testYear.substr(2,2));
+
+    if (fs.existsSync( path.join(fromThemeDir, testName) )) {
+      var latestTheme = testName;
+      console.log('Found theme ' + latestTheme);
+      break;
+    }
+    else {
+      console.log('No theme ' + testName);
+    }
+  }
+
+  if (typeof latestTheme === 'undefined') {
+    throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+  }
+
+  var fromTheme = path.join(fromThemeDir, latestTheme);
+  var toTheme   = path.join(toThemeDir, latestTheme);
 
   console.log('Moving theme `%s` to `%s`...', path.relative(cwd, fromTheme), path.relative(cwd, toTheme));
   fs.renameSync(fromTheme, toTheme);
