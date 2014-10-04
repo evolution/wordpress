@@ -55,4 +55,12 @@ WARN
 
     Rake::Task['evolve:log'].reenable
   end
+
+  task :prepare_key do
+    set :ssh_keyfile, fetch(:ssh_options)[:keys].last
+
+    run_locally do
+      execute "chmod 600 #{fetch(:ssh_keyfile)}"
+    end
+  end
 end

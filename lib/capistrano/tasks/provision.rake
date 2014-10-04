@@ -2,6 +2,7 @@ namespace :evolve do
   desc "Provisions remote machine via Ansible"
   task :provision do |task|
     begin
+      invoke "evolve:prepare_key"
       run_locally do
         ansible_path = Dir.pwd + "/lib/ansible"
         play = "cd #{ansible_path} && ansible-playbook -e stage=#{fetch(:stage)}"
