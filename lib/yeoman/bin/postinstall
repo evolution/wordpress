@@ -37,15 +37,14 @@ var existingThemes = fs.readdirSync(toThemeDir).filter(function(node) {
 // If no themes exist, copy over default theme
 if (!existingThemes.length) {
   var fromThemeDir  = path.join(from, 'wp-content', 'themes');
-  var currentYear   = new Date().getFullYear();
 
-  for (var i = 0; i < 5; i++) {
-    var testYear = (currentYear - i) + '';
-    var testName = words(testYear.substr(0,2)) + words(testYear.substr(2,2));
+  for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
+    var testName = words(testYear.toString().substr(0,2))
+                 + words(testYear.toString().substr(2,2))
+    ;
 
     if (fs.existsSync( path.join(fromThemeDir, testName) )) {
       var latestTheme = testName;
-      console.log('Found theme ' + latestTheme);
       break;
     }
     else {
@@ -54,8 +53,15 @@ if (!existingThemes.length) {
   }
 
   if (typeof latestTheme === 'undefined') {
-    throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+    if (fs.existsSync( path.join(fromThemeDir, 'default') )) {
+      var latestTheme = 'default';
+    }
+    else {
+      throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+    }
   }
+
+  console.log('Found theme ' + latestTheme);
 
   var fromTheme = path.join(fromThemeDir, latestTheme);
   var toTheme   = path.join(toThemeDir, latestTheme);
