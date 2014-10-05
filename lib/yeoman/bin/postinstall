@@ -30,37 +30,45 @@ if (!fs.existsSync(toThemeDir)) {
   }
 }
 
-var existingThemes = fs.readdirSync(toThemeDir).filter(function(node) {
-  return fs.lstatSync(path.join(toThemeDir, node)).isDirectory();
-});
-
-// If no themes exist, copy over default theme
-if (!existingThemes.length) {
-  var fromThemeDir  = path.join(from, 'wp-content', 'themes');
-
-  for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
-    var testName = words(testYear.toString().substr(0,2))
-                 + words(testYear.toString().substr(2,2))
-    ;
-
-    if (fs.existsSync( path.join(fromThemeDir, testName) )) {
-      var latestTheme = testName;
-      break;
+var fromThemeDir  = path.join(from, 'wp-content', 'themes');
+var latestTheme   = null;
+var themeExists   = function (parents, name) {
+  var exists = false;
+  parents.forEach (function (directory) {
+    if (fs.existsSync( path.join(directory, name) )) {
+      exists = true;
     }
-    else {
-      console.log('No theme ' + testName);
-    }
+  });
+  return exists;
+};
+
+for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
+  var testName = words(testYear.toString().substr(0,2))
+               + words(testYear.toString().substr(2,2))
+  ;
+
+  if (themeExists([toThemeDir,fromThemeDir], testName)) {
+    latestTheme = testName;
+    break;
   }
-
-  if (typeof latestTheme === 'undefined') {
-    if (fs.existsSync( path.join(fromThemeDir, 'default') )) {
-      var latestTheme = 'default';
-    }
-    else {
-      throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
-    }
+  else {
+    console.log('No theme ' + testName);
   }
+}
 
+if (latestTheme === null) {
+  if (themeExists([fromThemeDir], 'default')) {
+    latestTheme = 'default';
+  }
+  else {
+    throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+  }
+}
+
+if (themeExists([toThemeDir], latestTheme)) {
+  console.log('Existing core theme ' + latestTheme);
+}
+else {
   console.log('Found theme ' + latestTheme);
 
   var fromTheme = path.join(fromThemeDir, latestTheme);
