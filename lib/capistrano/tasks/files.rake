@@ -5,7 +5,6 @@ namespace :evolve do
       set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{fetch(:ssh_keyfile)}\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
     end
 
-    desc "Download remote uploads to Vagrant"
     task :down do |task|
       begin
         local_uploads = "/vagrant/web/wp-content/uploads"
@@ -37,7 +36,6 @@ namespace :evolve do
       end
     end
 
-    desc "Uploads local uploads to remote"
     task :up do |task|
       begin
         invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"

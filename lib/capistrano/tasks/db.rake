@@ -36,7 +36,6 @@ namespace :evolve do
       end
     end
 
-    desc "Import remote DB to local"
     task :down do |task|
       begin
         invoke "evolve:db:backup"
@@ -54,7 +53,6 @@ namespace :evolve do
       end
     end
 
-    desc "Export local DB to remote"
     task :up do |task|
       begin
         invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
