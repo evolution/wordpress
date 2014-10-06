@@ -10,6 +10,7 @@
     "github-latest": "^0.1.2",
     "request": "^2.42.0",
     "ssh-keygen": "^0.2.1",
+    "in-words": "^0.1.0",
     "yeoman-generator": "^0.16.0"
   },
   "devDependencies": {
