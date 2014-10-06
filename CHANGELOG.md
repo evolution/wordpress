@@ -1,5 +1,6 @@
 # Changelog
 
+- v1.0.11 - Ensure backup core theme on postinstall, fix ssh key permissions on provision, ensure up/down tasks compatible with genesis task names
 - v1.0.10 - Fix init.d calls, add `reboot`, fix branch inference for deployment
 - v1.0.9 - Restore user role in full provisioning
 - v1.0.8 - Add explicit creation of deploy user, before full provisioning
