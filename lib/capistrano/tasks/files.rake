@@ -1,11 +1,8 @@
 namespace :evolve do
   namespace :files do
-    task :prepare, :key_file, :path_from, :path_to do |task, args|
-      run_locally do
-        execute "chmod 600 #{args[:key_file]}"
-      end
-
-      set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{args[:key_file]}\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
+    task :prepare, :path_from, :path_to do |task, args|
+      invoke "evolve:prepare_key"
+      set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{fetch(:ssh_keyfile)}\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
     end
 
     desc "Download remote uploads to Vagrant"
@@ -20,14 +17,12 @@ namespace :evolve do
         end
 
         if uploads_exist
-          key = fetch(:ssh_options)[:keys].last
-
           run_locally do
             execute :vagrant, :up
           end
 
           on roles(:web) do |host|
-            invoke "evolve:files:prepare", key, "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
+            invoke "evolve:files:prepare", "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
             run_locally do
               execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
             end
@@ -57,10 +52,8 @@ namespace :evolve do
         end
 
         if uploads_exist
-          key = fetch(:ssh_options)[:keys].last
-
           on roles(:web) do |host|
-            invoke "evolve:files:prepare", key, local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
+            invoke "evolve:files:prepare", local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
             run_locally do
               execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
             end
