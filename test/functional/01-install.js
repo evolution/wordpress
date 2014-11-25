@@ -12,6 +12,13 @@ describe('Mock site', function() {
     browser
       .visit('http://local.example.com/wp/wp-admin/install.php')
       .then(function() {
+        if (browser.button('Continue')) {
+          browser.select('language', 'English (United States)');
+
+          return browser.pressButton('Continue');
+        }
+      })
+      .then(function() {
         if (browser.button('Install WordPress')) {
           browser
             .fill('Site Title',       'Evolution WordPress Test')
