@@ -36,4 +36,4 @@ install:
   - php composer.phar install --dev
 script:
   - ./vendor/bin/phpunit
-  - node --stack-size=1000 ./bin/test
+  - node --stack-size=10000 ./bin/test
