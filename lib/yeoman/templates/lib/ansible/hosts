@@ -2,7 +2,7 @@
 local.<%= props.domain %> stage=local
 
 [production]
-production.<%= props.domain %> stage=production
+<%= props.domain %> stage=production
 
 [staging]
 staging.<%= props.domain %> stage=staging
