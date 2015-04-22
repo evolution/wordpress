@@ -1,6 +1,6 @@
 namespace :evolve do
   namespace :db do
-    task :prepare do |task, args|
+    task :prepare do |task|
       set :perl_cmd, '-pi -e \'s!https?://(?:[^/]+\.)?' + Regexp.escape(fetch(:domain)) + '/!/!ig\''
     end
 
