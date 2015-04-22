@@ -37,9 +37,9 @@ require_once(dirname(__FILE__) . '/../bower_components/evolution-wordpress/lib/w
       "define('WP_CONTENT_DIR', dirname(__FILE__) . CONTENT_DIR);",
       "define('WP_CONTENT_URL', CONTENT_DIR);",
       "define('WP_ENV', Evolution::getEnv());",
-      "define('WP_HOME', '/');",
+      "define('WP_HOME', 'http://'.$_SERVER['HTTP_HOST'].'/');",
       "define('WP_POST_REVISIONS', 5);",
-      "define('WP_SITEURL', '/wp');",
+      "define('WP_SITEURL', 'http://'.$_SERVER['HTTP_HOST'].'/wp');",
       "/* That's all,",
     ].join('\n')
   )
