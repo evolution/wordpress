@@ -41,7 +41,7 @@ describe('cap production evolve:files:up', function(done) {
       .then(function() {
         assert(false, "Url unexpectedly exists")
       })
-      .fail(function(error) {
+      .catch(function(error) {
         done();
       })
     ;
@@ -79,7 +79,7 @@ describe('cap production evolve:files:up', function(done) {
       .then(function() {
         done();
       })
-      .fail(function(error) {
+      .catch(function(error) {
         assert(error)
       })
     ;

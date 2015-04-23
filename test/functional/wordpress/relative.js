@@ -10,7 +10,7 @@ describe('WordPress', function() {
     browser
       .visit('http://example.com/')
       .then(function() {
-        assert.equal('/hello-world/', browser.query('#content h1 a').getAttribute('href'));
+        assert.equal('/hello-world/', browser.query('#content h2 a').getAttribute('href'));
       })
       .then(done, done)
     ;
