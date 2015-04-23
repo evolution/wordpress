@@ -10,7 +10,7 @@ describe('Varnish', function() {
     browser
       .visit('http://example.com/')
       .then(function() {
-        assert.equal('Hello world!', browser.text('#content h1'));
+        assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
       })
       .then(done, done)
     ;
@@ -43,7 +43,7 @@ describe('Varnish', function() {
           return browser.visit('http://example.com/');
         })
         .then(function() {
-          assert.equal('Hello world!', browser.text('#content h1'));
+          assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
           assert.equal(0, browser.resources[0].response.headers.age);
           assert.equal('uncached', browser.resources[0].response.headers['x-cache']);
         })
