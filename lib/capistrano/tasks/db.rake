@@ -1,7 +1,7 @@
 namespace :evolve do
   namespace :db do
     task :prepare do |task|
-      set :perl_cmd, '-pi -e \'s!https?://(?:[^/]+\.)?' + Regexp.escape(fetch(:domain)) + '/!/!ig\''
+      set :perl_cmd, '-pi -e \'s!https?://(([^/]+\.)?(local|staging|production|www)\.)?' + Regexp.escape(fetch(:domain)) + '/!/!ig\''
     end
 
     desc "Create backup of remote DB"
