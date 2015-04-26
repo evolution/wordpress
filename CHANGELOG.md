@@ -1,5 +1,11 @@
 # Changelog
 
+- v1.0.13 - Several bugfixes + enhancements:
+    - Vagrantfile overriding default ssh port forwarding ([#27](https://github.com/evolution/wordpress/pull/27))
+    - Standardized prod subdomain for ansible/capistrano ([#39](https://github.com/evolution/wordpress/pull/39))
+    - Upgraded pound for SSL fix ([#40](https://github.com/evolution/wordpress/pull/40))
+    - Generator dependency checking ([#41](https://github.com/evolution/wordpress/pull/41))
+    - Generator infers settings for existing projects ([#42](https://github.com/evolution/wordpress/pull/42))
 - v1.0.12 - Fix postinstall break
 - v1.0.11 - Ensure backup core theme on postinstall, fix ssh key permissions on provision, ensure up/down tasks compatible with genesis task names
 - v1.0.10 - Fix init.d calls, add `reboot`, fix branch inference for deployment
