@@ -1,7 +1,11 @@
 namespace :evolve do
   namespace :db do
-    task :prepare do |task|
-      set :perl_cmd, '-pi -e \'s!https?://(([^/]+\.)?(local|staging|production|www)\.)?' + Regexp.escape(fetch(:domain)) + '/!/!ig\''
+    task :prepare, :target_stage do |task, args|
+      set :perl_cmd, '-pi -e \'s!(https?://)(?:(?:[^/]+\.)?(?:local|staging|production|www)\.)?(' +
+        Regexp.escape(fetch(:domain)) +
+        '/)!$1' +
+        Regexp.escape(args[:target_stage]) +
+        '\.$2!ig\''
     end
 
     desc "Create backup of remote DB"
@@ -43,7 +47,7 @@ namespace :evolve do
     task :down do |task|
       begin
         invoke "evolve:db:backup"
-        invoke "evolve:db:prepare"
+        invoke "evolve:db:prepare", "local"
 
         run_locally do
           execute :gzip, "-d", fetch(:db_gzip_file)
@@ -63,7 +67,7 @@ namespace :evolve do
       begin
         invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
         invoke "evolve:db:backup", true
-        invoke "evolve:db:prepare"
+        invoke "evolve:db:prepare", fetch(:stage)
 
         run_locally do
           execute :vagrant, :up
