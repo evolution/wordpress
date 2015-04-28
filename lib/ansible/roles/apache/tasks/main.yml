@@ -16,6 +16,15 @@
 
 - debug:          msg={{ apache_version.stdout }}
 
+- name:           Configure Apache canonical server name
+  template:       src=canonical dest=/etc/apache2/conf-available/canonical-servername.conf mode=0644
+  sudo:           true
+
+- name:           Enable canonical config
+  command:        a2enconf canonical-servername
+  notify:         restart apache
+  sudo:           yes
+
 - name:           Ensure Apache `NameVirtualHost` is 80 (2.2)
   lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:80' dest=/etc/apache2/ports.conf backup=yes
   notify:         restart apache

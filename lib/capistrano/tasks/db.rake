@@ -1,11 +1,14 @@
 namespace :evolve do
   namespace :db do
     task :prepare, :target_stage do |task, args|
+      stage_subdomain = args[:target_stage].to_s
+      stage_subdomain = stage_subdomain == 'production' ? '' : stage_subdomain + '.'
+
       set :perl_cmd, '-pi -e \'s!(https?://)(?:(?:[^/]+\.)?(?:local|staging|production|www)\.)?(' +
         Regexp.escape(fetch(:domain)) +
         '/)!$1' +
-        Regexp.escape(args[:target_stage]) +
-        '\.$2!ig\''
+        Regexp.escape(stage_subdomain) +
+        '$2!ig\''
     end
 
     desc "Create backup of remote DB"
