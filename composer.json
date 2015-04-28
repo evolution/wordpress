@@ -3,7 +3,7 @@
     "description":  "",
     "autoload": {
         "psr-0": {
-            "Evolution": "lib/wordpress"
+            "Evolution": "temp/web"
         }
     },
     "require-dev": {
