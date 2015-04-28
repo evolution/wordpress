@@ -1,16 +1,12 @@
 ---
-- name:       Install pound package
-  apt:        pkg=pound state=present
+# https://launchpad.net/~unleashedtech/+archive/ubuntu/pound-2.7
+- name:       Register pound 2.7 ppa
+  apt_repository: repo='ppa:unleashedtech/pound-2.7'
   sudo:       true
 
-- name:       Register Pound major/minor version
-  shell:      "pound -V 2>&1 | grep -i version | perl -pe 's|^.*?version ([0-9]+[.][0-9]+).*?$|$1|i'"
-  register:   pound_version
-
-- debug:      msg={{ pound_version.stdout }}
-
-- include:    build.yml
-  when:       pound_version.stdout < '2.6'
+- name:       Install pound package
+  apt:        pkg=pound state=latest update_cache=yes
+  sudo:       true
 
 - name:       Copy pound configuration file
   template:   src=pound.cfg dest=/etc/pound/pound.cfg mode=0644
