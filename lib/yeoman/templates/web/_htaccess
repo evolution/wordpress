@@ -1,4 +1,14 @@
-# BEGIN WordPress
+# BEGIN Evolution Wordpress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Force <%= props.www ? '' : 'non-' %>www for production
+RewriteCond %{HTTP_HOST} ^<%= props.www ? '' : 'www\\.' %><%= props.domain.replace('.', '\\.') %>$ [NC]
+RewriteCond %{HTTP:X-Forwarded-Proto} ^http(s)| [NC]
+RewriteRule ^(.*)$ http%1://<%= props.www ? 'www.' : '' %><%= props.domain %>/$1 [L,R=301,NC]
+</IfModule>
+# END Evolution Wordpress
+<%= htaccessFile %>
+<% if (!htaccessWpBlock) { %># BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
@@ -7,4 +17,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
 </IfModule>
-# END WordPress
+# END WordPress<% } %>
