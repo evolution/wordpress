@@ -9,9 +9,7 @@ fi
 
 # Ansible dependencies
 apt-get -qq -y update
-apt-get -qq -y install python-software-properties
-apt-get -qq -y install software-properties-common
-apt-get -qq -y install python-pycurl
+apt-get -qq -y install python-software-properties software-properties-common python-pycurl
 
 add-apt-repository -y ppa:rquillo/ansible &> /dev/null || exit 1
 apt-get -qq -y update
@@ -20,4 +18,4 @@ apt-get -qq -y update
 apt-get -qq -y install ansible
 
 # Run provisioning playbook
-(cd "$( dirname "$0" )/../lib/ansible" && ansible-playbook provision.yml --connection=local $@)
+(cd "$( dirname "$0" )/../temp" && ansible-playbook lib/ansible/provision.yml --connection=local -e stage=local)

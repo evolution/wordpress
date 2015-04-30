@@ -9,8 +9,12 @@
   when:           has_vagrant.stdout
   sudo:           yes
 
+- name:           Create deploy group
+  group:          name=deploy state=present system=no
+  sudo:           yes
+
 - name:           Create deploy user
-  user:           name=deploy append=yes groups=www-data shell=/bin/bash comment="Created by Evolution WordPress"
+  user:           name=deploy append=yes group=deploy groups=www-data shell=/bin/bash comment="Created by Evolution WordPress"
   sudo:           yes
 
 - name:           Grant sudo access to deploy user

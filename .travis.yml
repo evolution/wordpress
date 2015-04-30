@@ -22,7 +22,9 @@ before_install:
   - rm -rf /vagrant/bower_components/evolution-wordpress
   - cp -RP $PWD /vagrant/bower_components/evolution-wordpress/
   - echo "Provision server"
-  - sudo $PWD/temp/bin/provision -e stage=local
+  - sudo cp $PWD/.travis.provision.bin $PWD/bin/provision
+  - sudo chmod +x $PWD/bin/provision
+  - sudo $PWD/bin/provision
   - sudo chown -Rf $USER:$USER $HOME/.ansible
   - echo "Mocking vagrant binary"
   - sudo cp $PWD/.travis.vagrant.bin /bin/vagrant
