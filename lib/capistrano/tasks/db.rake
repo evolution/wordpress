@@ -1,8 +1,10 @@
 namespace :evolve do
   namespace :db do
     task :prepare, :target_stage do |task, args|
-      stage_subdomain = args[:target_stage].to_s
-      stage_subdomain = stage_subdomain == 'production' ? '' : stage_subdomain + '.'
+      stage_subdomain = args[:target_stage].to_s + '.'
+      if stage_subdomain == 'production.'
+        stage_subdomain = fetch(:www) ? 'www.' : ''
+      end
 
       set :perl_cmd, '-pi -e \'s!(https?://)(?:(?:[^/]+\.)?(?:local|staging|production|www)\.)?(' +
         Regexp.escape(fetch(:domain)) +

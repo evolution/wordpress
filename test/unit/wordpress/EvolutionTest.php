@@ -1,5 +1,10 @@
 <?php
 
+if (!defined('EVOLUTION_WWW_MODE')) {
+    $content = file_get_contents(dirname(__FILE__).'/../../../temp/lib/ansible/group_vars/all');
+    define('EVOLUTION_WWW_MODE', preg_match('/www[ ]*:[ ]*(true)/', $content) ? 'www.' : '');
+}
+
 class EvolutionTest extends PHPUnit_Framework_TestCase
 {
     public function testGetDbName()
@@ -45,12 +50,12 @@ class EvolutionTest extends PHPUnit_Framework_TestCase
     public function serverNameProvider()
     {
         return array(
-            array(Evolution::DOMAIN,                'production',  Evolution::DOMAIN),
-            array('www.'.Evolution::DOMAIN,         'production',  Evolution::DOMAIN),
+            array(Evolution::DOMAIN,                'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
+            array('www.'.Evolution::DOMAIN,         'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
             array('local.'.Evolution::DOMAIN,       'local',       'local.'.Evolution::DOMAIN),
             array('staging.'.Evolution::DOMAIN,     'staging',     'staging.'.Evolution::DOMAIN),
-            array('production.'.Evolution::DOMAIN,  'production',  Evolution::DOMAIN),
-            array('local.thewrongdomain.com',       'production',  Evolution::DOMAIN)
+            array('production.'.Evolution::DOMAIN,  'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
+            array('local.thewrongdomain.com',       'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN)
         );
     }
 }
