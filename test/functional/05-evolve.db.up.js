@@ -6,8 +6,6 @@ var exec    = require('child_process').exec;
 
 describe('cap production evolve:up:db', function(done) {
   it('should not fail', function(done) {
-    this.timeout(10 * 1000);
-
     exec('evolution_non_interactive=1 bundle exec cap production evolve:up:db', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {

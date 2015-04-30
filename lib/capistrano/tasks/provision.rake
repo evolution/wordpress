@@ -4,20 +4,23 @@ namespace :evolve do
     begin
       invoke "evolve:prepare_key"
       run_locally do
-        ansible_path = Dir.pwd + "/lib/ansible"
-        play = "cd #{ansible_path} && ansible-playbook -e stage=#{fetch(:stage)}"
+        def ansible_execute(command)
+           puts "Running " + command.yellow + " on " + "localhost".blue
+           return system(command)
+        end
 
-        success = system("#{play} --user=#{fetch(:user)} provision.yml")
+        ansible_path = Dir.pwd + "/lib/ansible"
+        play = "ansible-playbook -e stage=#{fetch(:stage)}"
+
+        success = ansible_execute("#{play} --user=#{fetch(:user)} #{ansible_path}/provision.yml")
 
         unless success
           error "\n\nUnable to provision with SSH publickey for \"#{fetch(:user)}\" user"
 
           set :provision_user, ask('user to provision as', 'root')
 
-          puts "password:"
-
-          system("#{play} --user=#{fetch(:provision_user)} --ask-pass --ask-sudo-pass user.yml")
-          system("#{play} --user=#{fetch(:user)} provision.yml")
+          ansible_execute("#{play} --user=#{fetch(:provision_user)} --ask-pass --ask-sudo-pass #{ansible_path}/user.yml")
+          ansible_execute("#{play} --user=#{fetch(:user)} #{ansible_path}/provision.yml")
         end
       end
 

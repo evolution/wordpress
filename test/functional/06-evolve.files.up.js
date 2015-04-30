@@ -10,8 +10,6 @@ var testUrl  = 'http://production.example.com/wp-content/uploads/uploads_sync_te
 
 describe('cap production evolve:files:up', function(done) {
   it('may need to remove uploads', function(done) {
-    this.timeout(10 * 1000);
-
     exec('vagrant ssh local -c "rm -f ' + testFile + '"', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
@@ -21,8 +19,6 @@ describe('cap production evolve:files:up', function(done) {
   });
 
   it('should have no uploads', function(done) {
-    this.timeout(10 * 1000);
-
     exec('evolution_non_interactive=1 bundle exec cap production evolve:files:up', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
@@ -32,8 +28,6 @@ describe('cap production evolve:files:up', function(done) {
   });
 
   it('should not exist at url', function(done) {
-    this.timeout(10 * 1000);
-
     var browser = new Browser();
 
     browser
@@ -48,8 +42,6 @@ describe('cap production evolve:files:up', function(done) {
   });
 
   it('may have to create upload', function(done) {
-    this.timeout(10 * 1000);
-
     exec('vagrant ssh local -c "touch ' + testFile + '"', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
@@ -59,8 +51,6 @@ describe('cap production evolve:files:up', function(done) {
   });
 
   it('should sync uploads', function(done) {
-    this.timeout(10 * 1000);
-
     exec('evolution_non_interactive=1 bundle exec cap production evolve:files:up', {
       cwd: process.cwd() + '/temp'
     }, function(err, stdout, stderr) {
@@ -70,8 +60,6 @@ describe('cap production evolve:files:up', function(done) {
   });
 
   it('should exist at url', function(done) {
-    this.timeout(10 * 1000);
-
     var browser = new Browser();
 
     browser
