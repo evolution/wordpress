@@ -179,6 +179,11 @@ sub vcl_hash {
         hash_data(req.http.Authorization);
     }
 
+    # hash forwarded protocol, if present
+    if (req.http.X-Forwarded-Proto) {
+        hash_data(req.http.X-Forwarded-Proto);
+    }
+
     return (hash);
 }
 
