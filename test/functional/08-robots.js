@@ -15,4 +15,16 @@ describe('robots.txt', function(done) {
       .then(done, done)
     ;
   });
+
+  it('on public prod, should point to sitemap', function(done) {
+    var browser = new Browser();
+
+    browser
+      .visit('http://example.com/robots.txt')
+      .then(function() {
+        assert(!!browser.text().match('# Sitemap: '));
+      })
+      .then(done, done)
+    ;
+  });
 });
