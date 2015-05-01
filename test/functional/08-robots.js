@@ -3,7 +3,7 @@
 var assert  = require('assert');
 var Browser = require('zombie');
 
-describe.only('robots.txt', function(done) {
+describe('robots.txt', function(done) {
   it('on local, should disallow all', function(done) {
     var browser = new Browser();
 
