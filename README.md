@@ -22,6 +22,9 @@ Evolution lets you generate an entirely versioned, multi-environment Wordpress s
 * Performance tuned [Apache](http://httpd.apache.org/) webserver
 * [Postfix](http://www.postfix.org/) mail server
 
+## Project Status
+
+Evolution is _largely_ stable and usable at this point, but features are still being added and bugs being fixed. This documentation is also a work in progress.
 
 ## Quick Start
 
