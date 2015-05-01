@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "evolution-wordpress",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Libraries for a multi-staged WordPress workflow with Vagrant",
   "main": "lib/yeoman/index.js",
   "dependencies": {

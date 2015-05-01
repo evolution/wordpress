@@ -1,5 +1,11 @@
 # Changelog
 
+- v1.0.14 - More enhancements, better WIP docs, and another SSL tweak
+    - Added expanded README with quickstart ([#43](https://github.com/evolution/wordpress/pull/43))
+    - Replaced vagrant shell provisioning ([#44](https://github.com/evolution/wordpress/pull/44))
+    - Fixed SSL detection and hashing issues ([#45](https://github.com/evolution/wordpress/pull/45))
+    - Open url after deployment ([#47](https://github.com/evolution/wordpress/pull/47))
+    - Added robots.txt ([#48](https://github.com/evolution/wordpress/pull/48))
 - v1.0.13 - Several bugfixes + enhancements:
     - Vagrantfile overriding default ssh port forwarding ([#27](https://github.com/evolution/wordpress/pull/27))
     - Standardized prod subdomain for ansible/capistrano ([#39](https://github.com/evolution/wordpress/pull/39))
