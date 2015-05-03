@@ -47,6 +47,7 @@ helpers.testDirectory(outputDir, function(err) {
       ssl:          true,
       name:         'Example.com',
       domain:       'example.com',
+      www:          false,
       roles:        WordpressGenerator.roles.map(function(role) { return role.value; }),
       ip:           '192.168.137.137',
       DB_NAME:      'example_db',
