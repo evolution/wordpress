@@ -1,24 +1,60 @@
 # BEGIN Evolution WordPress
 <IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-# Force <%= props.www ? '' : 'non-' %>www for production
-RewriteCond %{HTTP_HOST} ^<%= props.www ? '' : 'www\\.' %><%= props.domain.replace('.', '\\.') %>$ [NC]
-RewriteCond %{HTTP:X-Forwarded-Proto} ^http(s)| [NC]
-RewriteRule ^(.*)$ http%1://<%= props.www ? 'www.' : '' %><%= props.domain %>/$1 [L,R=301,NC]
-# Prevent spidering of non-canonical URLs, such as `[*.]staging.*` and `production.*`.
-RewriteCond %{HTTP_HOST} (^local|staging|^production)\.<%= props.domain.replace('.', '\\.') %>$ [NC]
-RewriteRule ^robots.txt$ no_robots.txt [L]
+  RewriteEngine On
+  RewriteBase /
+
+  # Force <%= props.www ? '' : 'non-' %>www for production
+  RewriteCond %{HTTP_HOST} ^<%= props.www ? '' : 'www\\.' %><%= props.domain.replace('.', '\\.') %>$ [NC]
+  RewriteCond %{HTTP:X-Forwarded-Proto} ^http(s)| [NC]
+  RewriteRule ^(.*)$ http%1://<%= props.www ? 'www.' : '' %><%= props.domain %>/$1 [L,R=301,NC]
+
+  # Prevent spidering of non-canonical URLs, such as `[*.]staging.*` and `production.*`.
+  RewriteCond %{HTTP_HOST} (^local|staging|^production)\.<%= props.domain.replace('.', '\\.') %>$ [NC]
+  RewriteRule ^robots.txt$ no_robots.txt [L]
+
+  ## SECURITY
+
+  # Block access to hidden files and directories.
+  RewriteCond %{SCRIPT_FILENAME} -d [OR]
+  RewriteCond %{SCRIPT_FILENAME} -f
+  RewriteRule "(^|/)\." - [F]
+
+  # Rules to protect wp-includes
+  RewriteRule ^wp/wp-admin/includes/ - [F]
+  RewriteRule !^wp/wp-includes/ - [S=3]
+  RewriteCond %{SCRIPT_FILENAME} !^(.*)wp-includes/ms-files.php
+  RewriteRule ^wp/wp-includes/[^/]+\.php$ - [F]
+  RewriteRule ^wp/wp-includes/js/tinymce/langs/.+\.php - [F]
+  RewriteRule ^wp/wp-includes/theme-compat/ - [F]
+
+  # Rules to prevent php execution in uploads
+  RewriteRule ^(.*)/uploads/(.*).php(.?) - [F]
+
+  # Rules to block unneeded HTTP methods
+  RewriteCond %{REQUEST_METHOD} ^(TRACE|DELETE|TRACK) [NC]
+  RewriteRule ^(.*)$ - [F]
+
+  # Rules to block foreign characters in URLs
+  RewriteCond %{QUERY_STRING} ^.*(%0|%A|%B|%C|%D|%E|%F).* [NC]
+  RewriteRule ^(.*)$ - [F]
+
+  # Rules to help reduce spam
+  RewriteCond %{REQUEST_METHOD} POST
+  RewriteCond %{REQUEST_URI} ^(.*)wp-comments-post\.php*
+  RewriteCond %{HTTP_REFERER} !^(.*)<%= props.domain %>.*
+  RewriteCond %{HTTP_REFERER} !^http://jetpack\.wordpress\.com/jetpack-comment/ [OR]
+  RewriteCond %{HTTP_USER_AGENT} ^$
+  RewriteRule ^(.*)$ - [F]
 </IfModule>
 # END Evolution WordPress
 <%= htaccessFile %>
 <% if (!htaccessWpBlock) { %># BEGIN WordPress
 <IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index\.php$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.php$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.php [L]
 </IfModule>
 # END WordPress<% } %>

@@ -51,8 +51,9 @@
   sudo:           yes
 
 - name:           Change VirtualHosts from 80 => 8080
-  lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ item }}.{{ domain }}.conf
-  with_items:     apache_vhosts
+  lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
+  with_nested_dict: apache_vhosts
+  when:           item.key_0 == stage
   notify:
     - restart apache
     - restart varnish
