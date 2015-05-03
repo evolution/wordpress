@@ -2,6 +2,10 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
+# Force <%= props.www ? '' : 'non-' %>www for production
+RewriteCond %{HTTP_HOST} ^<%= props.www ? '' : 'www\\.' %><%= props.domain.replace('.', '\\.') %>$ [NC]
+RewriteCond %{HTTP:X-Forwarded-Proto} ^http(s)| [NC]
+RewriteRule ^(.*)$ http%1://<%= props.www ? 'www.' : '' %><%= props.domain %>/$1 [L,R=301,NC]
 # Prevent spidering of non-canonical URLs, such as `[*.]staging.*` and `production.*`.
 RewriteCond %{HTTP_HOST} (^local|staging|^production)\.<%= props.domain.replace('.', '\\.') %>$ [NC]
 RewriteRule ^robots.txt$ no_robots.txt [L]

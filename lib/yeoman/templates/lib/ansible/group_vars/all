@@ -1,6 +1,7 @@
 ---
 evolve_version: <%= pkg.version %>
 domain:         <%= props.domain %>
+www:            <%= props.www %>
 
 mysql:
   name:         <%= props.DB_NAME %>
