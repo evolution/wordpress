@@ -76,7 +76,6 @@
     </FilesMatch>
 
     # Deny access to WordPress specific files
-    # TODO: test for readme.htm Readme.html readme.TXT README.md
     <FilesMatch "(?i:readme\.(html?|txt|md))">
         Order allow,deny
         Deny from all

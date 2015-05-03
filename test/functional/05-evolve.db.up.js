@@ -18,9 +18,9 @@ describe('cap production evolve:up:db', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://production.example.com/wp/wp-admin/install.php')
+      .visit('http://production.example.com/')
       .then(function() {
-        assert.equal('Log In', browser.text('a.button'));
+        assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
       })
       .then(done, done)
     ;
