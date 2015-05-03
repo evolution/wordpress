@@ -23,4 +23,11 @@ namespace :deploy do
       execute "cd #{release_path} && bower install --config.interactive=false"
     end
   end
+  after :finished, :launch_browser do
+    require 'launchy'
+    uri = "http://#{fetch(:stage)}.#{fetch(:domain)}/"
+    Launchy.open(uri) do |exception|
+      puts "Failed to open #{uri} because #{exception}"
+    end
+  end
 end
