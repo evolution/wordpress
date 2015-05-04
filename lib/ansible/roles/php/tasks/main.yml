@@ -4,14 +4,20 @@
   with_items:     php_packages
   sudo:           yes
 
+- shell:          ls -1d /etc/php5/conf.d 2>/dev/null || ls -1d /etc/php5/mods-available
+  register:       php_conf
+  sudo:           yes
+
+- debug:          var={{ php_conf.stdout }}
+
 - name:           Install PECL packages
-  command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates=/etc/php5/conf.d/{{ item if item is string else item.name }}.ini
+  command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates={{ php_conf.stdout }}/{{ item if item is string else item.name }}.ini
   with_items:     pecl_packages
   sudo:           yes
 
 - name:           Enable PECL packages
   lineinfile:     line="extension={{ item if item is string else item.name }}.so"
-                  dest="/etc/php5/conf.d/{{ item if item is string else item.name }}.ini"
+                  dest="{{ php_conf.stdout }}/{{ item if item is string else item.name }}.ini"
                   create=yes
   with_items:     pecl_packages
   sudo:           yes
