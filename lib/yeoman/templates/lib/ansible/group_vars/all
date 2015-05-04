@@ -3,6 +3,9 @@ evolve_version: <%= pkg.version %>
 domain:         <%= props.domain %>
 www:            <%= props.www %>
 
+monitoring:
+  newrelic:     '<%= props.newrelic %>'
+
 mysql:
   name:         <%= props.DB_NAME %>
   user:         <%= props.DB_USER %>
