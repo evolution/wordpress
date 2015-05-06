@@ -1,16 +1,20 @@
 namespace :evolve do
   namespace :db do
-    task :prepare, :target_stage do |task, args|
-      stage_subdomain = args[:target_stage].to_s + '.'
-      if stage_subdomain == 'production.'
-        stage_subdomain = fetch(:www) ? 'www.' : ''
+    task :prepare, :source, :target do |task, args|
+      def filter_stage(stage)
+        if stage == 'production'
+          return (fetch(:www) ? 'www.' : '') + fetch(:domain)
+        else
+          return stage + '.' + fetch(:domain)
+        end
       end
 
-      set :perl_cmd, '-pi -e \'s!(https?://)(?:(?:[^/]+\.)?(?:local|staging|production|www)\.)?(' +
-        Regexp.escape(fetch(:domain)) +
-        '/)!$1' +
-        Regexp.escape(stage_subdomain) +
-        '$2!ig\''
+      set :wp_cmd, [
+        '"://' + filter_stage(args[:source].to_s) + '/"',
+        '"://' + filter_stage(args[:target].to_s) + '/"',
+        '--path="' + fetch(:wp_path) + '"',
+        '--url="http://' + args[:target].to_s + '.' + fetch(:domain) + '/"',
+      ].join(' ')
     end
 
     desc "Create backup of remote DB"
@@ -52,13 +56,13 @@ namespace :evolve do
     task :down do |task|
       begin
         invoke "evolve:db:backup"
-        invoke "evolve:db:prepare", "local"
+        invoke "evolve:db:prepare", fetch(:stage), "local"
 
         run_locally do
           execute :gzip, "-d", fetch(:db_gzip_file)
-          execute :perl, fetch(:perl_cmd), fetch(:db_backup_file)
           execute :vagrant, :up
           execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
+          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
           execute :rm, fetch(:db_backup_file)
         end
 
@@ -72,7 +76,7 @@ namespace :evolve do
       begin
         invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
         invoke "evolve:db:backup", true
-        invoke "evolve:db:prepare", fetch(:stage)
+        invoke "evolve:db:prepare", "local", fetch(:stage)
 
         run_locally do
           execute :vagrant, :up
@@ -83,10 +87,10 @@ namespace :evolve do
         on release_roles(:db) do
           upload! fetch(:db_gzip_file), "/tmp/#{fetch(:db_gzip_file)}"
           execute :gzip, "-d", "/tmp/#{fetch(:db_gzip_file)}"
-          execute :perl, fetch(:perl_cmd), "/tmp/#{fetch(:db_backup_file)}"
 
           within fetch(:wp_path) do
             execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+            execute :wp, :'search-replace', fetch(:wp_cmd)
           end
 
           execute :rm, "/tmp/#{fetch(:db_backup_file)}"
