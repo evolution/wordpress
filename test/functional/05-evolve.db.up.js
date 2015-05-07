@@ -26,6 +26,21 @@ describe('cap production evolve:up:db', function(done) {
     ;
   });
 
+  it('should deny access to prod installer', function(done) {
+    var browser = new Browser();
+
+    browser
+      .visit('http://production.example.com/wp/wp-admin/install.php')
+      .then(function() {
+        assert(false, 'expected 403, got ' + browser.statusCode)
+      })
+      .catch(function(error) {
+        assert.equal(browser.statusCode, 403, "should be forbidden\n" + error);
+        done()
+      })
+    ;
+  });
+
   it('should have remote db backup', function(done) {
     exec('vagrant ssh local -c "ls -A /var/www/example.com/production/master/backups/example_db.*.gz"', {
       cwd: process.cwd() + '/temp'
