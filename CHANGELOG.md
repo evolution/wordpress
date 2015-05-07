@@ -1,5 +1,11 @@
 # Changelog
 
+- v1.0.15
+    - Added www option ([#51](https://github.com/evolution/wordpress/pull/51))
+    - Fixed Vagrant 1.7.0+ issue with ssh key insertion
+    - Incorporated htaccess/vhost tweaks for security/performance ([#52](https://github.com/evolution/wordpress/pull/52))
+    - Added optional new relic app/server monitoring ([#53](https://github.com/evolution/wordpress/pull/53))
+    - Fixed wordpress tagged version support([#55](https://github.com/evolution/wordpress/pull/55))
 - v1.0.14 - More enhancements, better WIP docs, and another SSL tweak
     - Added expanded README with quickstart ([#43](https://github.com/evolution/wordpress/pull/43))
     - Replaced vagrant shell provisioning ([#44](https://github.com/evolution/wordpress/pull/44))
