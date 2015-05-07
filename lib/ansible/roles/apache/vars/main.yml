@@ -9,9 +9,19 @@ apache_modules:
   - headers
   - rewrite
   - vhost_alias
+  - deflate
+  - setenvif
+  - filter
+  - mime
+
+apache_disabled_modules:
+  - autoindex
 
 apache_vhosts:
-  - 000-local
-  - 001-staging
-  - 002-branch
-  - 003-production
+  local:
+    0: local
+  staging:
+    1: staging
+    2: branch
+  production:
+    3: production

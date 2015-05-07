@@ -3,3 +3,4 @@ temp/
 test/temp/
 vendor/
 composer.phar
+*.pyc

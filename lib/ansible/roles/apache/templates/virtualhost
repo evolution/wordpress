@@ -1,0 +1,305 @@
+{% set _vhost_filename = item.value %}
+{% set _vhost_stagename = item.key_0 %}
+<VirtualHost *:80>
+{% if _vhost_filename == 'branch' %}
+    # To play nicely with VirtualDocumentRoot
+    UseCanonicalName Off
+{% endif %}
+    ServerAdmin webmaster@localhost
+
+    # Canonical server name for {{ _vhost_stagename }}
+{% if _vhost_filename == 'production' %}
+    ServerName {{ 'www.' if www else '' }}{{ domain }}
+{% else %}
+    ServerName {{ _vhost_stagename }}.{{ domain }}
+{% endif %}
+
+{% if _vhost_filename == 'branch' %}
+    # Support for branch staging subdomains
+    ServerAlias *.{{ _vhost_stagename }}.{{ domain }}
+
+{% elif _vhost_filename == 'production' %}
+    # Support for alt production subdomains
+    ServerAlias {{ '' if www else 'www.' }}{{ domain }}
+    ServerAlias {{ _vhost_stagename }}.{{ domain }}
+
+{% endif %}
+{% if _vhost_filename == 'local' %}
+    DocumentRoot /vagrant/web
+{% elif _vhost_filename == 'branch' %}
+    VirtualDocumentRoot /var/www/{{ domain }}/{{ _vhost_stagename }}/%1/current/web
+{% else %}
+    DocumentRoot /var/www/{{ domain }}/{{ _vhost_stagename }}/master/current/web
+{% endif %}
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+{% if _vhost_filename == 'local' %}
+    <Directory /vagrant/web/>
+{% elif _vhost_filename == 'branch' %}
+    <Directory /var/www/{{ domain }}/>
+{% else %}
+    <Directory /var/www/{{ domain }}/{{ _vhost_stagename }}/master/current/web/>
+{% endif %}
+        Options FollowSymLinks
+        AllowOverride All
+{% if apache_version.stdout == '2.2' %}
+        Order allow,deny
+        Allow from all
+{% elif apache_version.stdout == '2.4' %}
+        Require all granted
+{% endif %}
+    </Directory>
+
+    LogLevel warn
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ _vhost_filename }}.{{ domain }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ _vhost_filename }}.{{ domain }}-access.log combined
+{% if _vhost_filename != 'production' %}
+
+    # All the error reporting that's unfit for production
+    php_flag display_startup_errors on
+    php_flag display_errors on
+
+    php_value error_reporting -1
+    php_value scream.enabled 1
+{% endif %}
+
+    # Block access to backup and source files.
+    # These files may be left by some text editors and can pose a great security
+    # danger when anyone has access to them.
+    <FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+        Order allow,deny
+        Deny from all
+        Satisfy All
+    </FilesMatch>
+
+    # Deny access to WordPress specific files
+    <FilesMatch "(?i:readme\.(html?|txt|md))">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+    <Files wp-config.php>
+        Order allow,deny
+        Deny from all
+    </Files>
+
+{% if _vhost_filename != 'local' %}
+    # Deny access to install script for non-local environments
+    <Files install.php>
+        Order allow,deny
+        Deny from all
+    </Files>
+{% endif %}
+
+    # Disable XML-RPC
+    <files xmlrpc.php>
+        Order allow,deny
+        Deny from all
+    </files>
+
+    # Deny access to all .htaccess files
+    <Files ~ "^.*\.(?i:hta)">
+        Order allow,deny
+        Deny from all
+        Satisfy all
+    </Files>
+
+    # Deny access to php files under wp-content
+    <Directory ~ "(^|/)wp-content/?">
+        <Files *.php>
+            Deny from all
+        </Files>
+    </Directory>
+
+    # Deny access to php files under wp-includes, with exceptions
+    <Directory ~ "(^|/)wp-includes/?">
+        <Files *.php>
+            Deny from all
+        </Files>
+        <Files wp-tinymce.php>
+            Allow from all
+        </Files>
+        <Files ms-files.php>
+            Allow from all
+        </Files>
+    </Directory>
+
+    # ----------------------------------------------------------------------
+    # | Compression                                                        |
+    # ----------------------------------------------------------------------
+    <IfModule mod_deflate.c>
+        # Force compression for mangled `Accept-Encoding` request headers
+        # https://developer.yahoo.com/blogs/ydn/pushing-beyond-gzipping-25601.html
+        <IfModule mod_setenvif.c>
+            <IfModule mod_headers.c>
+                SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+                RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+            </IfModule>
+        </IfModule>
+
+        # Compress all output labeled with one of the following media types.
+    {% if apache_version.stdout != '2.2' %}
+
+        #
+        # (!) For Apache versions below version 2.3.7 you don't need to
+        # enable `mod_filter` and can remove the `<IfModule mod_filter.c>`
+        # and `</IfModule>` lines as `AddOutputFilterByType` is still in
+        # the core directives.
+        #
+        # https://httpd.apache.org/docs/current/mod/mod_filter.html#addoutputfilterbytype
+        <IfModule mod_filter.c>
+    {% endif %}
+            AddOutputFilterByType DEFLATE "application/atom+xml" \
+                                          "application/javascript" \
+                                          "application/json" \
+                                          "application/ld+json" \
+                                          "application/manifest+json" \
+                                          "application/rdf+xml" \
+                                          "application/rss+xml" \
+                                          "application/schema+json" \
+                                          "application/vnd.geo+json" \
+                                          "application/vnd.ms-fontobject" \
+                                          "application/x-font-ttf" \
+                                          "application/x-javascript" \
+                                          "application/x-web-app-manifest+json" \
+                                          "application/xhtml+xml" \
+                                          "application/xml" \
+                                          "font/eot" \
+                                          "font/opentype" \
+                                          "image/bmp" \
+                                          "image/svg+xml" \
+                                          "image/vnd.microsoft.icon" \
+                                          "image/x-icon" \
+                                          "text/cache-manifest" \
+                                          "text/css" \
+                                          "text/html" \
+                                          "text/javascript" \
+                                          "text/plain" \
+                                          "text/vcard" \
+                                          "text/vnd.rim.location.xloc" \
+                                          "text/vtt" \
+                                          "text/x-component" \
+                                          "text/x-cross-domain-policy" \
+                                          "text/xml"
+        {% if apache_version.stdout != '2.2' %}</IfModule>
+    {% endif %}
+
+        # Map the following filename extensions to the specified
+        # encoding type in order to make Apache serve the file types
+        # with the appropriate `Content-Encoding` response header
+        # (do note that this will NOT make Apache compress them!).
+        #
+        # If these files types would be served without an appropriate
+        # `Content-Enable` response header, client applications (e.g.:
+        # browsers) wouldn't know that they first need to uncompress
+        # the response, and thus, wouldn't be able to understand the
+        # content.
+        #
+        # https://httpd.apache.org/docs/current/mod/mod_mime.html#addencoding
+        <IfModule mod_mime.c>
+            AddEncoding gzip              svgz
+        </IfModule>
+    </IfModule>
+
+    # ----------------------------------------------------------------------
+    # | ETags                                                              |
+    # ----------------------------------------------------------------------
+
+    # Remove `ETags` as resources are sent with far-future expires headers.
+    #
+    # https://developer.yahoo.com/performance/rules.html#etags
+    # https://tools.ietf.org/html/rfc7232#section-2.3
+
+    # `FileETag None` doesn't work in all cases.
+    <IfModule mod_headers.c>
+        Header unset ETag
+    </IfModule>
+
+    FileETag None
+
+    # ----------------------------------------------------------------------
+    # | Expires headers                                                    |
+    # ----------------------------------------------------------------------
+
+    # Serve resources with far-future expires headers.
+    #
+    # (!) If you don't control versioning with filename-based
+    # cache busting, you should consider lowering the cache times
+    # to something like one week.
+    #
+    # https://httpd.apache.org/docs/current/mod/mod_expires.html
+    <IfModule mod_expires.c>
+
+        ExpiresActive on
+        ExpiresDefault                                      "access plus 1 month"
+
+      # CSS
+        ExpiresByType text/css                              "access plus 1 year"
+
+      # Data interchange
+        ExpiresByType application/atom+xml                  "access plus 1 hour"
+        ExpiresByType application/rdf+xml                   "access plus 1 hour"
+        ExpiresByType application/rss+xml                   "access plus 1 hour"
+
+        ExpiresByType application/json                      "access plus 0 seconds"
+        ExpiresByType application/ld+json                   "access plus 0 seconds"
+        ExpiresByType application/schema+json               "access plus 0 seconds"
+        ExpiresByType application/vnd.geo+json              "access plus 0 seconds"
+        ExpiresByType application/xml                       "access plus 0 seconds"
+        ExpiresByType text/xml                              "access plus 0 seconds"
+
+      # Favicon (cannot be renamed!) and cursor images
+        ExpiresByType image/vnd.microsoft.icon              "access plus 1 year"
+        ExpiresByType image/x-icon                          "access plus 1 year"
+
+      # HTML
+        ExpiresByType text/html                             "access plus 0 seconds"
+
+      # JavaScript
+        ExpiresByType application/javascript                "access plus 1 year"
+        ExpiresByType application/x-javascript              "access plus 1 year"
+        ExpiresByType text/javascript                       "access plus 1 year"
+
+      # Manifest files
+        ExpiresByType application/manifest+json             "access plus 1 year"
+
+        ExpiresByType application/x-web-app-manifest+json   "access plus 0 seconds"
+        ExpiresByType text/cache-manifest                   "access plus 0 seconds"
+
+      # Media files
+        ExpiresByType audio/ogg                             "access plus 1 month"
+        ExpiresByType image/bmp                             "access plus 1 month"
+        ExpiresByType image/gif                             "access plus 1 month"
+        ExpiresByType image/jpeg                            "access plus 1 month"
+        ExpiresByType image/png                             "access plus 1 month"
+        ExpiresByType image/svg+xml                         "access plus 1 month"
+        ExpiresByType video/mp4                             "access plus 1 month"
+        ExpiresByType video/ogg                             "access plus 1 month"
+        ExpiresByType video/webm                            "access plus 1 month"
+
+      # Web fonts
+
+        # Embedded OpenType (EOT)
+        ExpiresByType application/vnd.ms-fontobject         "access plus 1 year"
+        ExpiresByType font/eot                              "access plus 1 year"
+
+        # OpenType
+        ExpiresByType font/opentype                         "access plus 1 year"
+
+        # TrueType
+        ExpiresByType application/x-font-ttf                "access plus 1 year"
+
+        # Web Open Font Format (WOFF) 1.0
+        ExpiresByType application/font-woff                 "access plus 1 year"
+        ExpiresByType application/x-font-woff               "access plus 1 year"
+        ExpiresByType font/woff                             "access plus 1 year"
+
+        # Web Open Font Format (WOFF) 2.0
+        ExpiresByType application/font-woff2                "access plus 1 year"
+
+      # Other
+        ExpiresByType text/x-cross-domain-policy            "access plus 1 week"
+    </IfModule>
+</VirtualHost>
