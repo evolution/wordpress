@@ -1,7 +1,7 @@
 <?php
 
 /* Include Evolution to use with WordPress */
-require_once(dirname(__FILE__) . '/Evolution.php');
+require_once(dirname(__FILE__) . '/../Evolution.php');
 <%= wpConfigFile
   // Already started PHP
   .replace('<?php', '')

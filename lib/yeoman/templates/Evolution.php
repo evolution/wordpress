@@ -24,7 +24,7 @@ class Evolution
             self::$hostname = $env.'.'.self::DOMAIN;
         }
         else {
-            $content = file_get_contents(dirname(__FILE__).'/../lib/ansible/group_vars/all');
+            $content = file_get_contents(dirname(__FILE__).'/lib/ansible/group_vars/all');
 
             if (preg_match('/www[ ]*:[ ]*(true)/', $content)) {
                 self::$hostname = 'www.'.self::DOMAIN;

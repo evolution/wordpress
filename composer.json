@@ -3,7 +3,7 @@
     "description":  "",
     "autoload": {
         "psr-0": {
-            "Evolution": "temp/web"
+            "Evolution": "temp"
         }
     },
     "require-dev": {
