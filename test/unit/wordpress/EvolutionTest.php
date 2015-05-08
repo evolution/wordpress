@@ -1,60 +1,61 @@
 <?php
 
+if (!defined('EVOLUTION_WWW_MODE')) {
+    $content = file_get_contents(dirname(__FILE__).'/../../../temp/lib/ansible/group_vars/all');
+    define('EVOLUTION_WWW_MODE', preg_match('/www[ ]*:[ ]*(true)/', $content) ? 'www.' : '');
+}
+
 class EvolutionTest extends PHPUnit_Framework_TestCase
 {
     public function testGetDbName()
     {
-        $_SERVER['HTTP_HOST'] = 'local.example.com';
+        $_SERVER['SERVER_NAME'] = 'local.'.Evolution::DOMAIN;
 
         $this->assertEquals('test_local', Evolution::getDbName('test'));
     }
 
     /**
-     * @dataProvider httpHostProvider
+     * @dataProvider serverNameProvider
      */
-    public function testGetEnv($host, $expected)
+    public function testGetEnv($servername, $env, $hostname)
     {
-        $_SERVER['HTTP_HOST'] = $host;
+        $_SERVER['SERVER_NAME'] = $servername;
 
-        $this->assertEquals($expected, Evolution::getEnv());
+        $this->assertEquals($env, Evolution::getEnv());
     }
 
     /**
-     * @dataProvider httpHostProvider
+     * @dataProvider serverNameProvider
      */
-    public function testInitEnv($host, $expected)
+    public function testInitEnv($servername, $env, $hostname)
     {
-        $_SERVER['HTTP_HOST'] = $host;
+        $_SERVER['SERVER_NAME'] = $servername;
 
         Evolution::initEnv();
 
         $this->assertTrue(defined('WP_ENV'), '`Evolution::initEnv()` should define `WP_ENV`');
-        $this->assertEquals($expected, WP_ENV);
+        $this->assertEquals($env, WP_ENV);
     }
 
-    public function httpHostProvider()
+    /**
+     * @dataProvider serverNameProvider
+     */
+    public function testGetHostname($servername, $env, $hostname)
+    {
+        $_SERVER['SERVER_NAME'] = $servername;
+
+        $this->assertEquals($hostname, Evolution::getHostname());
+    }
+
+    public function serverNameProvider()
     {
         return array(
-            array('example.com',              'production'),
-            array('example.net',              'production'),
-            array('example.org',              'production'),
-            array('example.co.uk',            'production'),
-            array('www.example.com',          'production'),
-            array('www.example.org',          'production'),
-            array('www.example.net',          'production'),
-            array('www.example.co.uk',        'production'),
-            array('local.example.com',        'local'),
-            array('local.example.net',        'local'),
-            array('local.example.org',        'local'),
-            array('local.example.co.uk',      'local'),
-            array('staging.example.com',      'staging'),
-            array('staging.example.net',      'staging'),
-            array('staging.example.org',      'staging'),
-            array('staging.example.co.uk',    'staging'),
-            array('production.example.com',   'production'),
-            array('production.example.net',   'production'),
-            array('production.example.org',   'production'),
-            array('production.example.co.uk', 'production'),
+            array(Evolution::DOMAIN,                'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
+            array('www.'.Evolution::DOMAIN,         'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
+            array('local.'.Evolution::DOMAIN,       'local',       'local.'.Evolution::DOMAIN),
+            array('staging.'.Evolution::DOMAIN,     'staging',     'staging.'.Evolution::DOMAIN),
+            array('production.'.Evolution::DOMAIN,  'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN),
+            array('local.thewrongdomain.com',       'production',  EVOLUTION_WWW_MODE . Evolution::DOMAIN)
         );
     }
 }

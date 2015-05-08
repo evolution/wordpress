@@ -1,7 +1,7 @@
 <?php
 
 /* Include Evolution to use with WordPress */
-require_once(dirname(__FILE__) . '/../bower_components/evolution-wordpress/lib/wordpress/Evolution.php');
+require_once(dirname(__FILE__) . '/../Evolution.php');
 <%= wpConfigFile
   // Already started PHP
   .replace('<?php', '')
@@ -37,9 +37,9 @@ require_once(dirname(__FILE__) . '/../bower_components/evolution-wordpress/lib/w
       "define('WP_CONTENT_DIR', dirname(__FILE__) . CONTENT_DIR);",
       "define('WP_CONTENT_URL', CONTENT_DIR);",
       "define('WP_ENV', Evolution::getEnv());",
-      "define('WP_HOME', '/');",
+      "define('WP_HOME', 'http://'.Evolution::getHostname().'/');",
       "define('WP_POST_REVISIONS', 5);",
-      "define('WP_SITEURL', '/wp');",
+      "define('WP_SITEURL', 'http://'.Evolution::getHostname().'/wp');",
       "/* That's all,",
     ].join('\n')
   )
