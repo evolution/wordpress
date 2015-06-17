@@ -1,5 +1,6 @@
 # Changelog
 
+- v1.0.16 - Updated Vagrantfile box name and removed box_url
 - v1.0.15
     - Added www option ([#51](https://github.com/evolution/wordpress/pull/51))
     - Fixed Vagrant 1.7.0+ issue with ssh key insertion
