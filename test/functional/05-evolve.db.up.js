@@ -18,7 +18,7 @@ describe('cap production evolve:up:db', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://production.example.com/')
+      .visit('http://example.com/')
       .then(function() {
         assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
       })
@@ -30,7 +30,7 @@ describe('cap production evolve:up:db', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://production.example.com/wp/wp-admin/install.php')
+      .visit('http://example.com/wp/wp-admin/install.php')
       .then(function() {
         assert(false, 'expected 403, got ' + browser.statusCode)
       })
