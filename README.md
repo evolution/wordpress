@@ -57,6 +57,12 @@ cd ~/Example.com/
 yo evolve wordpress
 ```
 
+Finally, install bower dependencies as necessary:
+
+```
+bower install
+```
+
 ### What does multi-environment mean?
 
 Each evolution project has three distinct "stages", or environments:
