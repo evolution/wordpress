@@ -3,7 +3,7 @@
   "name": "<%= props.name %>",
   "version": "1.0.0",
   "dependencies": {
-    "evolution-wordpress": "<%= options.dev ? 'master' : '^' + pkg.version %>",
+    "evolution-wordpress": "<%= options.dev ? 'master' : '~' + pkg.version %>",
     "wordpress": "<%= props.wordpress %>"
   }
 }
