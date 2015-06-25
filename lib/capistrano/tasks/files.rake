@@ -7,6 +7,8 @@ namespace :evolve do
 
     task :down do |task|
       begin
+        raise "Cannot sync files down from local!" if fetch(:stage) == 'local'
+
         local_uploads = "/vagrant/web/wp-content/uploads"
         remote_uploads = "#{release_path}/web/wp-content/uploads"
         uploads_exist = false
@@ -38,6 +40,8 @@ namespace :evolve do
 
     task :up do |task|
       begin
+        raise "Cannot sync files up from #{fetch(:stage)}!" if fetch(:stage) != 'local'
+
         invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
 
         local_uploads = "/vagrant/web/wp-content/uploads"
