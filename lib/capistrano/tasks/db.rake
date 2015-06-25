@@ -9,11 +9,14 @@ namespace :evolve do
         end
       end
 
+      stage_source = args[:source].to_s
+      stage_target = args[:target].to_s
+
       set :wp_cmd, [
-        '"://' + filter_stage(args[:source].to_s) + '/"',
-        '"://' + filter_stage(args[:target].to_s) + '/"',
-        '--path="' + fetch(:wp_path) + '"',
-        '--url="http://' + args[:target].to_s + '.' + fetch(:domain) + '/"',
+        '"://' + filter_stage(stage_source) + '/"',
+        '"://' + filter_stage(stage_target) + '/"',
+        '--path="' + (stage_target == 'local' ? fetch(:local_wp_path) : fetch(:wp_path)) + '"',
+        '--url="http://' + stage_target + '.' + fetch(:domain) + '/"',
       ].join(' ')
     end
 
@@ -64,7 +67,7 @@ namespace :evolve do
           execute :gzip, "-d", fetch(:db_gzip_file)
           execute :vagrant, :up
           execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
-          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
+          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:local_wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
           execute :rm, fetch(:db_backup_file)
         end
 
