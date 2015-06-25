@@ -26,8 +26,8 @@ namespace :deploy do
   after :finished, :launch_browser do
     require 'launchy'
 
-    subdomain = fetch(:stage)
-    branch = fetch(:branch)
+    subdomain = fetch(:stage).to_s
+    branch = fetch(:branch).to_s
 
     if subdomain == 'staging' && branch != 'master'
       subdomain = "#{branch}.staging"
