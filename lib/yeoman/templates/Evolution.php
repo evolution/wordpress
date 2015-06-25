@@ -69,8 +69,8 @@ class Evolution
             return false;
         }
 
-        $old_url = self::getHostname();
-        $new_url = htmlspecialchars($_SERVER['HTTP_HOST']);
+        $old_url = '://' . self::getHostname();
+        $new_url = '://' . htmlspecialchars($_SERVER['HTTP_HOST']);
 
         if ($old_url === $new_url) {
             return false;
