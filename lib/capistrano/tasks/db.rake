@@ -79,7 +79,7 @@ namespace :evolve do
 
     task :up do |task|
       begin
-        raise "Cannot sync db up from #{fetch(:stage)}!" if fetch(:stage) != 'local'
+        raise "Cannot sync db up to local!" if fetch(:stage) == 'local'
 
         invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
         invoke "evolve:db:backup", true

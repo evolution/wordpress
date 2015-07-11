@@ -40,7 +40,7 @@ namespace :evolve do
 
     task :up do |task|
       begin
-        raise "Cannot sync files up from #{fetch(:stage)}!" if fetch(:stage) != 'local'
+        raise "Cannot sync files up to local!" if fetch(:stage) == 'local'
 
         invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
 
