@@ -12,11 +12,13 @@ namespace :evolve do
       stage_source = args[:source].to_s
       stage_target = args[:target].to_s
 
+      invoke "evolve:calc_wp_path", stage_target == 'local'
+
       set :wp_cmd, [
-        '"://' + filter_stage(stage_source) + '/"',
-        '"://' + filter_stage(stage_target) + '/"',
-        '--path="' + (stage_target == 'local' ? fetch(:local_wp_path) : fetch(:wp_path)) + '"',
-        '--url="http://' + stage_target + '.' + fetch(:domain) + '/"',
+        "\"://#{filter_stage(stage_source)}/\"",
+        "\"://#{filter_stage(stage_target)}/\"",
+        "--path=\"#{fetch(:working_wp_path)}\"",
+        "--url=\"http://#{stage_target}.#{fetch(:domain)}/\"",
       ].join(' ')
     end
 
@@ -25,12 +27,14 @@ namespace :evolve do
       set :db_backup_file, DateTime.now.strftime("#{fetch(:wp_config)['name']}.%Y-%m-%d.%H%M%S.sql")
       set :db_gzip_file, "#{fetch(:db_backup_file)}.gz"
 
+      invoke "evolve:calc_wp_path", false
+
       on release_roles(:db) do |host|
         backups_path = "#{deploy_to}/backups"
         execute :mkdir, '-p', backups_path
 
         within backups_path do
-          execute :wp, :db, :export, fetch(:db_backup_file), "--opt", "--path=\"#{fetch(:wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+          execute :wp, :db, :export, fetch(:db_backup_file), "--opt", "--path=\"#{fetch(:working_wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
           execute :gzip, fetch(:db_backup_file)
 
           if args[:skip_download]
@@ -67,7 +71,7 @@ namespace :evolve do
           execute :gzip, "-d", fetch(:db_gzip_file)
           execute :vagrant, :up
           execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
-          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:local_wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
+          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:working_wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
           execute :rm, fetch(:db_backup_file)
         end
 
@@ -95,8 +99,8 @@ namespace :evolve do
           upload! fetch(:db_gzip_file), "/tmp/#{fetch(:db_gzip_file)}"
           execute :gzip, "-d", "/tmp/#{fetch(:db_gzip_file)}"
 
-          within fetch(:wp_path) do
-            execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+          within fetch(:working_wp_path) do
+            execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:working_wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
             execute :wp, :'search-replace', fetch(:wp_cmd)
           end
 

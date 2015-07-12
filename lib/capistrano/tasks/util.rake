@@ -1,4 +1,29 @@
 namespace :evolve do
+  task :calc_wp_path, :is_local do |task, args|
+    # short circuit when local wp_path is needed
+    if args[:is_local]
+      set :working_wp_path, fetch(:local_wp_path)
+    else
+      # fetch branch and initial wp_path
+      branch  = fetch(:branch).to_s
+      wp_path = fetch(:wp_path).to_s
+
+      on release_roles(:db) do
+        # test wp path exists and correct as necessary
+        unless branch == 'master'
+          unless test "[ -d #{wp_path} ]"
+            wp_path.sub!("/#{branch}/", '/master/')
+          end
+        end
+
+        raise "WP path '#{wp_path}' does not exist on #{stage_target}" unless test "[ -d #{wp_path} ]"
+      end
+
+      set :working_wp_path, wp_path
+    end
+    Rake::Task['evolve:calc_wp_path'].reenable
+  end
+
   task :confirm, :message do |task, args|
     # interpret env values of blank, "false", or "0" as falsey
     if ENV.has_key?('evolution_non_interactive')
