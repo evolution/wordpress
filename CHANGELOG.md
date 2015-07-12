@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.1.1
+    - Deploy of non-master to staging opens branch subdomain in browser ([#62](https://github.com/evolution/wordpress/pull/62))
+    - Shortened apt cache valid time ([#65](https://github.com/evolution/wordpress/pull/65))
 - v1.1.0 - Fixed bower version range
 - v1.0.16
     - Updated Vagrantfile box name and removed box_url

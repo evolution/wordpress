@@ -9,7 +9,7 @@
   debug:          var=new_hostname
 
 - name:           Update apt cache
-  apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 * 30 }}"
+  apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 }}"
   sudo:           yes
 
 - name:           Install common packages
