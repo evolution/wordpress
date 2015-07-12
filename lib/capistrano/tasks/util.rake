@@ -16,7 +16,7 @@ namespace :evolve do
           end
         end
 
-        raise "WP path '#{wp_path}' does not exist on #{stage_target}" unless test "[ -d #{wp_path} ]"
+        raise "WP path '#{wp_path}' does not exist on #{fetch(:stage)}" unless test "[ -d #{wp_path} ]"
       end
 
       set :working_wp_path, wp_path
