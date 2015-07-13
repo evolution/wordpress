@@ -1,5 +1,6 @@
 # Changelog
 
+- v1.1.3 - Fixed potential issue with db host using implicit local socket vs explicit TCP/IP ([#67](https://github.com/evolution/wordpress/pull/67))
 - v1.1.2 - Fixed sync and pathing issues with wp-cli ([#64](https://github.com/evolution/wordpress/pull/64))
 - v1.1.1
     - Deploy of non-master to staging opens branch subdomain in browser ([#62](https://github.com/evolution/wordpress/pull/62))
