@@ -109,6 +109,8 @@ namespace :evolve do
     task :exec, :sql_file do |task, args|
       begin
         raise "Missing sql file!" if args[:sql_file].nil?
+        raise "Given sql file does not exist: #{args[:sql_file]}" unless File.exist?(args[:sql_file])
+
         invoke "evolve:confirm", "You are about to execute a sql file against \"#{fetch(:stage)}\" database!"
 
         on release_roles(:db) do
