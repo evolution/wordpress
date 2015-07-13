@@ -1,0 +1,161 @@
+#!/usr/bin/env node
+
+var fs        = require('fs');
+var fsx       = require('fs-extra');
+var os        = require('os');
+var path      = require('path');
+var cp        = require('child_process');
+var util      = require('util');
+var chalk     = require('chalk');
+var deasync   = require('deasync');
+var inquirer  = require('inquirer');
+var replace   = require("replace");
+var AdmZip    = require('adm-zip');
+
+// Evolution site working directory
+var siteDirectory  = process.cwd();
+
+// prompt for exported zipfile (from cambrian plugin)
+var inquirerPrompt = deasync(inquirer.prompt);
+var answers;
+
+try {
+  inquirerPrompt([
+    {
+      type: 'input',
+      name: 'zipfile',
+      message: 'Cambrian export file for your existing site',
+      filter: function (input) { return input.trim(); },
+      validate: function (input) { var input = input.trim(); return fs.existsSync(input) ? true : 'File "'+input.trim+'" does not exist!'; },
+    }
+  ]);
+}
+catch(e) {
+  answers = e;
+}
+
+// extract zip to tmpdir
+var extractedPath = path.join(os.tmpdir(), path.basename(answers.zipfile, '.zip'));
+fsx.emptyDirSync(extractedPath);
+
+console.log('Extracting', chalk.yellow(answers.zipfile), 'to', chalk.green(extractedPath));
+
+var zip = new AdmZip(answers.zipfile);
+zip.extractAllTo(extractedPath, true);
+
+// read the manifest
+var manifest = JSON.parse(fs.readFileSync(path.join(extractedPath, 'cambrian-manifest.json')).toString());
+
+// get sql dump
+var extractedSql = path.join(extractedPath, 'wordpress.sql');
+
+// necessary cleanup of sql dump, when coming from multisite
+if (manifest.is_multisite) {
+  // replace subsite table prefix with new global table prefix
+  var subsiteTablePrefix = manifest.get_blog_prefix;
+  var wpConfig = fs.readFileSync(path.join(siteDirectory, 'web', 'wp-config.php')).toString();
+
+  var tablePrefix = wpConfig.match(/table_prefix\s*=\s*(?:'|")([^'"]+)(?:'|")/);
+  tablePrefix = tablePrefix == null ? 'wp_' : tablePrefix[1];
+
+  console.log('db cleanup: replacing', chalk.yellow(subsiteTablePrefix), 'with', chalk.green(tablePrefix));
+
+  filterSql('`' + regexEscape(subsiteTablePrefix), '`' + tablePrefix, extractedSql);
+
+  // replace multisite uploads path
+  var uploadPath = 'uploads/';
+  var subsiteUploadPath = uploadPath + 'sites/'+manifest.blogid+'/';
+
+  console.log('db cleanup: replacing', chalk.yellow(subsiteUploadPath), 'with', chalk.green(uploadPath));
+
+  filterSql(regexEscape(subsiteUploadPath), 'uploads/', extractedSql);
+
+  // append cleanup sql to file
+  var appendedSql = [
+    '-- delete any usermeta specific to the other subsites',
+    'delete from '+tablePrefix+'usermeta where meta_key regexp "^'+regexEscape(tablePrefix)+'([0-9]+)_";',
+    '-- duplicate the '+tablePrefix+'usermeta structure in a working data table,',
+    '-- but add a unique index for filtering out duplicates',
+    'create table _fix_usermeta like '+tablePrefix+'usermeta;',
+    'alter table _fix_usermeta add unique(user_id, meta_key);',
+    '-- copy the site-specific usermeta, keeping only the last of each duplicate',
+    'insert into _fix_usermeta',
+    '    select * from '+tablePrefix+'usermeta',
+    '    where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
+    '    order by user_id, meta_key, umeta_id',
+    '    on duplicate key update umeta_id=values(umeta_id), meta_value=values(meta_value);',
+    '-- remove the first of each duplicate',
+    'delete from '+tablePrefix+'usermeta',
+    'where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
+    'and not exists (select * from _fix_usermeta where umeta_id = '+tablePrefix+'usermeta.umeta_id);',
+    '-- remove that working data table',
+    'drop table _fix_usermeta;',
+  ];
+
+  fs.appendFileSync(path.join(extractedPath, 'wordpress.sql'), appendedSql.join("\n"));
+}
+
+// strip domains from (network_)?(home|site)_url, and search/replace them in sql dump with domain from group_vars
+var searchDomains = [];
+
+['home_url','site_url','network_home_url','network_site_url'].forEach(function(value) {
+  var match = manifest[value].match(/:\/\/([^\/]+)/);
+  if (match) {
+    var escapedMatch = regexEscape(match[1]);
+    if (searchDomains.indexOf(escapedMatch) < 0)
+      searchDomains.push(escapedMatch);
+  }
+});
+
+if (searchDomains.length) {
+  var siteDomain = 'local.' + fs.readFileSync(path.join(siteDirectory, 'lib', 'ansible', 'group_vars', 'all')).toString().match(/domain:[ \t]+([^\n]+)/)[1];
+
+  console.log('domain cleanup: replacing', chalk.yellow(searchDomains.join('|')), 'with', chalk.green(siteDomain));
+
+  filterSql('(' + searchDomains.join('|') + ')', siteDomain, extractedSql);
+}
+
+// run sql against db
+var cpExec = deasync(cp.exec);
+var capCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 'wordpress.sql') + ']';
+
+console.log('importing sql via:', chalk.cyan(capCmd));
+cpExec(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit'});
+
+// Copying Themes / Plugins / Uploads
+var pluginsPath = path.join(extractedPath, 'plugins');
+console.log('installing plugins from', chalk.cyan(pluginsPath));
+fsx.copySync(pluginsPath, path.join(siteDirectory, 'web', 'wp-content', 'plugins'), {clobber: true});
+
+var themesPath = path.join(extractedPath, 'themes');
+console.log('installing themes from', chalk.cyan(themesPath));
+fsx.copySync(themesPath, path.join(siteDirectory, 'web', 'wp-content', 'themes'), {clobber: true});
+
+var uploadsPath = path.join(extractedPath, 'uploads');
+if (manifest.is_multisite) {
+  uploadsPath = path.join(uploadsPath, 'sites', manifest.blogid);
+}
+console.log('installing uploads from', chalk.cyan(uploadsPath));
+fsx.copySync(uploadsPath, path.join(siteDirectory, 'web', 'wp-content', 'uploads'), {clobber: true});
+
+console.log(chalk.green('looks like we\'re done here!'));
+
+
+function regexEscape(input) {
+  return input.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
+}
+
+function sqlLikeEscape(input) {
+  return input.replace(/[_%]/g, "\\$&");
+}
+
+function filterSql(search, replacement, filename) {
+  replace({
+    regex: search,
+    replacement: replacement,
+    paths: [ filename ],
+    recursive: false,
+    silent: true,
+    excludeList: '/dev/null',
+  });
+}
