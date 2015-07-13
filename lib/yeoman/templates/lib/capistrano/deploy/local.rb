@@ -3,4 +3,4 @@ server 'local.<%= props.domain %>',
   user:         fetch(:user),
   ssh_options:  fetch(:ssh_options)
 
-set :wp_path,   "/vagrant/web/wp"
+set :wp_path,   fetch(:local_wp_path)

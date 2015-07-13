@@ -27,3 +27,6 @@ set :wp_config, Hash[File
   .scan(/DB_(\w+)(?:'|"),[^\'\"]+(?:'|")([^\'\"]*)/)
   .map { |match| [match[0].downcase, match[1]] }
 ]
+
+# Path for wp-cli on local vagrant
+set :local_wp_path,   "/vagrant/web/wp"
