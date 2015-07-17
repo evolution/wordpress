@@ -52,3 +52,6 @@ _notes
 bower_components
 backups
 web/wp
+
+# Generated file, don't edit above this line
+<%= gitignoreFile %>
