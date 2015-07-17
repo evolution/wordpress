@@ -50,5 +50,6 @@ nbproject
 .vagrant
 _notes
 bower_components
+node_modules
 backups
 web/wp
