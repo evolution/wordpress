@@ -49,7 +49,8 @@ npm install -g bower yo generator-evolve
 
 ### Common Workflows
 
-* [Generating a new site](/docs/TUTORIAL-NEW.md)
+* [Generating a new site](./docs/TUTORIAL-NEW.md)
+* [Regenerating an existing Evolution site](./docs/TUTORIAL-UPGRADE.md)
 
 ## Managing Remote Environments
 

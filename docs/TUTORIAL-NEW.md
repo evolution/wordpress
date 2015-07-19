@@ -2,7 +2,7 @@
 
 ### First things first...
 
-Ensure that you've installed all [prerequisites](../#pre-requisites) (including the Evolve generator).
+Ensure that you've installed all [prerequisites](../README.md#pre-requisites) (including the Evolve generator).
 
 ### Let's create something!
 
