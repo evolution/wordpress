@@ -5,7 +5,7 @@
 [![devDependencies](https://david-dm.org/evolution/wordpress/dev-status.svg)](https://david-dm.org/evolution/wordpress#info=devDependencies&view=table)
 
 > Rapidly create, develop, & deploy WordPress across multiple environments.
-> ![Generating a site](generate.gif)
+> ![Generating a site](./docs/generate.gif)
 
 Evolution lets you generate an entirely versioned, multi-environment Wordpress site in under a minute!
 

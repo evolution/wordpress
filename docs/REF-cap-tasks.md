@@ -1,0 +1,73 @@
+# Capistrano tasks
+
+### deploy
+
+Provided out of the box by Capistrano, this task connects to the remote environment via ssh, and pulls the latest codebase from your git remote.
+
+### wp:{command}[:subcommand[..]]
+
+Invokes [wp-cli](http://wp-cli.org/) on the remote environment, with the given command/subcommands. For example, to get the current version of wp-cli:
+
+	bundle exec cap staging wp:cli:version
+
+Passing parameter flags is not currently supported, though `--path` and `--url` are automatically supplied.
+
+### evolve:provision
+
+Invokes [Ansible](http://docs.ansible.com/) locally, connecting to and provisioning the remote environment.
+
+### evolve:ssh
+
+Opens an interactive ssh terminal to the remote environment.
+
+### evolve:version
+
+Outputs the version of Evolution with which the remote environment was last provisioned.
+
+### evolve:permissions
+
+Recursively resets file and directory permissions of the deployment release path.
+
+### evolve:down
+
+Syncs database and uploaded files _down_ from remote environment to local. Also supports `:down:db` and `:down:files` variants for more specific needs.
+
+Note that **this is destructive to the _local_ environment**.
+
+### evolve:up
+
+Syncs database and uploaded files _up_ from local to remote environment. Also supports `:up:db` and `:up:files` variants for more specific needs.
+
+Note that **this is destructive to the _remote_ environment**.
+
+### evolve:teardown
+
+Totally removes _all_ deployments from the remote environment.
+
+### evolve:reboot
+
+Reboots the remote environment.
+
+### evolve:restart
+
+Restarts the remote environment's web stack (mysql, apache, varnish, pound, iptables). Also supports `:stop` and `:start` variants:
+
+	bundle exec cap staging evolve:stop
+
+### evolve:logs:apache:error
+
+Actively tails the Apache error logs; terminate with `ctrl+c`. Also supports `:access` variant (for access logs):
+
+	bundle exec cap staging evolve:apache:access
+
+### evolve:logs:varnish
+
+Invokes the `varnishlog` utility, for viewing shared memory logs; terminate with `ctrl+c`.
+
+### evolve:logs:pound
+
+Actively tails the syslog, filtered for mentions of `pound:`; terminate with `ctrl+c`.
+
+### evolve:logs:evolution
+
+Actively tails the log of Evolution actions performed against the remote environment; terminate with `ctrl+c`.

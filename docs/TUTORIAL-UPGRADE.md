@@ -2,9 +2,14 @@
 
 ### Why regenerate your site?
 
-Non-breaking changes to Evolution are added across patch versions (eg, `v1.0.15` to `v1.0.16`), and are automatically pulled down on `bower install` or deployment to a remote stage.
+Non-breaking changes to Evolution are added across **patch versions** (eg, `v1.0.15` to `v1.0.16`), and are automatically pulled down on `bower install` or deployment to a remote stage.
 
-Breaking changes are added across minor versions (eg `v1.0.16` to `v1.1.0`), and require running the generator against your existing site codebase.
+Breaking changes are added across **minor versions** (eg `v1.0.16` to `v1.1.0`), and require running the generator against your existing site codebase
+
+##### Sidenote: Regenerating means recreating
+> It's important to have your site already versioned in git and to have any recent changes already committed before regenerating.
+>
+> This is because running the generator may _recreate_ certain files, and git will show you _precisely_ what will have changed in your site.
 
 ### Cloning the existing site
 
@@ -18,7 +23,7 @@ If you don't already have the site running locally (eg, someone else set it up),
 > * ssh keys go in: `lib/ansible/files/ssh/`
 > * ssl certs go in: `lib/ansible/files/ssl/`
 
-Now, run the generator and follow the prompts -- it should pre-select the choices for which it was already configured, and install bundler and bower dependencies automatically:
+Now, run the generator and follow [the prompts](./REF-generator-prompts.md) -- it should pre-select the choices for which it was already configured, and install bundler and bower dependencies automatically:
 
 	yo evolve wordpress
 	git status
@@ -38,7 +43,7 @@ You can start the local environment with vagrant:
 
 	vagrant up
 
-And then sync down from a remote environment (staging in this case) any Wordpress configuration and content:
+And then sync down from a remote environment (staging in this case) any Wordpress configuration and content that already exists:
 
 	bundle exec cap staging evolve:down
 

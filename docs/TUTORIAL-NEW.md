@@ -6,27 +6,21 @@ Ensure that you've installed all [prerequisites](../README.md#pre-requisites) (i
 
 ### Let's create something!
 
-Create and move to a directory for your Evolution site, and initialize it as a new git repository:
+Create and change to a directory for your Evolution site, and initialize it as a new git repository:
 
 	mkdir ~/Example.com
 	cd ~/Example.com
 	git init
 
-Run the yeoman generator in said directory and follow the prompts:
+Run the yeoman generator in said directory and follow [the prompts](./REF-generator-prompts.md):
 
 	yo evolve wordpress
 
-![Generating a site](../generate.gif)
+![Generating a site](./generate.gif)
 
 ##### Sidenote: Differences between public and private
 
-> If you opt for a *public* site in the prompts, the generator will configure your [`.gitignore`](http://git-scm.com/docs/gitignore) to prevent ssh keys and ssl certificates from being versioned.
->
-> **This is ideal if you plan to open-source your site on a free public repository (we recommend Github for this).**
->
-> If you opt for *private*, it will configure your [`bower.json`](https://github.com/bower/bower.json-spec#private) to prevent publication through Bower, but *your keys and certificates will be versioned*.
->
-> **In this case, you should use a paid [private repository on Github](https://help.github.com/articles/making-a-public-repository-private/), or a free [private repository on Gitlab](http://doc.gitlab.com/ce/gitlab-basics/create-project.html).**
+> The difference between [public and private projects](./REF-generator-prompts.md#private-or-public) is important, and will affect where and how you version your project.
 
 Add and commit your pristine generated site:
 
@@ -42,13 +36,13 @@ Create a remote repository (eg, on [Github](https://help.github.com/articles/cre
 
 Every Evolution site has three pre-configured "stages", environments with a specific purpose:
 
-* local - where all of your development should happen, such as installing or editing themes and plugins
-* staging - where quality assurance and review of new features should happen
-* production - where your polished end product, the canonical "live site", should exist
+* **local** - where all of your development should happen, such as installing or editing themes and plugins
+* **staging** - where quality assurance and review of new features should happen
+* **production** - where your polished end product, the canonical "live site", should exist
 
 ### Getting to know your local environment...
 
-Create a self-contained local environment for your site by running:
+Create a self-contained local environment for your site with vagrant. This may take several minutes to complete:
 
 	vagrant up
 
@@ -56,7 +50,7 @@ This creates a virtual server with the entire Evolution web stack, and your site
 
 	vagrant ssh
 
-And you can view the local site in your browser -- following our example, it would be:
+As well as view the local site in your browser -- following our example, it would be:
 
 > http://local.example.com/
 
@@ -68,7 +62,7 @@ Follow the steps to configure your site. You should only need to do this once, a
 
 ### Useful tools for all stages
 
-Evolution provides several tasks that you can run for a given stage, using [Capistrano](http://capistranorb.com/):
+Evolution [provides several Capistrano tasks](./REF-cap-tasks.md) that you can run for a given stage:
 
 	# tail the apache error logs in real time
 	# (ctrl+c to stop)
@@ -89,7 +83,7 @@ For provisioning, you'll need a user on said server with password-based SSH acce
 Many web hosts will provide you a `root` user with a private key for remote access. We will demonstrate how to prepare such a server for Evolution.
 
 ##### Sidenote: Provisioning as root
-> You may be thinking, "My root user _has_ password-based SSH access. Can I provision as root?" To which the anser is yes, you absolutely can!
+> You may be asking, "My root user _has_ password-based SSH access. Can I provision as root?" To which the anser is yes, you absolutely can!
 >
 > That said, it is [pretty universally recommended](http://unix.stackexchange.com/questions/82626/why-is-root-login-via-ssh-so-bad-that-everyone-advises-to-disable-it#answer-82639) to _disable_ password-based root access to a server -- either by setting up an ssh keypair for the root user, or setting the `PermitRootLogin` option of your ssh daemon to `no`.
 
@@ -108,18 +102,18 @@ Evolution provides a capistrano task for provisioning your remote stage:
 
 	bundle exec cap staging evolve:provision
 
-Against a never before provisioned server, you should be prompted for a username, password, and sudo password (typically the exact same password):
+When running this against a never before provisioned server, you should be prompted for a username, password, and sudo password (typically the exact same password):
 
 	Unable to provision with SSH publickey for "deploy" user
 	Please enter user to provision as (root):
 	SSH password:
 	sudo password [defaults to SSH password]:
 
-What follows is [ansible]() provisioning, which (among other things) sets up private key access for the **deploy** user.
+What follows is Ansible provisioning, which (among other things) sets up private key access for the newly created **deploy** user.
 
 ### Plugging the provision hole
 
-Any subsequent reprovisioning will use the **deploy** user, so it's a good idea at this point to remove or disable the user we added a couple steps back.
+Any subsequent reprovisioning will use the **deploy** user, so it's a good idea at this point to remove or disable that `jdoe` user we added a couple steps back.
 
 	# lock user account
 	passwd -l jdoe
@@ -143,12 +137,12 @@ You should now be able to reach the remote environment in your web browser:
 
 You'll notice that your remote environment produces a [403 Forbidden](https://en.wikipedia.org/wiki/HTTP_403) error, because access to the Wordpress install page is disabled for security concerns.
 
-Sync up your local database and uploaded files to the remote environment, and restart it (to clear the varnish cache):
+Sync your local database and uploaded files up to the remote environment, and restart it (to clear the varnish cache):
 
 	bundle exec cap staging evolve:up
 	bundle exec cap staging evolve:restart
 
-You'll be prompted that this is a destructive operation and will overwrite any existing db and files:
+You'll be prompted that this is a destructive operation and will overwrite any existing db and files on the remote server:
 
 	WARNING: You are about to destroy & override the "staging" database!
 	WARNING: You are about to overwrite "staging" files!
@@ -161,10 +155,10 @@ Try your browser again, and it should mirror your local environment.
 >
  	bundle exec cap staging evolve:down
  	bundle exec cap local evolve:restart
-> Note that we're restarting local, because the remote database is syncing down to local.
+> Note that we're restarting local, because the previous command is overwriting the local database/files.
 
 ### What now?
 
 As you continue to develop your site, you'll want to commit and push future changes (including adding themes and plugins) to your git remote. Sending newly committed changes to your remote needs only another deployment.
 
-As you add content and uploaded images in Wordpress itself, you can send it to your remote with another sync up.
+As you add content and uploaded files in Wordpress itself, you can send it to your remote with another sync up.
