@@ -18,7 +18,7 @@ Run the yeoman generator in said directory and follow [the prompts](./REF-genera
 
 ![Generating a site](./generate.gif)
 
-##### Sidenote: Differences between public and private
+##### Sidenote: Public versus private
 
 > The difference between [public and private projects](./REF-generator-prompts.md#private-or-public) is important, and will affect where and how you version your project.
 

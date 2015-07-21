@@ -1,5 +1,23 @@
 # Capistrano tasks
 
+* [deploy](#deploy)
+* [wp:{command}[:subcommand[..]]](#wpcommandsubcommand)
+* [evolve:provision](#evolveprovision)
+* [evolve:ssh](#evolvessh)
+* [evolve:version](#evolveversion)
+* [evolve:permissions](#evolvepermissions)
+* [evolve:down](#evolvedown)
+* [evolve:up](#evolveup)
+* [evolve:teardown](#evolveteardown)
+* [evolve:reboot](#evolvereboot)
+* [evolve:restart](#evolverestart)
+* [evolve:logs:apache:error](#evolvelogsapacheerror)
+* [evolve:logs:varnish](#evolvelogsvarnish)
+* [evolve:logs:pound](#evolvelogspound)
+* [evolve:logs:evolution](#evolvelogsevolution)
+
+---
+
 ### deploy
 
 Provided out of the box by Capistrano, this task connects to the remote environment via ssh, and pulls the latest codebase from your git remote.

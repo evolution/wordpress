@@ -74,8 +74,8 @@ You can remotely stop and start services, or even reboot the server:
 
 ```
 bundle exec cap staging evolve:stop
+bundle exec cap staging evolve:start
 bundle exec cap staging evolve:restart
-bundle exec cap staging evolve:status
 bundle exec cap staging evolve:reboot
 ```
 
@@ -89,4 +89,4 @@ bundle exec cap staging evolve:logs:pound
 bundle exec cap staging evolve:logs:evolution
 ```
 
-These and more can be found in the [Evolution tasks directory](https://github.com/evolution/wordpress/tree/master/lib/capistrano/tasks).
+These and more can be found in the [Capistrano tasks reference](./docs/REF-cap-tasks.md).

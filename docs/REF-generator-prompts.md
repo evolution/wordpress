@@ -1,5 +1,20 @@
 # Generator prompts
 
+* [Private or Public](#private-or-public)
+* [SSL Enabled](#ssl-enabled)
+* [Overwrite existing SSH keys](#overwrite-existing-ssh-keys)
+* [Project name](#project-name)
+* [Domain name](#domain-name)
+* [WWW or bare domain](#www-or-bare-domain)
+* [New Relic license key](#new-relic-license-key)
+* [Optional features](#optional-features)
+* [Wordpress version](#wordpress-version)
+* [Wordpress table prefix](#wordpress-table-prefix)
+* [Database credentials](#database-credentials)
+* [Vagrant IP](#vagrant-ip)
+
+---
+
 ### Private or Public
 
 If you opt for a *public* project, the generator will configure your [`.gitignore`](http://git-scm.com/docs/gitignore) to prevent ssh keys and ssl certificates from being versioned.
