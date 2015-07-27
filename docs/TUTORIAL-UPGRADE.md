@@ -11,17 +11,9 @@ Breaking changes are added across **minor versions** (eg `v1.0.16` to `v1.1.0`),
 >
 > This is because running the generator may _recreate_ certain files, and git will show you _precisely_ what will have changed in your site.
 
-### Cloning the existing site
+Bring up your local copy of the site, or [follow the guide](./TUTORIAL-ClONE.md#cloning-from-the-remote) if you don't already have one.
 
-If you don't already have the site running locally (eg, someone else set it up), you will want to clone your own local copy:
-
-	git clone git@yourremoteprovider.com:yourusername/Example.com.git ~/Example.com
-	cd ~/Example.com
-
-##### Sidenote: Extra step for public projects
-> Since public projects don't have ssh keys or ssl certificates versioned, you would have to acquire them from whoever set up the site initially, and manually put them in the appropriate directories:
-> * ssh keys go in: `lib/ansible/files/ssh/`
-> * ssl certs go in: `lib/ansible/files/ssl/`
+### Regenerating
 
 Now, run the generator and follow [the prompts](./REF-generator-prompts.md) -- it should pre-select the choices for which it was already configured, and install bundler and bower dependencies automatically:
 
@@ -30,22 +22,25 @@ Now, run the generator and follow [the prompts](./REF-generator-prompts.md) -- i
 
 Git will show you what, if anything, has changed. Add and commit them as necessary.
 
-##### Sidenote: Installing deps without the generator
+### Reprovisioning
 
-> Should you ever need to install dependencies on a newly cloned version of the site _without_ running the generator, you'll need to:
+You should reboot and reprovision your local environment, in case anything in the ansible playbooks have changed. This can be done in a single step:
+
+	vagrant reload --provision
+
+##### Sidenote: Ansible and idempotence
+> The playbooks we use for provisioning are designed to be idempotent, meaning that we _should_ be able to provision a machine repeatedly and achieve the same end result.
 >
-	bundle install
-	bower install
+> Should you ever find that reprovisioning fails, we encourage you to [file a Github issue](https://github.com/evolution/wordpress/issues/new) with the full ansible output (to help us diagnose and reproduce the problem).
 
-### Bringing up local
+You should test your local site to ensure it is working properly, after which you can reprovision and redeploy your remote environments:
 
-You can start the local environment with vagrant:
+	bundle exec cap staging evolve:provision
+	bundle exec cap staging deploy
 
-	vagrant up
+You _may_ also want to reboot the server:
 
-And then sync down from a remote environment (staging in this case) any Wordpress configuration and content that already exists:
-
-	bundle exec cap staging evolve:down
+	bundle exec cap staging evolve:reboot
 
 ### What now?
 

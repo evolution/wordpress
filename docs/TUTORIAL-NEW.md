@@ -159,6 +159,6 @@ Try your browser again, and it should mirror your local environment.
 
 ### What now?
 
-As you continue to develop your site, you'll want to commit and push future changes (including adding themes and plugins) to your git remote. Sending newly committed changes to your remote needs only another deployment.
+As you continue to develop your site, you'll want to commit and push future changes (including adding themes and plugins) to your git remote. Sending said committed changes to your remote environment is as simple as another deployment.
 
-As you add content and uploaded files in Wordpress itself, you can send it to your remote with another sync up.
+As you add content and uploaded files in Wordpress itself, you can send them between your local and remote with another sync.
