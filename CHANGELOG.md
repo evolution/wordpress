@@ -1,5 +1,9 @@
 # Changelog
 
+- v1.2.0
+    - Added/refined workflow documentation
+    - Fixed vagrant private key issues ([#59](https://github.com/evolution/wordpress/pull/59))
+    - Fixed lingering url issues for production and branch stages ([#56](https://github.com/evolution/wordpress/pull/56))
 - v1.1.4
     - Gitignore enhancements ([#68](https://github.com/evolution/wordpress/pull/68) and [#69](https://github.com/evolution/wordpress/pull/69))
     - Significant documentation of workflows ([#70](https://github.com/evolution/wordpress/pull/70))
