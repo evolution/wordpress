@@ -2,7 +2,7 @@ namespace :evolve do
   namespace :files do
     task :prepare, :path_from, :path_to do |task, args|
       invoke "evolve:prepare_key"
-      set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{fetch(:ssh_keyfile)}\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
+      set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{fetch(:ssh_keyfile)} -o StrictHostKeyChecking=no\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
     end
 
     task :down do |task|
