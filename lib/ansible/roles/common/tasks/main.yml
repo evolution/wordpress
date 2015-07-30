@@ -12,6 +12,10 @@
   apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 }}"
   sudo:           yes
 
+- name:           Autoremove unused packages
+  shell:          DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
+  sudo:           yes
+
 - name:           Install common packages
   apt:            pkg={{ item }} state=present
   with_items:     common_packages
