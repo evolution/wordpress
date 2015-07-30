@@ -8,9 +8,27 @@ Vagrant.configure("2") do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box         = "ubuntu/trusty64"
 
-  # Configure 1GB (1024MB) of memory
+  # Borrowed from: https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", 1024]
+    host = RbConfig::CONFIG['host_os']
+    mem_divisor = 4 # Allocate 1/4 host memory
+
+    if host =~ /darwin/
+      cpus = `sysctl -n hw.ncpu`.to_i
+      mem = `sysctl -n hw.memsize`.to_i / 1024 / 1024 / mem_divisor
+    elsif host =~ /linux/
+      cpus = `nproc`.to_i
+      mem = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 / mem_divisor
+    elsif host =~ /mswin|mingw/
+      cpus = `WMIC CPU Get NumberOfLogicalProcessors /Value`.strip.split('=')[1].to_i
+      mem = `WMIC ComputerSystem Get TotalPhysicalMemory /Value`.strip.split('=')[1].to_i / 1024 / 1024 / mem_divisor
+    else
+      cpus = 2
+      mem = 1024
+    end
+
+    vb.customize ["modifyvm", :id, "--memory", mem]
+    vb.customize ["modifyvm", :id, "--cpus", cpus]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
