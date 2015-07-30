@@ -47,3 +47,5 @@ require_once(dirname(__FILE__) . '/../Evolution.php');
   // Replace ABSPATH
   .replace(/define\('ABSPATH'.+\);/, "define('ABSPATH', dirname(__FILE__) . '/wp/');")
 %>
+/** Output rewriting for production.DOMAIN or *.staging.DOMAIN **/
+Evolution::rewriteUrls();

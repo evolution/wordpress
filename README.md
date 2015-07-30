@@ -5,7 +5,7 @@
 [![devDependencies](https://david-dm.org/evolution/wordpress/dev-status.svg)](https://david-dm.org/evolution/wordpress#info=devDependencies&view=table)
 
 > Rapidly create, develop, & deploy WordPress across multiple environments.
-> ![Generating a site](generate.gif)
+> ![Generating a site](./docs/generate.gif)
 
 Evolution lets you generate an entirely versioned, multi-environment Wordpress site in under a minute!
 
@@ -47,108 +47,20 @@ You can then use npm to install Bower and the Yeoman generator:
 npm install -g bower yo generator-evolve
 ```
 
-### Generating a project
+### Common Workflows
 
-Create a directory for your new project, invoke the generator from said directory, and then follow the prompts:
-
-```
-mkdir -p ~/Example.com
-cd ~/Example.com/
-yo evolve wordpress
-```
-
-Finally, install bower dependencies as necessary:
-
-```
-bower install
-```
-
-### What does multi-environment mean?
-
-Each evolution project has three distinct "stages", or environments:
-
-* local - where all your development happens
-* staging - qa and feature review
-* production - polished end product
-
-
-### Starting the local environment
-
-In your newly generated project, bring up the vagrant machine. This will probably prompt for a password, and may take several minutes to complete:
-
-```
-vagrant up
-```
-
-Now, you can SSH into the local server:
-
-```
-vagrant ssh
-```
-
-As well as view the local site in your web browser -- following our example, it would be:
-
-> http://local.example.com/
-
-### Building a remote environment
-
-For your remote environment, you will need:
-
-* A web accessible server running Ubuntu 14.04
-* A DNS or hostfile entry for said server, resolving to (in our example) `staging.example.com`
-* An SSH user on said server, with password login and sudo priveledges
-* A recent version of git on the server (see below)
-
-You can confirm the above is working by opening a terminal to the remote machine, and installing git:
-
-```
-ssh jdoe@example.com
-sudo apt-get install git
-```
-
-You will also need to:
-
-* Version your new project with git
-* Push it to a web accessible remote, such as [Github](https://github.com/) or [Gitlab](https://gitlab.com/)
-* Configure your project's SSH key (in `lib/ansible/files/ssh/`) as a deployment key.
-  * [Github - Managing Deploy Keys](https://developer.github.com/guides/managing-deploy-keys/)
-  * [Gitlab - Deploy keys](http://doc.gitlab.com/ce/ssh/README.html#deploy-keys)
-
-Next, you will provision the remote server. You should be prompted for the username above and the corresponding password:
-
-```
-bundle exec cap staging evolve:provision
-```
-
-Now, you will deploy your project to the server:
-
-```
-bundle exec cap staging deploy
-```
-
-You should now be able to reach the remote environment in your web browser:
-
-> http://staging.example.com/
-
-You'll notice that your remote environment is probably showing you the Wordpress setup page. You can push your local database and uploaded files to the remote environment:
-
-```
-bundle exec cap staging evolve:up
-```
-
-It's similarly easy to pull your remote database and files to the local environment:
-
-```
-bundle exec cap staging evolve:down
-```
+* [Generating a new site](./docs/TUTORIAL-NEW.md)
+* [Bringing up an existing Evolution site](./docs/TUTORIAL-CLONE.md)
+* [Regenerating an existing Evolution site](./docs/TUTORIAL-UPGRADE.md)
 
 ## Managing Remote Environments
 
 Evolution exposes several commands via Capistrano for managing and supporting your remote environments.
 
-As mentioned earlier, you can sync the database and uploaded files all at once...as well as separately:
+You can sync the database and uploaded files all at once...as well as separately:
 
 ```
+bundle exec cap staging evolve:up
 bundle exec cap staging evolve:up:db
 bundle exec cap staging evolve:up:files
 ```
@@ -163,8 +75,8 @@ You can remotely stop and start services, or even reboot the server:
 
 ```
 bundle exec cap staging evolve:stop
+bundle exec cap staging evolve:start
 bundle exec cap staging evolve:restart
-bundle exec cap staging evolve:status
 bundle exec cap staging evolve:reboot
 ```
 
@@ -178,4 +90,4 @@ bundle exec cap staging evolve:logs:pound
 bundle exec cap staging evolve:logs:evolution
 ```
 
-These and more can be found in the [Evolution tasks directory](https://github.com/evolution/wordpress/tree/master/lib/capistrano/tasks).
+These and more can be found in the [Capistrano tasks reference](./docs/REF-cap-tasks.md).

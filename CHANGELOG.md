@@ -1,5 +1,13 @@
 # Changelog
 
+- v1.2.0
+    - Added/refined workflow documentation
+    - Fixed vagrant private key issues ([#59](https://github.com/evolution/wordpress/pull/59))
+    - Fixed lingering url issues for production and branch stages ([#56](https://github.com/evolution/wordpress/pull/56))
+- v1.1.4
+    - Gitignore enhancements ([#68](https://github.com/evolution/wordpress/pull/68) and [#69](https://github.com/evolution/wordpress/pull/69))
+    - Significant documentation of workflows ([#70](https://github.com/evolution/wordpress/pull/70))
+- v1.1.3 - Fixed potential issue with db host using implicit local socket vs explicit TCP/IP ([#67](https://github.com/evolution/wordpress/pull/67))
 - v1.1.2 - Fixed sync and pathing issues with wp-cli ([#64](https://github.com/evolution/wordpress/pull/64))
 - v1.1.1
     - Deploy of non-master to staging opens branch subdomain in browser ([#62](https://github.com/evolution/wordpress/pull/62))

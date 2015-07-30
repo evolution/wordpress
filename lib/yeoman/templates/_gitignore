@@ -50,5 +50,9 @@ nbproject
 .vagrant
 _notes
 bower_components
+node_modules
 backups
 web/wp
+
+# Generated file, don't edit above this line
+<%= gitignoreFile %>
