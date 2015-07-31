@@ -1,5 +1,10 @@
 # Changelog
 
+- v1.2.1
+    - Fixed host verification from within vm ([#75](https://github.com/evolution/wordpress/pull/75))
+    - Customized php `upload_max_filesize` ([#76](https://github.com/evolution/wordpress/pull/76))
+    - Added apt autoremove on provision
+    - Added vagrant performance tweaks ([#78](https://github.com/evolution/wordpress/pull/78))
 - v1.2.0
     - Added/refined workflow documentation
     - Fixed vagrant private key issues ([#59](https://github.com/evolution/wordpress/pull/59))
