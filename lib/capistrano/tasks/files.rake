@@ -2,14 +2,14 @@ namespace :evolve do
   namespace :files do
     task :prepare, :path_from, :path_to do |task, args|
       invoke "evolve:prepare_key"
-      set :rsync_cmd, "-c 'cd /vagrant && rsync -e \"ssh -i #{fetch(:ssh_keyfile)} -o StrictHostKeyChecking=no\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/'"
+      set :rsync_cmd, "rsync -e \"ssh -i #{fetch(:ssh_keyfile)}\" -avvru --delete --copy-links --progress #{args[:path_from]}/ #{args[:path_to]}/"
     end
 
     task :down do |task|
       begin
         raise "Cannot sync files down from local!" if fetch(:stage) == 'local'
 
-        local_uploads = "/vagrant/web/wp-content/uploads"
+        local_uploads = "#{Dir.pwd}/web/wp-content/uploads"
         remote_uploads = "#{release_path}/web/wp-content/uploads"
         uploads_exist = false
 
@@ -18,14 +18,10 @@ namespace :evolve do
         end
 
         if uploads_exist
-          run_locally do
-            execute :vagrant, :up
-          end
-
           on roles(:web) do |host|
             invoke "evolve:files:prepare", "#{fetch(:user)}@#{host}:#{remote_uploads}", local_uploads
             run_locally do
-              execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
+              execute fetch(:rsync_cmd)
             end
           end
         else
@@ -44,20 +40,19 @@ namespace :evolve do
 
         invoke "evolve:confirm", "You are about to overwrite \"#{fetch(:stage)}\" files!"
 
-        local_uploads = "/vagrant/web/wp-content/uploads"
+        local_uploads = "#{Dir.pwd}/web/wp-content/uploads"
         remote_uploads = "#{release_path}/web/wp-content/uploads"
         uploads_exist = false
 
         run_locally do
-          execute :vagrant, :up
-          uploads_exist = test :vagrant, :ssh, :local, "-c '[ -d #{local_uploads} ]'"
+          uploads_exist = test "[ -d #{local_uploads} ]"
         end
 
         if uploads_exist
           on roles(:web) do |host|
             invoke "evolve:files:prepare", local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
             run_locally do
-              execute :vagrant, :ssh, :local, fetch(:rsync_cmd)
+              execute fetch(:rsync_cmd)
             end
           end
         else
