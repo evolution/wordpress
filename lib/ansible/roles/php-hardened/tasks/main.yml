@@ -1,0 +1,9 @@
+---
+- name:           Disable allow_url_fopen
+  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
+  sudo:           yes
+
+- name:           Disable system calls from PHP userland
+  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*disable_functions' line='disable_functions = {{ php_disable_functions | join(",") }}'
+  sudo:           yes
+  notify:         restart apache
