@@ -1,37 +1,34 @@
 ---
-- name:           Fetch stable source
-  get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz
+- name:           Install apg (for cryptkeys)
+  apt:            name=apg state=present
   sudo:           yes
 
-- name:           Hash source for checksum
-  shell:          sha1sum /tmp/src-suhosin.tar.gz
-  register:       suhosin_shahash
+- name:           Generate session cryptkey
+  command:        apg -m 32
+  register:       generated_session_cryptkey
+
+- debug:          var=generated_session_cryptkey
+
+- name:           Is suhosin already installed?
+  stat:           path={{ suhosin.ini }}
+  register:       suhosin_installed
+
+- name:           Find existing session cryptkey
+  shell:          cat {{ suhosin.ini }} | sed -n -e 's/^suhosin\.session\.cryptkey = //p'
+  register:       existing_session_cryptkey
+  when:           suhosin_installed.stat.exists == True
+
+- debug:          var=existing_session_cryptkey
+  when:           suhosin_installed.stat.exists == True
+
+- include:        build.yml
+  when:           suhosin_installed.stat.exists == False
+
+- name:           Generate ini config for extension
+  template:       src=suhosin.ini.j2 dest={{ suhosin.ini }}
   sudo:           yes
 
-- debug:          var=suhosin_shahash.stdout
-
-- fail:           msg="Suhosin source failed SHA1 hash"
-  when:           suhosin_shahash.stdout.find('{{ suhosin.sha }}') == -1
-
-- name:           Expand source package
-  unarchive:      src=/tmp/src-suhosin.tar.gz dest=/tmp/ copy=no
+- name:           Enable extension
+  command:        php5enmod suhosin
   sudo:           yes
-
-- shell:          ls -1d /tmp/suhosin*
-  register:       suhosin_srcdir
-  sudo:           yes
-
-- debug:          var=suhosin_srcdir.stdout
-
-- name:           Compile and install extension
-  command:        "{{ item }} chdir={{ suhosin_srcdir.stdout }}"
-  sudo:           yes
-  with_items:
-  - phpize
-  - ./configure
-  - make
-  - make install
-
-- name:           Clean up after ourselves
-  shell:          rm -rf /tmp/*suhosin*
-  sudo:           yes
+  notify:         restart apache

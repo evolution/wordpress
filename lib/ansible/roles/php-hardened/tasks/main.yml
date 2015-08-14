@@ -3,36 +3,5 @@
   lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
   sudo:           yes
 
-- name:           Install apg (for cryptkeys)
-  apt:            name=apg state=present
-  sudo:           yes
-
-- name:           Generate session cryptkey
-  command:        apg -m 32
-  register:       generated_session_cryptkey
-
-- debug:          var=generated_session_cryptkey
-
-- name:           Is suhosin already installed?
-  stat:           path={{ suhosin.ini }}
-  register:       suhosin_installed
-
-- name:           Find existing session cryptkey
-  shell:          cat {{ suhosin.ini }} | sed -n -e 's/^suhosin\.session\.cryptkey = //p'
-  register:       existing_session_cryptkey
-  when:           suhosin_installed.stat.exists == True
-
-- debug:          var=existing_session_cryptkey
-  when:           suhosin_installed.stat.exists == True
-
 - include:        suhosin.yml
-  when:           suhosin_installed.stat.exists == False
-
-- name:           Generate ini config for extension
-  template:       src=suhosin.ini.j2 dest={{ suhosin.ini }}
-  sudo:           yes
-
-- name:           Enable extension
-  command:        php5enmod suhosin
-  sudo:           yes
-  notify:         restart apache
+  when:           lookup('env','TRAVIS') != 'true'
