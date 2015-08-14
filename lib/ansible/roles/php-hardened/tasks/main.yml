@@ -3,23 +3,36 @@
   lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
   sudo:           yes
 
-- name:           Install repository key
-  apt_key:        url=https://sektioneins.de/files/repository.asc state=present
+- name:           Install apg (for cryptkeys)
+  apt:            name=apg state=present
   sudo:           yes
 
-- name:           Configure repository source list
-  apt_repository: repo='deb http://repo.suhosin.org/ ubuntu-trusty main' state=present
+- name:           Generate session cryptkey
+  command:        apg -m 32
+  register:       generated_session_cryptkey
+
+- debug:          var=generated_session_cryptkey
+
+- name:           Is suhosin already installed?
+  stat:           path={{ suhosin.ini }}
+  register:       suhosin_installed
+
+- name:           Find existing session cryptkey
+  shell:          cat {{ suhosin.ini }} | sed -n -e 's/^suhosin\.session\.cryptkey = //p'
+  register:       existing_session_cryptkey
+  when:           suhosin_installed.stat.exists == True
+
+- debug:          var=existing_session_cryptkey
+  when:           suhosin_installed.stat.exists == True
+
+- include:        suhosin.yml
+  when:           suhosin_installed.stat.exists == False
+
+- name:           Generate ini config for extension
+  template:       src=suhosin.ini.j2 dest={{ suhosin.ini }}
   sudo:           yes
 
-- name:           Install Suhosin extension
-  apt:            pkg=php5-suhosin-extension state=latest update_cache=yes
-  sudo:           yes
-
-- name:           Enable Suhosin
+- name:           Enable extension
   command:        php5enmod suhosin
-  sudo:           yes
-
-- name:           Disable system calls from PHP userland
-  lineinfile:     dest=/etc/php5/mods-available/suhosin.ini backup=yes regexp='^[;# ]*suhosin.executor.func.blacklist =' line='suhosin.executor.func.blacklist = {{ php_disable_functions | join(",") }}'
   sudo:           yes
   notify:         restart apache
