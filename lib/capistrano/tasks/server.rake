@@ -78,6 +78,8 @@ namespace :evolve do
       execute :sudo, "find -L #{release_path}/web -type d -exec chown :www-data {} \\; -exec chmod 775 {} \\; -exec chmod g+s {} \\;"
       # Ensure files are group readable
       execute :sudo, "find -L #{release_path}/web -type f -exec chmod 664 {} \\;"
+      # Ensure wp-content directories are owned by deploy
+      execute :sudo, "find -L #{release_path}/web/wp-content -type d -exec chown deploy {} \\;"
     end
   end
 
