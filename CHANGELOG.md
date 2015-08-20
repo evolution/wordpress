@@ -1,5 +1,9 @@
 # Changelog
 
+- v1.2.2
+    - Fixed rsync host key checking ([#79](https://github.com/evolution/wordpress/pull/79))
+    - Fixed rsync file time warnings ([#80](https://github.com/evolution/wordpress/pull/80))
+    - Fixed SSL generator prompt ([#81](https://github.com/evolution/wordpress/pull/81))
 - v1.2.1
     - Fixed host verification from within vm ([#75](https://github.com/evolution/wordpress/pull/75))
     - Customized php `upload_max_filesize` ([#76](https://github.com/evolution/wordpress/pull/76))
