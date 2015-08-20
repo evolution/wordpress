@@ -49,6 +49,8 @@ namespace :evolve do
         end
 
         if uploads_exist
+          invoke "evolve:permissions"
+
           on roles(:web) do |host|
             invoke "evolve:files:prepare", local_uploads, "#{fetch(:user)}@#{host}:#{remote_uploads}"
             run_locally do
