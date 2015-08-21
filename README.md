@@ -91,3 +91,9 @@ bundle exec cap staging evolve:logs:evolution
 ```
 
 These and more can be found in the [Capistrano tasks reference](./docs/REF-cap-tasks.md).
+
+## Troubleshooting
+
+If you've encountered a problem, there may already be a solution in the [Frequently Asked Questions](./FAQ.md).
+
+Failing that, check the [Github issues](https://github.com/evolution/wordpress/issues) and [pull requests](https://github.com/evolution/wordpress/pulls) to see if someone has already encountered your same problem. If no one has, then feel free to [file a new issue](https://github.com/evolution/wordpress/issues/new).
