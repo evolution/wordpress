@@ -74,12 +74,17 @@ namespace :evolve do
   desc "Fix remote filesystem permissions"
   task :permissions do
     on release_roles(:web) do
-      # Ensure directories are group-owned by apache & group executable; SGID
-      execute :sudo, "find -L #{release_path}/web -type d -exec chown :www-data {} \\; -exec chmod 775 {} \\; -exec chmod g+s {} \\;"
-      # Ensure files are group readable
-      execute :sudo, "find -L #{release_path}/web -type f -exec chmod 664 {} \\;"
-      # Ensure wp-content directories are owned by deploy
-      execute :sudo, "find -L #{release_path}/web/wp-content -type d -exec chown deploy {} \\;"
+      if test :ls, "#{deploy_to}/releases/*/web"
+        # Ensure directories are group-owned by apache & group executable; SGID
+        execute :sudo, "find -L #{deploy_to}/releases/*/web -type d -exec chown :www-data {} \\; -exec chmod 775 {} \\; -exec chmod g+s {} \\;"
+        # Ensure files are group readable
+        execute :sudo, "find -L #{deploy_to}/releases/*/web -type f -exec chmod 664 {} \\;"
+
+        if test :ls, "#{deploy_to}/releases/*/web/wp-content"
+          # Ensure wp-content directories are owned by deploy
+          execute :sudo, "find -L #{deploy_to}/releases/*/web/wp-content -type d -exec chown deploy {} \\;"
+        end
+      end
     end
   end
 
