@@ -37,3 +37,8 @@ fail2ban:
   # ban_time: 600
   # notification_email: root@localhost
   # notify_on_ban: 0
+
+swap:
+  path: /swapfile
+  swappiness: 10
+  vfs_cache_pressure: 50

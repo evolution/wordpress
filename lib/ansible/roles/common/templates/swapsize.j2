@@ -1,0 +1,20 @@
+{# determine available space on root partition #}
+{%- for mp in ansible_mounts -%}
+  {%- if mp.mount == '/' -%}
+    {%- set _disk_avail_mb = mp.size_available / 1024 / 1024 -%}
+    {# if enough space for 4x current memory, use 2x for swap #}
+    {%- if _disk_avail_mb >= (ansible_memtotal_mb * 4) -%}
+      {{ ansible_memtotal_mb * 2 }}
+    {# if enough space for 2x current memory, use 1x for swap #}
+    {%- elif _disk_avail_mb >= (ansible_memtotal_mb * 2) -%}
+      {{ ansible_memtotal_mb }}
+    {# if enough space for 1x current memory, use 1/2 for swap #}
+    {%- elif _disk_avail_mb >= ansible_memtotal_mb -%}
+      {{ ansible_memtotal_mb / 2 }}
+    {# if enough space for 1/2 current memory, use 1/4 for swap #}
+    {%- elif _disk_avail_mb >= (ansible_memtotal_mb / 2) -%}
+      {{ ansible_memtotal_mb / 4 }}
+    {%- endif -%}
+    {# otherwise leave blank, for playbook to handle #}
+  {%- endif -%}
+{%- endfor -%}
