@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.2.3
+    - Fixed permissions issue on cleanup of old releases ([#82](https://github.com/evolution/wordpress/pull/82))
 - v1.2.2
     - Fixed rsync host key checking ([#79](https://github.com/evolution/wordpress/pull/79))
     - Fixed rsync file time warnings ([#80](https://github.com/evolution/wordpress/pull/80))
