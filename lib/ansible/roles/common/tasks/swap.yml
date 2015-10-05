@@ -12,31 +12,31 @@
   when:           swapfile_size_mb.stdout == ''
 
 - name:           Write swapfile
-  command:        fallocate -l {{swapfile_size_mb.stdout}}M {{swap.path}}
+  command:        fallocate -l {{swapfile_size_mb.stdout}}M {{swap__path}}
   sudo:           yes
 
 - name:           Set permissions
-  file:           path={{swap.path}} mode=600 owner=root group=root
+  file:           path={{swap__path}} mode=600 owner=root group=root
   sudo:           yes
 
 - name:           Create swapfile
-  command:        mkswap {{swap.path}}
+  command:        mkswap {{swap__path}}
   sudo:           yes
 
 - name:           Enable swapfile
-  command:        swapon {{swap.path}}
+  command:        swapon {{swap__path}}
   sudo:           yes
 
 - name:           Add swapfile to /etc/fstab
-  lineinfile:     dest=/etc/fstab state=present line="{{ swap.path }}   none    swap    sw    0   0"
+  lineinfile:     dest=/etc/fstab state=present line="{{ swap__path }}   none    swap    sw    0   0"
   sudo:           yes
 
 - name:           Configure vm.swappiness
-  lineinfile:     dest=/etc/sysctl.conf line="vm.swappiness = {{ swap.swappiness }}" regexp="^vm.swappiness\s*?=" state=present
+  lineinfile:     dest=/etc/sysctl.conf line="vm.swappiness = {{ swap__swappiness }}" regexp="^vm.swappiness\s*?=" state=present
   sudo:           yes
 
 - name:           Configure vm.vfs_cache_pressure
-  lineinfile:     dest=/etc/sysctl.conf line="vm.vfs_cache_pressure = {{ swap.vfs_cache_pressure }}" regexp="^vm.vfs_cache_pressure\s*?=" state=present
+  lineinfile:     dest=/etc/sysctl.conf line="vm.vfs_cache_pressure = {{ swap__vfs_cache_pressure }}" regexp="^vm.vfs_cache_pressure\s*?=" state=present
   sudo:           yes
 
 - name:           Reload sysctl
