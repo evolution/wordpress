@@ -1,4 +1,9 @@
 ---
+- shell:          df {{ swap__path | dirname }} | awk '/^\\/dev/ {print $NF}'
+  register:       swapfile_mountpoint
+
+- debug:          var=swapfile_mountpoint
+
 - name:           Calculate ideal swapfile size
   template:       src=swapsize.j2 dest=/tmp/swapsize
 
