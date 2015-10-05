@@ -30,3 +30,10 @@ set :wp_config, Hash[File
 
 # Path for wp-cli on local vagrant
 set :local_wp_path,   "/vagrant/web/wp"
+
+# fix permissions before deployment
+namespace :deploy do
+  before :started, :release_permissions do
+    invoke "evolve:permissions"
+  end
+end
