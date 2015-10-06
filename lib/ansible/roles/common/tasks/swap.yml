@@ -1,0 +1,49 @@
+---
+- shell:          df {{ swap__path | dirname }} | awk '/^\\/dev/ {print $NF}'
+  register:       swapfile_mountpoint
+
+- debug:          var=swapfile_mountpoint
+
+- name:           Calculate ideal swapfile size
+  template:       src=swapsize.j2 dest=/tmp/swapsize
+
+- name:           Fetch swapfile size
+  shell:          "cat /tmp/swapsize | tr -d '[:space:]'"
+  register:       swapfile_size_mb
+
+- debug:          var=swapfile_size_mb.stdout
+
+- fail:           msg="Could not determine swapfile size with available diskspace"
+  when:           swapfile_size_mb.stdout == ''
+
+- name:           Write swapfile
+  command:        fallocate -l {{swapfile_size_mb.stdout}}M {{swap__path}}
+  sudo:           yes
+
+- name:           Set permissions
+  file:           path={{swap__path}} mode=600 owner=root group=root
+  sudo:           yes
+
+- name:           Create swapfile
+  command:        mkswap {{swap__path}}
+  sudo:           yes
+
+- name:           Enable swapfile
+  command:        swapon {{swap__path}}
+  sudo:           yes
+
+- name:           Add swapfile to /etc/fstab
+  lineinfile:     dest=/etc/fstab state=present line="{{ swap__path }}   none    swap    sw    0   0"
+  sudo:           yes
+
+- name:           Configure vm.swappiness
+  lineinfile:     dest=/etc/sysctl.conf line="vm.swappiness = {{ swap__swappiness }}" regexp="^vm.swappiness\s*?=" state=present
+  sudo:           yes
+
+- name:           Configure vm.vfs_cache_pressure
+  lineinfile:     dest=/etc/sysctl.conf line="vm.vfs_cache_pressure = {{ swap__vfs_cache_pressure }}" regexp="^vm.vfs_cache_pressure\s*?=" state=present
+  sudo:           yes
+
+- name:           Reload sysctl
+  command:        sysctl -p
+  sudo:           yes
