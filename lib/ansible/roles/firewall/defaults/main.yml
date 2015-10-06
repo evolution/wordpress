@@ -1,0 +1,8 @@
+---
+iptables__ipv6: 0
+
+fail2ban__whitelist:
+  - 127.0.0.1/8
+fail2ban__ban_time: 600
+fail2ban__notification_email: root@localhost
+fail2ban__notify_on_ban: 0

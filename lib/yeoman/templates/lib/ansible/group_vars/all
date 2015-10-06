@@ -12,28 +12,20 @@ mysql:
   password:     <%= props.DB_PASSWORD %>
   host:         <%= props.DB_HOST %>
 
-php_settings:
-  # memory_limit:
+# php__memory_limit:
 
-reserved_memory:
-  # mysql:
-  # system:
-apache_settings:
-  # start_servers:
-  # min_spare_servers:
-  # max_spare_servers:
-  # max_clients:
-  # max_requests_per_child:
+# apache__start_servers:
+# apache__min_spare_servers:
+# apache__max_spare_servers:
+# apache__max_clients:
+# apache__max_requests_per_child:
 
-mail:
-  postmaster: no-reply@<%= props.domain %>
+mail__postmaster: no-reply@<%= props.domain %>
 
-iptables:
-  # ipv6: 0
+# iptables__ipv6: 0
 
-fail2ban:
-  # whitelist:
-  #   - 127.0.0.1/8
-  # ban_time: 600
-  # notification_email: root@localhost
-  # notify_on_ban: 0
+# fail2ban__whitelist:
+#   - 127.0.0.1/8
+# fail2ban__ban_time: 600
+# fail2ban__notification_email: root@localhost
+# fail2ban__notify_on_ban: 0
