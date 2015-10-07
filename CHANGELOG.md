@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.2.4
+    - Added swapfile provisioning ([#83](https://github.com/evolution/wordpress/pull/83))
 - v1.2.3
     - Fixed permissions issue on cleanup of old releases ([#82](https://github.com/evolution/wordpress/pull/82))
 - v1.2.2

@@ -29,3 +29,7 @@ mail__postmaster: no-reply@<%= props.domain %>
 # fail2ban__ban_time: 600
 # fail2ban__notification_email: root@localhost
 # fail2ban__notify_on_ban: 0
+
+# swap__path: /swapfile
+# swap__swappiness: 10
+# swap__vfs_cache_pressure: 50

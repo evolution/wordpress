@@ -1,0 +1,4 @@
+---
+swap__path: /swapfile
+swap__swappiness: 10
+swap__vfs_cache_pressure: 50
