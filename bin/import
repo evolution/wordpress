@@ -90,6 +90,14 @@ if (manifest.is_multisite) {
     'and not exists (select * from _fix_usermeta where umeta_id = '+tablePrefix+'usermeta.umeta_id);',
     '-- remove that working data table',
     'drop table _fix_usermeta;',
+    '-- rename any site-specific options',
+    'update wp_options join (',
+    '    select option_id as oid, replace(option_name, "'+subsiteTablePrefix+'", "'+tablePrefix+'") as oname',
+    '    from wp_options',
+    '    where option_name like "'+subsiteTablePrefix+'%"',
+    ') as new_opts',
+    'set option_name=new_opts.oname',
+    'where option_id=new_opts.oid;',
   ];
 
   fs.appendFileSync(path.join(extractedPath, 'wordpress.sql'), appendedSql.join("\n"));
