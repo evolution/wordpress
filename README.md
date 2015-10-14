@@ -52,6 +52,7 @@ npm install -g bower yo generator-evolve
 * [Generating a new site](./docs/TUTORIAL-NEW.md)
 * [Bringing up an existing Evolution site](./docs/TUTORIAL-CLONE.md)
 * [Regenerating an existing Evolution site](./docs/TUTORIAL-UPGRADE.md)
+* [Importing a non Evolution site](./docs/TUTORIAL-IMPORT.md)
 
 ## Managing Remote Environments
 
