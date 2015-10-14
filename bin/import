@@ -130,6 +130,43 @@ var capCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 
 console.log('importing sql via:', chalk.cyan(capCmd));
 cpExec(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit'});
 
+// list all users via wp-cli
+capCmd = 'bundle exec cap local wp:user:list:--fields=ID,user_login,roles:--format=json';
+console.log('listing users via:', chalk.cyan(capCmd));
+var capOut = cpExec(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+
+// prompt for role of any users lacking one
+var existingUsers = capOut.match(/\s+(\[\{"ID":[^\r\n]+)/);
+if (existingUsers) {
+  JSON.parse(existingUsers[1]).forEach(function(user) {
+    if (!user.hasOwnProperty('roles') || user.roles == '') {
+      try {
+        inquirerPrompt([
+          {
+            type: 'list',
+            name: 'role',
+            message: 'User '+chalk.green(user.user_login)+' has no role...please assign one:',
+            choices: [
+              'subscriber',
+              'contributor',
+              'author',
+              'editor',
+              'administrator',
+            ]
+          }
+        ]);
+      }
+      catch(e) {
+        answers = e;
+      }
+
+      capCmd = 'bundle exec cap local wp:user:add-role:'+user.ID+':'+answers.role;
+      console.log('assigning user role via:', chalk.cyan(capCmd));
+      cpExec(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+    }
+  });
+}
+
 // Copying Themes / Plugins / Uploads
 var pluginsPath = path.join(extractedPath, 'plugins');
 console.log('installing plugins from', chalk.cyan(pluginsPath));
