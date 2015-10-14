@@ -1,0 +1,37 @@
+---
+- name:           Fetch stable source
+  get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz
+  sudo:           yes
+
+- name:           Hash source for checksum
+  shell:          sha1sum /tmp/src-suhosin.tar.gz
+  register:       suhosin_shahash
+  sudo:           yes
+
+- debug:          var=suhosin_shahash.stdout
+
+- fail:           msg="Suhosin source failed SHA1 hash"
+  when:           suhosin_shahash.stdout.find('{{ suhosin.sha }}') == -1
+
+- name:           Expand source package
+  unarchive:      src=/tmp/src-suhosin.tar.gz dest=/tmp/ copy=no
+  sudo:           yes
+
+- shell:          ls -1d /tmp/suhosin*
+  register:       suhosin_srcdir
+  sudo:           yes
+
+- debug:          var=suhosin_srcdir.stdout
+
+- name:           Compile and install extension
+  command:        "{{ item }} chdir={{ suhosin_srcdir.stdout }}"
+  sudo:           yes
+  with_items:
+  - phpize
+  - ./configure
+  - make
+  - make install
+
+- name:           Clean up after ourselves
+  shell:          rm -rf /tmp/*suhosin*
+  sudo:           yes
