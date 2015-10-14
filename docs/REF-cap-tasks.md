@@ -28,7 +28,9 @@ Invokes [wp-cli](http://wp-cli.org/) on the remote environment, with the given c
 
 	bundle exec cap staging wp:cli:version
 
-Passing parameter flags is not currently supported, though `--path` and `--url` are automatically supplied.
+Passing parameter flags is not explicitly supported, though `--path` and `--url` are automatically supplied &mdash; additional flags _can_ be crammed into the task name:
+
+	bundle exec cap staging wp:user:list:--format=json
 
 ### evolve:provision
 
