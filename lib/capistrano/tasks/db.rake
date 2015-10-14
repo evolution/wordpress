@@ -116,5 +116,26 @@ namespace :evolve do
         invoke "evolve:log", success, task.name
       end
     end
+
+    task :exec, :sql_file do |task, args|
+      begin
+        raise "Missing sql file!" if args[:sql_file].nil?
+        raise "Given sql file does not exist: #{args[:sql_file]}" unless File.exist?(args[:sql_file])
+
+        invoke "evolve:confirm", "You are about to execute a sql file against \"#{fetch(:stage)}\" database!"
+
+        on release_roles(:db) do
+          remote_sql_file = "/tmp/" + DateTime.now.strftime("wpe-exec.%Y-%m-%d.%H%M%S.sql")
+          upload! args[:sql_file], remote_sql_file
+
+          execute :mysql, "-uroot -D \"#{fetch(:wp_config)['name']}_#{fetch(:stage)}\" < #{remote_sql_file}"
+          execute :rm, remote_sql_file
+        end
+
+        success=true
+      ensure
+        invoke "evolve:log", success, task.name
+      end
+    end
   end
 end

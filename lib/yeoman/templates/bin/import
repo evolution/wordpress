@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+IMPORTER_PATH="$( dirname "$0" )/../bower_components/evolution-wordpress"
+IMPORTER_SCRIPT="$IMPORTER_PATH/bin/import"
+
+chmod +x "$IMPORTER_SCRIPT"
+
+(cd "$IMPORTER_PATH"; npm install)
+
+VAGRANT_STATUS=$(vagrant status)
+
+if [[ "$VAGRANT_STATUS" == *"running ("* ]]; then
+    $IMPORTER_SCRIPT
+else
+    echo -e "Make sure your vagrant is running first! Run \033[0;32mvagrant up\033[0m"
+fi
+
