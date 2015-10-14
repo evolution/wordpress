@@ -1,5 +1,10 @@
 # Changelog
 
+- v1.3.0
+    - Fixed regeneration of existing READMEs ([#85](https://github.com/evolution/wordpress/pull/85))
+    - Added php hardening role ([#54](https://github.com/evolution/wordpress/pull/54))
+    - Added ansible role defaults where applicable ([#84](https://github.com/evolution/wordpress/pull/84))
+    - Added Cambrian importer ([#66](https://github.com/evolution/wordpress/pull/66))
 - v1.2.4
     - Added swapfile provisioning ([#83](https://github.com/evolution/wordpress/pull/83))
 - v1.2.3
