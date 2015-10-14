@@ -3,30 +3,20 @@
 # Global definition of options, can be overridden in each jail afterwards.
 [DEFAULT]
 
-{% if fail2ban.whitelist is defined %}
 # Can be space separated IP addresses, CIDR masks or DNS hosts
-ignoreip = 127.0.0.1/8 {{ fail2ban.whitelist | join(' ') }}
+ignoreip = {{ ['127.0.0.1/8'] | union(fail2ban__whitelist) | unique | join(' ') }}
 
-{% endif %}
-{% if fail2ban.ban_time is defined %}
 # Global default ban time (in seconds)
-bantime  = {{ fail2ban.ban_time }}
+bantime  = {{ fail2ban__ban_time }}
 
-{% endif %}
-{% if fail2ban.notification_email is defined %}
 # Destination email for interpolations in jail.{conf,local}
-destemail = {{ fail2ban.notification_email }}
+destemail = {{ fail2ban__notification_email }}
 
-{% endif %}
 # Default banning action
 banaction = iptables-multiport
 
 # Default action (e.g. action_ for ban only, action_mw for ban + email, action_mwl for ban + email w relevant log entries)
-{% if fail2ban.notify_on_ban is defined and fail2ban.notify_on_ban %}
-action = %(action_mwl)s
-{% else %}
-action = %(action_)s
-{% endif %}
+action = %(action_{{ 'mwl' if fail2ban__notify_on_ban else '' }})s
 
 
 [ssh]
