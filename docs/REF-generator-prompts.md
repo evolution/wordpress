@@ -67,6 +67,10 @@ This scales the settings for Apache's [prefork module](http://httpd.apache.org/d
 
 These values can be manually overridden in `lib/ansible/group_vars/all`.
 
+##### php-hardened
+
+This restricts features of PHP that are known security risks, and installs the [Suhosin](https://suhosin.org/) extension.
+
 ##### varnish
 
 This configures a high performance [Varnish](https://www.varnish-cache.org/) reverse-proxy cache in front of your Apache webserver.
