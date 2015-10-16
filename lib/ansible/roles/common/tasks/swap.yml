@@ -1,5 +1,5 @@
 ---
-- shell:          df {{ swap__path | dirname }} | awk '/^\\/dev/ {print $NF}'
+- shell:          "df {{ swap__path | dirname }} | awk '!/^Filesystem/ {print $NF}'"
   register:       swapfile_mountpoint
 
 - debug:          var=swapfile_mountpoint
