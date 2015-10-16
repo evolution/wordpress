@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.1
+    - Fixed awk escape sequence bug ([#86](https://github.com/evolution/wordpress/pull/86))
 - v1.3.0
     - Fixed regeneration of existing READMEs ([#85](https://github.com/evolution/wordpress/pull/85))
     - Added php hardening role ([#54](https://github.com/evolution/wordpress/pull/54))
