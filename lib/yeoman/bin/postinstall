@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
-var fs    = require('fs');
-var path  = require('path');
-var util  = require('util');
+var fs     = require('fs');
+var path   = require('path');
+var util   = require('util');
+var semver = require('semver');
+var latest = require('../lib/github-latest');
 
-var cwd   = process.cwd();
-var from  = path.join(cwd, 'bower_components', 'wordpress');
-var to    = path.join(cwd, 'web', 'wp');
+var cwd    = process.cwd();
+var from   = path.join(cwd, 'bower_components', 'wordpress');
+var to     = path.join(cwd, 'web', 'wp');
+var bower  = path.join(cwd, 'bower_components', 'evolution-wordpress', 'bower.json');
+var notice = path.join(cwd, 'web', 'wp-content', 'mu-plugins', 'evo-update.php');
 
 console.log('Evolution WordPress - Bower `postinstall` Script\n');
 
@@ -116,5 +120,56 @@ if (fs.existsSync(to)) {
 
 console.info('Renaming `%s` to `%s`...', path.relative(cwd, from), path.relative(cwd, to));
 fs.renameSync(from, to);
+
+// add wp admin notices, if newer minor version
+var bowerVersion  = JSON.parse(fs.readFileSync(bower)).version;
+var latestVersion = latest('evolution', 'wordpress');
+
+console.info('Comparing latest `%s` to current `%s`...', latestVersion, bowerVersion);
+
+var bowerSemver   = semver.SemVer(bowerVersion);
+var latestSemver  = semver.SemVer(latestVersion);
+
+if (!semver.satisfies(latestSemver, util.format('%s.%s.x', bowerSemver.major, bowerSemver.minor))) {
+  console.info('Adding wp-admin notice for `%s`...', latestVersion);
+
+  var pluginContent = "<?php\n\n"
+    +"add_action('admin_notices', 'evo_update_vSLUGVER');\n\n"
+    +"function evo_update_vSLUGVER() {\n"
+    +"  global $current_user;\n"
+    +"  if ( current_user_can('install_plugins') ) {\n"
+    +"    if ( ! get_user_meta($current_user->ID, 'evo_update_vSLUGVER_ignore_notice') ) {\n"
+    +"      echo '<div class=\"update-nag\"><p>';\n"
+    +"      printf(\n"
+    +"        __('Evolution has <a href=\"%1$s\" target=\"_blank\">a new minor version</a>! To get the latest features and fixes, please <a href=\"%2$s\" target=\"_blank\">regenerate your site</a>. | <a href=\"%3$s\">Dismiss</a>'),\n"
+    +"        'https://github.com/evolution/wordpress/blob/master/CHANGELOG.md#vRAWVER',\n"
+    +"        'https://github.com/evolution/wordpress/blob/master/docs/TUTORIAL-UPGRADE.md',\n"
+    +"        '?evo_update_vSLUGVER_ignore=0'\n"
+    +"      );\n"
+    +"      echo '</p></div>';\n"
+    +"    }\n"
+    +"  }\n"
+    +"}\n\n"
+    +"add_action('admin_init', 'evo_update_vSLUGVER_ignore');\n\n"
+    +"function evo_update_vSLUGVER_ignore() {\n"
+    +"  global $current_user;\n"
+    +"  if ( current_user_can('install_plugins') ) {\n"
+    +"    if ( isset($_GET['evo_update_vSLUGVER_ignore']) && '0' == $_GET['evo_update_vSLUGVER_ignore'] ) {\n"
+    +"      add_user_meta($current_user->ID, 'evo_update_vSLUGVER_ignore_notice', 'true', true);\n"
+    +"    }\n"
+    +"  }\n"
+    +"}\n"
+  ;
+
+  fs.writeFileSync(notice,
+    pluginContent
+      .replace(/RAWVER/g, latestSemver.toString())
+      .replace(/SLUGVER/g, latestSemver.toString().replace(/[.]/g, '_')),
+    {flag: 'w',mode: 0755}
+  );
+}
+else if (fs.existsSync(notice)) {
+  fs.unlinkSync(notice);
+}
 
 console.log('Done!');

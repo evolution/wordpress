@@ -12,6 +12,7 @@ error_log
 !**/wp-content/cache/.htaccess
 **/wp-content/upgrade
 **/wp-content/uploads
+**/wp-content/mu-plugins/evo-update.php
 
 # Misc
 *.diff
