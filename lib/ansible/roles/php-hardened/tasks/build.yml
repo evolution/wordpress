@@ -1,6 +1,6 @@
 ---
 - name:           Fetch stable source
-  get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz
+  get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz validate_certs=False
   sudo:           yes
 
 - name:           Hash source for checksum
