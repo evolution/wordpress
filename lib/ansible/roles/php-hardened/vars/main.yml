@@ -4,7 +4,6 @@ php_disable_functions:
   - shell_exec
   - system
   - passthru
-  - proc_open
 
 suhosin:
   ini: /etc/php5/mods-available/suhosin.ini
