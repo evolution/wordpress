@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.2
+    - Several suhosin bugfixes (9fef3ab, 7017c3a, 458d32e)
 - v1.3.1
     - Fixed awk escape sequence bug ([#86](https://github.com/evolution/wordpress/pull/86))
 - v1.3.0
