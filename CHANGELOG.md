@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.3
+    - Fixed generator dependency issues on Ubuntu ([#92](https://github.com/evolution/wordpress/pull/92))
 - v1.3.2
     - Several suhosin bugfixes (9fef3ab, 7017c3a, 458d32e)
 - v1.3.1
