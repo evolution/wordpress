@@ -19,8 +19,8 @@ describe('cap production evolve:up:db', function(done) {
 
     browser
       .visit('http://example.com/')
-      .then(function() {
-        assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
+      .then(null, function() {
+        assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
       })
       .then(done, done)
     ;
