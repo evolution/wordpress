@@ -19,13 +19,18 @@ describe('Mock site', function() {
         }
       })
       .then(function() {
+        if (browser.button('Hide')) {
+          return browser.pressButton('Hide');
+        }
+      })
+      .then(function() {
         if (browser.button('Install WordPress')) {
           browser
             .fill('Site Title',       'Evolution WordPress Test')
             .fill('Username',         'test')
             .fill('admin_password',   'test')
             .fill('admin_password2',  'test')
-            .fill('Your E-mail',      'test@example.com')
+            .fill('admin_email',      'test@example.com')
             .uncheck('blog_public')
           ;
 
