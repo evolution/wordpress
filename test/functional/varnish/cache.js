@@ -9,8 +9,8 @@ describe('Varnish', function() {
 
     browser
       .visit('http://example.com/')
-      .then(function() {
-        assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
+      .then(null, function() {
+        assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
       })
       .then(done, done)
     ;
@@ -22,7 +22,7 @@ describe('Varnish', function() {
 
       browser
         .visit('http://example.com/')
-        .then(function() {
+        .then(null, function() {
           assert.equal('cached', browser.resources[0].response.headers['x-cache']);
         })
         .then(done, done)
@@ -36,14 +36,14 @@ describe('Varnish', function() {
 
       browser
         .visit('http://example.com/wp-admin')
-        .then(function() {
+        .then(null, function() {
           assert(browser.resources.browser.getCookie('wordpress_test_cookie'));
         })
-        .then(function() {
+        .then(null, function() {
           return browser.visit('http://example.com/');
         })
-        .then(function() {
-          assert.equal('Evolution WordPress Test | Just another WordPress site', browser.text('title'));
+        .then(null, function() {
+          assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
           assert.equal(0, browser.resources[0].response.headers.age);
           assert.equal('uncached', browser.resources[0].response.headers['x-cache']);
         })
@@ -65,7 +65,7 @@ describe('Varnish', function() {
 
       browser
         .visit('http://example.com/')
-        .then(function() {
+        .then(null, function() {
           assert(browser.getCookie('_test'));
           assert(browser.resources[0].response.headers.age);
           assert.equal('cached', browser.resources[0].response.headers['x-cache']);
@@ -90,7 +90,7 @@ describe('Varnish', function() {
 
       browser
         .visit('http://example.com/')
-        .then(function() {
+        .then(null, function() {
           assert(browser.getCookie('test'));
           assert.equal(0, browser.resources[0].response.headers.age);
           assert.equal('uncached', browser.resources[0].response.headers['x-cache']);
@@ -106,7 +106,7 @@ describe('Varnish', function() {
 
       browser
         .visit('http://example.com/')
-        .then(function() {
+        .then(null, function() {
           assert(browser.getCookie('test'));
           assert(browser.resources[0].response.headers.age);
           assert.equal('cached', browser.resources[0].response.headers['x-cache']);
