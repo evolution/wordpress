@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.3.4
+    - Fixed functional tests ([#94](https://github.com/evolution/wordpress/pull/94))
+    - Customized apache logrotate config ([#95](https://github.com/evolution/wordpress/pull/95))
 - v1.3.3
     - Fixed generator dependency issues on Ubuntu ([#92](https://github.com/evolution/wordpress/pull/92))
 - v1.3.2
