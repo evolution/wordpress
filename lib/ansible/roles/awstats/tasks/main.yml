@@ -1,0 +1,3 @@
+---
+- include:        vagrant.yml
+  when:           has_vagrant.stdout
