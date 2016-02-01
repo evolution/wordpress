@@ -1,4 +1,11 @@
 namespace :evolve do
+  task :launch_browser, :url do |task, args|
+    require 'launchy'
+    Launchy.open(args[:url]) do |exception|
+      puts "Failed to open #{args[:url]} because #{exception}"
+    end
+  end
+
   task :calc_wp_path, :is_local do |task, args|
     # short circuit when local wp_path is needed
     if args[:is_local]
