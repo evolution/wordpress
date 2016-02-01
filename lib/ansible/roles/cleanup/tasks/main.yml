@@ -1,4 +1,11 @@
 ---
+- name:         Ensure logrotate runs hourly
+  command:      mv /etc/cron.daily/logrotate /etc/cron.hourly/logrotate
+  args:
+    creates:    /etc/cron.hourly/logrotate
+    removes:    /etc/cron.daily/logrotate
+  sudo:         yes
+
 - name:         Generate init.d for installed evolution services
   template:     src=evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
   sudo:         yes
