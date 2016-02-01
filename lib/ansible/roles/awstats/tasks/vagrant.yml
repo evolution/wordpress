@@ -3,8 +3,8 @@
   apt:            pkg=awstats state=present
   sudo:           yes
 
-- name:           Use logfile synced down from production
-  lineinfile:     regexp='^LogFile=' line='LogFile="/tmp/apache2-production-access.log"' dest=/etc/awstats/awstats.conf
+- name:           Use logfile synced down from remote
+  lineinfile:     regexp='^LogFile=' line='LogFile="/tmp/apache2-remote-access.log"' dest=/etc/awstats/awstats.conf
   sudo:           yes
 
 - name:           Use combined log format
@@ -16,7 +16,7 @@
   sudo:           yes
 
 - name:           Set host aliases
-  lineinfile:     regexp='^HostAliases=' line='HostAliases="localhost 127.0.0.1 www.{{ domain }} production.{{ domain }}"' dest=/etc/awstats/awstats.conf
+  lineinfile:     regexp='^HostAliases=' line='HostAliases="localhost 127.0.0.1 REGEX[^.*\.{{ domain | replace(".", "\\.") }}$]' dest=/etc/awstats/awstats.conf
   sudo:           yes
 
 - name:           Enable Apache cgi module
