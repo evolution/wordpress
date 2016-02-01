@@ -1,4 +1,40 @@
 namespace :evolve do
+  task :sync_log do |task|
+    begin
+      raise "Cannot sync logs down from local!" if fetch(:stage) == 'local'
+
+      log_dir = '/var/log/apache2'
+      log_sync_prefix = 'apache2-remote-access.log'
+      log_gzip_file = DateTime.now.strftime("#{log_sync_prefix}.%Y-%m-%d.%H%M%S.tar.gz")
+
+      on release_roles(:db) do
+        logfiles = capture(:sudo, :bash, '-c', "'cd #{log_dir} && ls -x ./*#{fetch(:domain)}-access.log*'").split
+        raise "No matching logs in #{fetch(:stage)}, to sync down" if logfiles.empty?
+
+        execute :sudo, :bash, '-c', "'cd #{log_dir} && tar -czvf /tmp/#{log_gzip_file} #{logfiles.join(' ')}'"
+        download! "/tmp/#{log_gzip_file}", "#{log_gzip_file}"
+        execute :sudo, :rm, "/tmp/#{log_gzip_file}"
+      end
+
+      run_locally do
+        execute :mkdir, '-p', "./#{log_sync_prefix}/"
+        execute :tar, '-C', "./#{log_sync_prefix}/", '-xvzf', log_gzip_file
+        execute :vagrant, :up
+        execute :vagrant, :ssh, :local,  "-c 'sudo /usr/share/awstats/tools/logresolvemerge.pl /vagrant/#{log_sync_prefix}/* > /tmp/#{log_sync_prefix}'"
+        execute :rm, '-rf', "./#{log_sync_prefix}/"
+        execute :rm, log_gzip_file
+        execute :vagrant, :ssh, :local, "-c 'sudo /usr/lib/cgi-bin/awstats.pl -config=#{fetch(:domain)} -update'"
+        execute :vagrant, :ssh, :local, "-c 'sudo rm /tmp/#{log_sync_prefix}'"
+      end
+
+      invoke "evolve:launch_browser", "http://local.#{fetch(:domain)}/awstats/awstats.pl"
+
+      success=true
+    ensure
+      invoke "evolve:log", success, task.name
+    end
+  end
+
   task :launch_browser, :url do |task, args|
     require 'launchy'
     Launchy.open(args[:url]) do |exception|
