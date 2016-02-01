@@ -22,8 +22,8 @@
 
 - debug:          msg={{ apache_version.stdout }}
 
-- name:           Configure apache logrotate
-  template:       src=logrotate dest=/etc/logrotate.d/apache2 mode=0644
+- name:           Configure apache log rotation
+  copy:           src=logrotate-apache dest=/etc/logrotate.d/apache2 owner=root group=root mode=644
   sudo:           yes
 
 - name:           Configure Apache canonical server name (2.2)
