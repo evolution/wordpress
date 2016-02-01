@@ -98,3 +98,26 @@ These and more can be found in the [Capistrano tasks reference](./docs/REF-cap-t
 If you've encountered a problem, there may already be a solution in the [Frequently Asked Questions](./FAQ.md).
 
 Failing that, check the [Github issues](https://github.com/evolution/wordpress/issues) and [pull requests](https://github.com/evolution/wordpress/pulls) to see if someone has already encountered your same problem. If no one has, then feel free to [file a new issue](https://github.com/evolution/wordpress/issues/new).
+
+## Developing
+
+If you'd like to help develop or test new features for Evolution, it's relatively simple to do so!
+
+First, you'll need to clone this repo, and checkout whatever branch you're wanting to test (or create a new branch and implement a feature within it):
+
+```
+EVOLUTION_TEST_FRAMEWORK_PATH=~/git/evolution-wordpress
+mkdir -p $EVOLUTION_TEST_FRAMEWORK_PATH
+git clone https://github.com/evolution/wordpress.git $EVOLUTION_TEST_FRAMEWORK_PATH
+cd $EVOLUTION_TEST_FRAMEWORK_PATH
+git checkout -b some-existing-feature-from-origin
+```
+
+Next, go to the repo of the evolution site with which you intend to test the feature, and invoke the generator with the `framework-path` argument:
+
+```
+cd ~/git/my-testing-site.com
+yo evolve wordpress --framework-path=$EVOLUTION_TEST_FRAMEWORK_PATH
+```
+
+Now, this site should be generated from the feature branch in question!
