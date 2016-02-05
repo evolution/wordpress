@@ -20,6 +20,7 @@
   register:       purgekernels_result
   ignore_errors:  yes
   sudo:           yes
+  when:           not lookup('env','CI')
 
 - name:           Show purged kernels
   debug:          var=purgekernels_result
