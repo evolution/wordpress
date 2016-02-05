@@ -14,6 +14,7 @@
     dest:         /tmp/purge-kernels.py
     mode:         0755
     force:        yes
+  sudo:           yes
 
 - name:           Purge kernels as necessary
   command:        /tmp/purge-kernels.py
