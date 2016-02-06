@@ -8,6 +8,8 @@
 * [evolve:permissions](#evolvepermissions)
 * [evolve:down](#evolvedown)
 * [evolve:up](#evolveup)
+* [evolve:db:backup](#evolvedbbackup)
+* [evolve:db:exec](#evolvedbexec)
 * [evolve:teardown](#evolveteardown)
 * [evolve:reboot](#evolvereboot)
 * [evolve:restart](#evolverestart)
@@ -59,6 +61,22 @@ Note that **this is destructive to the _local_ environment**.
 Syncs database and uploaded files _up_ from local to remote environment. Also supports `:up:db` and `:up:files` variants for more specific needs.
 
 Note that **this is destructive to the _remote_ environment**.
+
+### evolve:db:backup
+
+Intended for internal use by other tasks, creates and (by default) syncs down a zipped SQL backup of the remote database. Can leave said backup on the remote server, given a truthy argument:
+
+```
+bundle exec cap staging evolve:db:backup[1]
+```
+
+### evolve:db:exec
+
+Also intended for internal use, executes the contents of a provided SQL file against the remote database:
+
+```
+bundle exec cap staging evolve:db:exec[/tmp/foo.sql]
+```
 
 ### evolve:teardown
 
