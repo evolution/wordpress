@@ -1,5 +1,11 @@
 # Changelog
 
+- v1.3.5
+    - Added local awstats for remote log analysis ([#96](https://github.com/evolution/wordpress/pull/96))
+    - Fixed full boot partition issues ([#98](https://github.com/evolution/wordpress/pull/98))
+    - Ensured latest wp-cli on reprovision ([#99](https://github.com/evolution/wordpress/pull/99))
+    - Fixed potential git protocal issues ([#100](https://github.com/evolution/wordpress/pull/100))
+    - Revamped CI testing ([#101](https://github.com/evolution/wordpress/pull/101))
 - v1.3.4
     - Fixed functional tests ([#94](https://github.com/evolution/wordpress/pull/94))
     - Customized apache logrotate config ([#95](https://github.com/evolution/wordpress/pull/95))
