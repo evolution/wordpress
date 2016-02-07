@@ -14,6 +14,7 @@
 * [evolve:reboot](#evolvereboot)
 * [evolve:restart](#evolverestart)
 * [evolve:logs:apache:error](#evolvelogsapacheerror)
+* [evolve:logs:apache:sync](#evolvelogsapachesync)
 * [evolve:logs:varnish](#evolvelogsvarnish)
 * [evolve:logs:pound](#evolvelogspound)
 * [evolve:logs:evolution](#evolvelogsevolution)
@@ -97,6 +98,10 @@ Restarts the remote environment's web stack (mysql, apache, varnish, pound, ipta
 Actively tails the Apache error logs; terminate with `ctrl+c`. Also supports `:access` variant (for access logs):
 
 	bundle exec cap staging evolve:apache:access
+
+### evolve:logs:apache:sync
+
+Syncs down and processes apache access logs from remote, with local installation of [AWStats](http://www.awstats.org/).
 
 ### evolve:logs:varnish
 

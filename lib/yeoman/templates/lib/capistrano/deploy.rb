@@ -24,8 +24,6 @@ namespace :deploy do
     end
   end
   after :finished, :launch_browser do
-    require 'launchy'
-
     subdomain = fetch(:stage).to_s
     branch = fetch(:branch).to_s
 
@@ -33,9 +31,6 @@ namespace :deploy do
       subdomain = "#{branch}.staging"
     end
 
-    uri = "http://#{subdomain}.#{fetch(:domain)}/"
-    Launchy.open(uri) do |exception|
-      puts "Failed to open #{uri} because #{exception}"
-    end
+    invoke "evolve:launch_browser", "http://#{subdomain}.#{fetch(:domain)}/"
   end
 end
