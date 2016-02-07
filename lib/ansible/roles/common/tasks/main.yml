@@ -8,6 +8,24 @@
 - name:           New Hostname
   debug:          var=new_hostname
 
+- name:           Fetch kernel purging script
+  get_url:
+    url:          https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py
+    dest:         /tmp/purge-kernels.py
+    mode:         0755
+    force:        yes
+  sudo:           yes
+
+- name:           Purge kernels as necessary
+  command:        /tmp/purge-kernels.py
+  register:       purgekernels_result
+  ignore_errors:  yes
+  sudo:           yes
+  when:           not lookup('env','CI')
+
+- name:           Show purged kernels
+  debug:          var=purgekernels_result
+
 - name:           Update apt cache
   apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 }}"
   sudo:           yes
@@ -34,6 +52,15 @@
 - name:           Configure logrotate for evolution logs
   copy:           src=logrotate dest=/etc/logrotate.d/evolution mode=0644
   sudo:           yes
+
+- name:           Test for git protocol (git://) connectivity
+  command:        curl -v -m 10 http://github.com:9418/
+  register:       git_protocol_test
+  ignore_errors:  true
+
+- name:           Bypass git protocol if necessary
+  command:        git config --global url."https://".insteadOf git://
+  when:           "'connect() timed out' in git_protocol_test.stderr"
 
 - include:        swap.yml
   when:           ansible_swaptotal_mb == 0
