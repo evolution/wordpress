@@ -1,6 +1,6 @@
-language: node_js
-node_js:
-  - "0.10"
+sudo: required
+dist: trusty
+language: generic
 addons:
   hosts:
     - example.com
@@ -8,30 +8,45 @@ addons:
     - production.example.com
     - www.example.com
 before_install:
-  - rvm use 1.9.3
-  - gem install bundler
-  - echo "Install NPM dependencies"
+  # node setup (for yeoman/bower)
+  - nvm install 0.10
+  - node --version
+  - npm --version
+  - nvm --version
   - npm install -g bower
   - npm install
-  - echo "Mock test project"
+  # ruby setup (for capistrano)
+  - rvm use 1.9.3
+  - gem install bundler
+  - ruby --version
+  - rvm --version
+  - gem --version
+  - bundle --version
+  # python setup (for ansible)
+  - sudo pip install ansible==1.9.4
+  - python --version
+  - pip --version
+  - ansible --version
+  # mock up test project, and move to /vagrant for end-user tests
   - $PWD/bin/mock
-  - echo "Move mock project to /vagrant for end-user tests"
   - sudo mv $PWD/temp /vagrant
   - ln -s /vagrant $PWD/temp
-  - echo "Copying local Evolution WordPress as dependency"
+  # copy our local evolution-wordpress as bower dependency
   - rm -rf /vagrant/bower_components/evolution-wordpress
   - cp -RP $PWD /vagrant/bower_components/evolution-wordpress/
-  - echo "Provision server"
+  # invoke local provision (as default user with elevated permissions)
   - sudo cp $PWD/.travis.provision.bin $PWD/bin/provision
   - sudo chmod +x $PWD/bin/provision
   - sudo $PWD/bin/provision
   - sudo chown -Rf $USER:$USER $HOME/.ansible
-  - echo "Mocking vagrant binary"
+  # mock vagrant binary (for parity with local/remote stages)
   - sudo cp $PWD/.travis.vagrant.bin /bin/vagrant
   - sudo chmod +x /bin/vagrant
+  # ensure known ssh fingerprints for remote stages
   - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H www.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H example.com >> $HOME/.ssh/known_hosts
+  # install composer (for phpunit)
   - curl -sS https://getcomposer.org/installer | php
 install:
   - echo "Install Composer dependencies"

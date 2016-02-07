@@ -4,4 +4,3 @@
   sudo:           yes
 
 - include:        suhosin.yml
-  when:           lookup('env','TRAVIS') != 'true'
