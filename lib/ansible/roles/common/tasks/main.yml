@@ -8,6 +8,24 @@
 - name:           New Hostname
   debug:          var=new_hostname
 
+- name:           Fetch kernel purging script
+  get_url:
+    url:          https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py
+    dest:         /tmp/purge-kernels.py
+    mode:         0755
+    force:        yes
+  sudo:           yes
+
+- name:           Purge kernels as necessary
+  command:        /tmp/purge-kernels.py
+  register:       purgekernels_result
+  ignore_errors:  yes
+  sudo:           yes
+  when:           not lookup('env','CI')
+
+- name:           Show purged kernels
+  debug:          var=purgekernels_result
+
 - name:           Update apt cache
   apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 }}"
   sudo:           yes
