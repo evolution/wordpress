@@ -12,4 +12,4 @@ Disallow: /wp/trackback
 Disallow: /wp/xmlrpc.php
 Disallow: ?wptheme=
 
-# Sitemap: http://<%= props.domain %>/sitemap.xml
+# Sitemap: http://<%- props.domain %>/sitemap.xml

@@ -10,12 +10,12 @@ else
 end
 
 # Repository name
-set :application,   "<%= props.name %>"
-set :domain,        "<%= props.domain %>"
+set :application,   "<%- props.name %>"
+set :domain,        "<%- props.domain %>"
 set :deploy_to,     "/var/www/#{fetch(:domain)}/#{fetch(:stage)}/#{fetch(:branch)}"
 set :linked_dirs,   %w{web/wp-content/uploads}
 set :wp_path,       "#{release_path}/web/wp"
-set :www,           <%= props.www ? 'true' : 'false' %>
+set :www,           <%- props.www ? 'true' : 'false' %>
 
 namespace :deploy do
   after :updated, :bower_install do

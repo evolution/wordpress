@@ -1,16 +1,16 @@
 ---
-evolve_version: <%= pkg.version %>
-domain:         <%= props.domain %>
-www:            <%= props.www %>
+evolve_version: <%- pkg.version %>
+domain:         <%- props.domain %>
+www:            <%- props.www %>
 
 monitoring:
-  newrelic:     '<%= props.newrelic %>'
+  newrelic:     '<%- props.newrelic %>'
 
 mysql:
-  name:         <%= props.DB_NAME %>
-  user:         <%= props.DB_USER %>
-  password:     <%= props.DB_PASSWORD %>
-  host:         <%= props.DB_HOST %>
+  name:         <%- props.DB_NAME %>
+  user:         <%- props.DB_USER %>
+  password:     <%- props.DB_PASSWORD %>
+  host:         <%- props.DB_HOST %>
 
 # php__memory_limit:
 
@@ -20,7 +20,7 @@ mysql:
 # apache__max_clients:
 # apache__max_requests_per_child:
 
-mail__postmaster: no-reply@<%= props.domain %>
+mail__postmaster: no-reply@<%- props.domain %>
 
 # iptables__ipv6: 0
 

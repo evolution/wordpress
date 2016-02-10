@@ -55,4 +55,4 @@ backups
 web/wp
 
 # Generated file, don't edit above this line
-<%= gitignoreFile %>
+<%- gitignoreFile %>
