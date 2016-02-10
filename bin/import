@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var fs        = require('fs');
-var fsx       = require('fs-extra');
+var fs        = require('fs-extra');
 var os        = require('os');
 var path      = require('path');
 var cp        = require('child_process');
@@ -9,7 +8,7 @@ var util      = require('util');
 var chalk     = require('chalk');
 var deasync   = require('deasync');
 var inquirer  = require('inquirer');
-var replace   = require("replace");
+var replace   = require('replace');
 var AdmZip    = require('adm-zip');
 
 // Evolution site working directory
@@ -36,7 +35,7 @@ catch(e) {
 
 // extract zip to tmpdir
 var extractedPath = path.join(os.tmpdir(), path.basename(answers.zipfile, '.zip'));
-fsx.emptyDirSync(extractedPath);
+fs.emptyDirSync(extractedPath);
 
 console.log('Extracting', chalk.yellow(answers.zipfile), 'to', chalk.green(extractedPath));
 
@@ -124,16 +123,15 @@ if (searchDomains.length) {
 }
 
 // run sql against db
-var cpExec = deasync(cp.exec);
 var capCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 'wordpress.sql') + ']';
 
 console.log('importing sql via:', chalk.cyan(capCmd));
-cpExec(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit'});
+cp.execSync(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit'});
 
 // list all users via wp-cli
 capCmd = 'bundle exec cap local wp:user:list:--fields=ID,user_login,roles:--format=json';
 console.log('listing users via:', chalk.cyan(capCmd));
-var capOut = cpExec(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+var capOut = cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
 
 // prompt for role of any users lacking one
 var existingUsers = capOut.match(/\s+(\[\{"ID":[^\r\n]+)/);
@@ -162,7 +160,7 @@ if (existingUsers) {
 
       capCmd = 'bundle exec cap local wp:user:add-role:'+user.ID+':'+answers.role;
       console.log('assigning user role via:', chalk.cyan(capCmd));
-      cpExec(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+      cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
     }
   });
 }
@@ -170,18 +168,18 @@ if (existingUsers) {
 // Copying Themes / Plugins / Uploads
 var pluginsPath = path.join(extractedPath, 'plugins');
 console.log('installing plugins from', chalk.cyan(pluginsPath));
-fsx.copySync(pluginsPath, path.join(siteDirectory, 'web', 'wp-content', 'plugins'), {clobber: true});
+fs.copySync(pluginsPath, path.join(siteDirectory, 'web', 'wp-content', 'plugins'), {clobber: true});
 
 var themesPath = path.join(extractedPath, 'themes');
 console.log('installing themes from', chalk.cyan(themesPath));
-fsx.copySync(themesPath, path.join(siteDirectory, 'web', 'wp-content', 'themes'), {clobber: true});
+fs.copySync(themesPath, path.join(siteDirectory, 'web', 'wp-content', 'themes'), {clobber: true});
 
 var uploadsPath = path.join(extractedPath, 'uploads');
 if (manifest.is_multisite) {
   uploadsPath = path.join(uploadsPath, 'sites', manifest.blogid);
 }
 console.log('installing uploads from', chalk.cyan(uploadsPath));
-fsx.copySync(uploadsPath, path.join(siteDirectory, 'web', 'wp-content', 'uploads'), {clobber: true});
+fs.copySync(uploadsPath, path.join(siteDirectory, 'web', 'wp-content', 'uploads'), {clobber: true});
 
 console.log(chalk.green('looks like we\'re done here!'));
 
