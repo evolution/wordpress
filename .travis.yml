@@ -9,7 +9,7 @@ addons:
     - www.example.com
 before_install:
   # node setup (for yeoman/bower)
-  - nvm install 0.10
+  - nvm install 4.0
   - node --version
   - npm --version
   - nvm --version
