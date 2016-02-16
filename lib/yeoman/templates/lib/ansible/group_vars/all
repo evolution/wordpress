@@ -1,5 +1,6 @@
 ---
 evolve_version: <%- pkg.version %>
+wp_version:     <%- props.wordpress %>
 domain:         <%- props.domain %>
 www:            <%- props.www %>
 

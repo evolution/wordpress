@@ -1,0 +1,91 @@
+#!/usr/bin/env node
+
+'use strict'
+
+var fs        = require('fs-extra');
+var gh        = require('github-download');
+var inWords   = require('in-words').en;
+var path      = require('path');
+var util      = require('util');
+
+console.log('Evolution WordPress - npm `postinstall` Script\n');
+
+// our point of reference on the filesystem
+var siteDir = process.cwd();
+
+// wordpress to install, by argument or groupvar
+var wpVersion = process.argv[2];
+if (!wpVersion) {
+  var groupVars = fs.readFileSync(path.join(siteDir, 'lib/ansible/group_vars/all')).toString();
+  var matched = groupVars.match(/^wp_version\s*:\s*['"]?([\d.]+)/m);
+
+  if (!matched) {
+    throw new Error('Couldn\'t find wordpress version to install');
+  }
+
+  wpVersion = matched[1];
+}
+
+// ensure fresh install
+var installDir = path.join(siteDir, 'web/wp');
+fs.removeSync(installDir);
+
+// install from github
+console.log('Downloading wordpress `%s` to `%s`...', wpVersion, installDir);
+gh({user: 'wordpress', repo: 'wordpress', ref: wpVersion}, installDir)
+  .on('error', function (err) {
+    throw err;
+  })
+  .on('end', function () {
+    var toThemeDir   = path.join(siteDir, 'web/wp-content/themes');
+    var fromThemeDir = path.join(siteDir, 'web/wp/wp-content/themes');
+    var latestTheme  = null;
+    var themeExists  = function (parents, name) {
+      var exists = false;
+      parents.forEach(function (directory) {
+        if (fs.existsSync(path.join(directory, name))) {
+          exists = true;
+        }
+      });
+      return exists;
+    };
+
+    fs.ensureDirSync(toThemeDir);
+
+    for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
+      var testName = inWords(testYear.toString().substr(0, 2))
+                   + inWords(testYear.toString().substr(2, 2))
+      ;
+
+      if (themeExists([toThemeDir, fromThemeDir], testName)) {
+        latestTheme = testName;
+        break;
+      }
+      else {
+        console.log('* No theme ' + testName);
+      }
+    }
+
+    if (latestTheme === null) {
+      if (themeExists([fromThemeDir], 'default')) {
+        latestTheme = 'default';
+      }
+      else {
+        throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+      }
+    }
+
+    if (themeExists([toThemeDir], latestTheme)) {
+      console.log('* Existing core theme ' + latestTheme);
+    }
+    else {
+      console.log('* Found theme ' + latestTheme);
+
+      var fromTheme = path.join(fromThemeDir, latestTheme);
+      var toTheme   = path.join(toThemeDir, latestTheme);
+
+      console.log('* Moving theme `%s` to `%s`...', path.relative(siteDir, fromTheme), path.relative(siteDir, toTheme));
+      fs.renameSync(fromTheme, toTheme);
+    }
+  })
+;
