@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.6
+    - Added ESI cache ttl support ([#102](https://github.com/evolution/wordpress/pull/102))
 - v1.3.5
     - Added local awstats for remote log analysis ([#96](https://github.com/evolution/wordpress/pull/96))
     - Fixed full boot partition issues ([#98](https://github.com/evolution/wordpress/pull/98))
