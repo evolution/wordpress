@@ -1,15 +1,5 @@
 ---
-- name:           Create custom apache prefork config (2.2)
-  template:       src=prefork.conf dest=/etc/apache2/prefork.conf mode=0644
-  when:           apache_version.stdout == '2.2'
-  sudo:           yes
-
-- name:           Remove default apache prefork config (2.2)
-  replace:        dest=/etc/apache2/apache2.conf backup=yes regexp='^(?:#[^\n]+\n)*<IfModule mpm_prefork_module>[^<]+?<\/IfModule>' replace='Include prefork.conf' validate='/usr/sbin/apache2ctl -f %s -t'
-  when:           apache_version.stdout == '2.2'
-  sudo:           yes
-
-- name:           Override apache prefork module config (2.4)
+- name:           Override apache prefork module config
   template:       src=prefork.conf dest=/etc/apache2/mods-available/mpm_prefork.conf backup=yes mode=0644
   when:           apache_version.stdout == '2.4'
   sudo:           yes

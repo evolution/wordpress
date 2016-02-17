@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
-IMPORTER_PATH="$( dirname "$0" )/../bower_components/evolution-wordpress"
+IMPORTER_PATH="$( dirname "$0" )/../node_modules/evolution-wordpress"
 IMPORTER_SCRIPT="$IMPORTER_PATH/bin/import"
 
 chmod +x "$IMPORTER_SCRIPT"
-
-(cd "$IMPORTER_PATH"; npm install)
 
 VAGRANT_STATUS=$(vagrant status)
 

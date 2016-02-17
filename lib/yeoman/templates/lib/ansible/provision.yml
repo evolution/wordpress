@@ -10,7 +10,7 @@
     - apache            # (Required) Web server (Soon: Nginx)
     - mysql             # (Required) Database server (Soon: Maria)
     - php               # (Required) PHP 5.3
-    - node              # (Required) Tools for deployment (e.g. `bower`)
+    - node              # (Required) Tools for deployment + dependencies (e.g. `npm`)
     - wp-cli            # (Required) CLI for managing WordPress
 
     # Optional Features

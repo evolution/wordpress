@@ -21,7 +21,7 @@ If you opt for a *public* project, the generator will configure your [`.gitignor
 
 **This is ideal if you plan to open-source your site on a free public repository (we recommend Github for this).**
 
-If you opt for *private*, it will configure your [`bower.json`](https://github.com/bower/bower.json-spec#private) to prevent publication through Bower, but *your keys and certificates will be versioned*.
+If you opt for *private*, it will configure your [`package.json`](https://docs.npmjs.com/files/package.json) to prevent publication through npm, but *your keys and certificates will be versioned*.
 
 **In this case, you should use a paid [private repository on Github](https://help.github.com/articles/making-a-public-repository-private/), or a free [private repository on Gitlab](http://doc.gitlab.com/ce/gitlab-basics/create-project.html).**
 
@@ -89,7 +89,7 @@ This installs some command line utilities that are useful for monitoring process
 
 ### Wordpress version
 
-This determines which version of Wordpress will be fetched from Github and installed as a bower dependency. **The default for this is the latest tagged version.**
+This determines which version of Wordpress will be fetched and installed from Github. **The default for this is the latest tagged version.**
 
 ### Wordpress table prefix
 

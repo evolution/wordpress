@@ -2,11 +2,13 @@
 
 'use strict'
 
-var fs        = require('fs-extra');
-var gh        = require('github-download');
-var inWords   = require('in-words').en;
-var path      = require('path');
-var util      = require('util');
+var AdmZip  = require('adm-zip');
+var fs      = require('fs-extra');
+var glob    = require('glob');
+var inWords = require('in-words').en;
+var path    = require('path');
+var request = require('request');
+var util    = require('util');
 
 console.log('Evolution WordPress - npm `postinstall` Script\n');
 
@@ -32,62 +34,80 @@ fs.removeSync(installDir);
 
 // install from github
 console.log('Downloading wordpress `%s` to `%s`...', wpVersion, installDir);
-gh({user: 'wordpress', repo: 'wordpress', ref: wpVersion}, installDir)
-  .on('error', function (err) {
-    throw err;
-  })
-  .on('end', function () {
-    var toThemeDir   = path.join(siteDir, 'web/wp-content/themes');
-    var fromThemeDir = path.join(siteDir, 'web/wp/wp-content/themes');
-    var latestTheme  = null;
-    var themeExists  = function (parents, name) {
-      var exists = false;
-      parents.forEach(function (directory) {
-        try {
-          if (fs.statSync(path.join(directory, name)).isDirectory()) {
-            exists = true;
-          }
-        } catch (e) {};
-      });
-      return exists;
-    };
+extract('wordpress', 'wordpress', wpVersion, installDir, function (err) {
+  if (err) throw err;
 
-    fs.ensureDirSync(toThemeDir);
+  var toThemeDir   = path.join(siteDir, 'web/wp-content/themes');
+  var fromThemeDir = path.join(siteDir, 'web/wp/wp-content/themes');
+  var latestTheme  = null;
+  var themeExists  = function (parents, name) {
+    var exists = false;
+    parents.forEach(function (directory) {
+      try {
+        if (fs.statSync(path.join(directory, name)).isDirectory()) {
+          exists = true;
+        }
+      } catch (e) {};
+    });
+    return exists;
+  };
 
-    for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
-      var testName = inWords(testYear.toString().substr(0, 2))
-                   + inWords(testYear.toString().substr(2, 2))
-      ;
+  fs.ensureDirSync(toThemeDir);
 
-      if (themeExists([toThemeDir, fromThemeDir], testName)) {
-        latestTheme = testName;
-        break;
-      }
-      else {
-        console.log('* No theme ' + testName);
-      }
-    }
+  for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
+    var testName = inWords(testYear.toString().substr(0, 2))
+                 + inWords(testYear.toString().substr(2, 2))
+    ;
 
-    if (latestTheme === null) {
-      if (themeExists([fromThemeDir], 'default')) {
-        latestTheme = 'default';
-      }
-      else {
-        throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
-      }
-    }
-
-    if (themeExists([toThemeDir], latestTheme)) {
-      console.log('* Existing core theme ' + latestTheme);
+    if (themeExists([toThemeDir, fromThemeDir], testName)) {
+      latestTheme = testName;
+      break;
     }
     else {
-      console.log('* Found theme ' + latestTheme);
-
-      var fromTheme = path.join(fromThemeDir, latestTheme);
-      var toTheme   = path.join(toThemeDir, latestTheme);
-
-      console.log('* Moving theme `%s` to `%s`...', path.relative(siteDir, fromTheme), path.relative(siteDir, toTheme));
-      fs.renameSync(fromTheme, toTheme);
+      console.log('* No theme ' + testName);
     }
+  }
+
+  if (latestTheme === null) {
+    if (themeExists([fromThemeDir], 'default')) {
+      latestTheme = 'default';
+    }
+    else {
+      throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+    }
+  }
+
+  if (themeExists([toThemeDir], latestTheme)) {
+    console.log('* Existing core theme ' + latestTheme);
+  }
+  else {
+    console.log('* Found theme ' + latestTheme);
+
+    var fromTheme = path.join(fromThemeDir, latestTheme);
+    var toTheme   = path.join(toThemeDir, latestTheme);
+
+    console.log('* Moving theme `%s` to `%s`...', path.relative(siteDir, fromTheme), path.relative(siteDir, toTheme));
+    fs.renameSync(fromTheme, toTheme);
+  }
+});
+
+function extract(username, repo, version, directory, cb) {
+  var zipName = path.join(siteDir, [username, repo, version].join('-'));
+  request({
+    url: 'https://github.com/' + username + '/' + repo + '/archive/' + version + '.zip',
+    headers: { 'user-agent': 'https://github.com/request/request' }
   })
-;
+    .on('error', function (err) { cb(err); })
+    .pipe(fs.createWriteStream(zipName+'.zip'))
+    .on('close', function () {
+      var zip = new AdmZip(zipName+'.zip');
+      zip.extractAllTo(zipName, true);
+      fs.unlinkSync(zipName+'.zip');
+
+      var entryDir = glob.sync(path.join(zipName, '*/'))[0];
+      fs.copySync(entryDir, directory, {clobber:true});
+      fs.removeSync(zipName);
+
+      cb();
+    });
+};

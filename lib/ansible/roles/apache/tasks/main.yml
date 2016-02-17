@@ -26,27 +26,15 @@
   copy:           src=logrotate-apache dest=/etc/logrotate.d/apache2 owner=root group=root mode=644
   sudo:           yes
 
-- name:           Configure Apache canonical server name (2.2)
-  template:       src=canonical dest=/etc/apache2/conf.d/canonical-servername.conf mode=0644
-  notify:         restart apache
-  when:           apache_version.stdout == '2.2'
-  sudo:           true
-
-- name:           Configure Apache canonical server name (2.4)
+- name:           Configure Apache canonical server name
   template:       src=canonical dest=/etc/apache2/conf-available/canonical-servername.conf mode=0644
   when:           apache_version.stdout == '2.4'
   sudo:           true
 
-- name:           Enable canonical config (2.4)
+- name:           Enable canonical config
   command:        a2enconf canonical-servername
   notify:         restart apache
   when:           apache_version.stdout == '2.4'
-  sudo:           yes
-
-- name:           Ensure Apache `NameVirtualHost` is 80 (2.2)
-  lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:80' dest=/etc/apache2/ports.conf backup=yes
-  notify:         restart apache
-  when:           apache_version.stdout == '2.2'
   sudo:           yes
 
 - name:           Ensure Apache `Listen` is 80

@@ -1,13 +1,17 @@
 ---
-- name:           Add Node apt-repository
-  apt_repository: repo='ppa:chris-lea/node.js' state=present update_cache=yes
+- name:           Remove old node repository if necessary
+  apt_repository: repo='ppa:chris-lea/node.js' state=absent
+  sudo:           yes
+
+- name:           Add Nodesource apt key
+  apt_key:        url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+  sudo:           yes
+
+- name:           Add Nodesource 4.x repos
+  apt_repository: repo={{item}} state=present update_cache=yes
+  with_items:     node_repos
   sudo:           yes
 
 - name:           Install node
   apt:            pkg=nodejs state=present
-  sudo:           yes
-
-- name:           Install global node modules
-  command:        npm install -g {{ item }}
-  with_items:     node_modules
   sudo:           yes

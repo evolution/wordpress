@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "evolution-wordpress",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "Libraries for a multi-staged WordPress workflow with Vagrant",
   "main": "lib/yeoman/index.js",
   "engines": {
@@ -11,7 +11,6 @@
     "adm-zip": "^0.4.7",
     "chalk": "^1.1.1",
     "fs-extra": "^0.26.4",
-    "github-download": "^0.4.0",
     "glob": "^6.0.4",
     "in-words": "^0.2.0",
     "inquirer": "^0.11.2",
