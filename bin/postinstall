@@ -43,9 +43,11 @@ gh({user: 'wordpress', repo: 'wordpress', ref: wpVersion}, installDir)
     var themeExists  = function (parents, name) {
       var exists = false;
       parents.forEach(function (directory) {
-        if (fs.existsSync(path.join(directory, name))) {
-          exists = true;
-        }
+        try {
+          if (fs.statSync(path.join(directory, name)).isDirectory()) {
+            exists = true;
+          }
+        } catch (e) {};
       });
       return exists;
     };

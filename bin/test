@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict'
+
 var glob  = require('glob');
 var Mocha = require('mocha');
 var path  = require('path');
