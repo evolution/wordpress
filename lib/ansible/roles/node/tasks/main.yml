@@ -3,6 +3,11 @@
   apt_repository: repo='ppa:chris-lea/node.js' state=absent
   sudo:           yes
 
+- name:           Ensure removal of old node source lists
+  shell:          rm -f /etc/apt/sources.list.d/chris-lea-node_js-*.list
+  ignore_errors:  true
+  sudo:           yes
+
 - name:           Add Nodesource apt key
   apt_key:        url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
   sudo:           yes
