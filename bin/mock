@@ -22,9 +22,12 @@ helpers.testDirectory(outputDir, function(err) {
     throw err;
   }
 
+  var branch = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version.replace(/^([\d.]+).*?$/, '$1');
+
   var prep = [
     'git clone git@github.com:evolution/wordpress-example.git ' + outputDir,
     'cd ' + outputDir,
+    'git checkout ' + branch,
     'git rm -rf .',
   ];
 
@@ -42,7 +45,7 @@ helpers.testDirectory(outputDir, function(err) {
     ]);
 
     app.options['skip-install'] = true;
-    app.options['dev'] = true;
+    app.options['dev'] = !(process.env.CI || process.env.TRAVIS);
 
     helpers.mockPrompt(app, {
       private:      false,
@@ -94,6 +97,11 @@ helpers.testDirectory(outputDir, function(err) {
           [
             '# Mount library for testing',
             '    box.vm.synced_folder "../", "/wordpress", :nfs => true',
+            '',
+            '    # Symlink deployment paths for testing',
+            '    box.vm.provision "shell", inline: "mkdir -p /var/www/example.com/production/' + branch + '"',
+            '    box.vm.provision "shell", inline: "ln -s /var/www/example.com/production/' + branch + ' /var/www/example.com/production/master"',
+            '    box.vm.provision "shell", inline: "chmod -R 0777 /var/www/example.com/production"',
             '',
             '    $1'
           ].join('\n')
