@@ -82,7 +82,7 @@ helpers.testDirectory(outputDir, function(err) {
         '# Added for testing purposes',
         'set :repo_url,      ' + (
           isCI
-          ? '"file:///vagrant/.git"'
+          ? '"file://' + outputDir + '/.git"'
           : '"https://github.com/evolution/wordpress-example.git"'
         ),
         '',
