@@ -20,19 +20,23 @@ helpers.testDirectory(outputDir, function(err) {
     throw err;
   }
 
-  var branch = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version.replace(/^([\d.]+).*?$/, '$1');
+  console.log('Mocking in `%s`', outputDir);
+  var isCI = (process.env.CI || process.env.TRAVIS);
 
-  var prep = [
-    'git clone git@github.com:evolution/wordpress-example.git ' + outputDir,
-    'cd ' + outputDir,
-    'git checkout ' + branch,
-    'git rm -rf .',
-  ];
-
-  if (process.env.CI || process.env.TRAVIS) {
-    prep = ['echo "Detected CI.."'];
+  if (isCI) {
+    var prep = [
+      'git init ' + outputDir,
+    ];
+  }
+  else {
+    var prep = [
+      'git clone git@github.com:evolution/wordpress-example.git ' + outputDir,
+      'cd ' + outputDir,
+      'git rm -rf .',
+    ];
   }
 
+  console.log('Executing `%s`', prep.join(' && '));
   exec(prep.join(' && '), function(err, stdout, stderr) {
     if (err) {
       throw err;
@@ -43,7 +47,7 @@ helpers.testDirectory(outputDir, function(err) {
     ]);
 
     app.options['skip-install'] = true;
-    app.options['dev'] = !(process.env.CI || process.env.TRAVIS);
+    app.options['dev'] = !isCI;
 
     helpers.mockPrompt(app, {
       private:      false,
@@ -76,7 +80,11 @@ helpers.testDirectory(outputDir, function(err) {
       fs.appendFileSync(outputDir + '/lib/capistrano/deploy.rb', [
         '',
         '# Added for testing purposes',
-        'set :repo_url,      "https://github.com/evolution/wordpress-example.git"',
+        'set :repo_url,      ' + (
+          isCI
+          ? '"file:///vagrant/.git"'
+          : '"https://github.com/evolution/wordpress-example.git"'
+        ),
         '',
       ].join('\n'));
 
@@ -96,19 +104,26 @@ helpers.testDirectory(outputDir, function(err) {
             '# Mount library for testing',
             '    box.vm.synced_folder "../", "/wordpress", :nfs => true',
             '',
-            '    # Symlink deployment paths for testing',
-            '    box.vm.provision "shell", inline: "mkdir -p /var/www/example.com/production/' + branch + '"',
-            '    box.vm.provision "shell", inline: "ln -s /var/www/example.com/production/' + branch + ' /var/www/example.com/production/master"',
-            '    box.vm.provision "shell", inline: "chmod -R 0777 /var/www/example.com/production"',
-            '',
-            '    $1'
+            '    $1',
           ].join('\n')
         )
       ;
 
       fs.writeFileSync(outputDir + '/Vagrantfile', vagrantFile);
 
-      exec('git add .', { cwd: outputDir });
+      var wrap = [
+        'git add .',
+      ];
+
+      if (isCI) {
+        Array.prototype.push.apply(wrap, [
+          'git commit -m "Something to deploy"',
+          'git remote add origin ' + outputDir + '/.git',
+        ]);
+      }
+
+      console.log('Executing `%s`', wrap.join(' && '));
+      exec(wrap.join(' && '), { cwd: outputDir });
     });
   });
 });
