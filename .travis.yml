@@ -31,8 +31,8 @@ before_install:
   - sudo mv $PWD/temp /vagrant
   - ln -s /vagrant $PWD/temp
   # copy our local evolution-wordpress as npm dependency
-  - mkdir -p /vagrant/node_modules/evolution-wordpress
-  - cp -RP $PWD /vagrant/node_modules/evolution-wordpress/
+  - mkdir -p /vagrant/node_modules
+  - cp -RP $PWD /vagrant/node_modules/evolution-wordpress
   - ls -al /vagrant/node_modules/evolution-wordpress/
   - ls -al /vagrant/node_modules/evolution-wordpress/lib/ansible/roles
   # invoke local provision (as default user with elevated permissions)
