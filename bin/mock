@@ -120,7 +120,7 @@ helpers.testDirectory(outputDir, function(err) {
       if (isCI) {
         Array.prototype.push.apply(wrap, [
           'git commit -m "Something to deploy"',
-          'git remote add origin ' + outputDir + '/.git',
+          'git remote add origin /vagrant/.git',
         ]);
       }
 
