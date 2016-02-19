@@ -32,6 +32,7 @@ before_install:
   - ln -s /vagrant $PWD/temp
   # copy our local evolution-wordpress as npm dependency
   - rm -rf /vagrant/node_modules/evolution-wordpress
+  - mkdir -p /vagrant/node_modules/evolution-wordpress
   - cp -RP $PWD /vagrant/node_modules/evolution-wordpress/
   # invoke local provision (as default user with elevated permissions)
   - sudo cp $PWD/.travis.provision.bin $PWD/bin/provision
