@@ -11,7 +11,7 @@
   args:
     name:       "wpcron for {{stage}}"
     user:       "{{item.value.user}}"
-    job:        "cd {{item.value.path}} && /usr/local/bin/wp core is-installed --path=$PWD --url='{{item.value.url}}' && /usr/local/bin/wp cron event run --all --quiet --path=$PWD --url='{{item.value.url}}'"
+    job:        "cd {{item.value.path}} && /usr/local/bin/wp core is-installed --path=$PWD --url='http://{{stage}}.{{domain}}/' && /usr/local/bin/wp cron event run --all --quiet --path=$PWD --url='http://{{stage}}.{{domain}}/'"
   with_dict:    wp_cron
   when:         item.key == stage
 

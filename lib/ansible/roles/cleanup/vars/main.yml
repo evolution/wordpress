@@ -3,12 +3,9 @@ wp_cron:
   local:
     user: vagrant
     path: /vagrant/web/wp
-    url: "http://{{stage}}.{{domain}}/"
   staging:
     user: deploy
     path: "/var/www/{{domain}}/staging/*/current/wp"
-    url: "http://{{stage}}.{{domain}}/"
   production:
     user: deploy
     path: "/var/www/{{domain}}/production/master/current/wp"
-    url: "http://{{stage}}.{{domain}}/"
