@@ -10,9 +10,9 @@
   cron:
   args:
     name:       "wpcron for {{stage}}"
-    user:       "{{item.value.user}}"
-    job:        "cd {{item.value.path}} && /usr/local/bin/wp core is-installed --path=$PWD --url='http://{{stage}}.{{domain}}/' && /usr/local/bin/wp cron event run --all --quiet --path=$PWD --url='http://{{stage}}.{{domain}}/'"
-  with_dict:    wp_cron
+    user:       deploy
+    job:        "cd {{item.value}} && /usr/local/bin/wp core is-installed --path=$PWD --url='http://{{stage}}.{{domain}}/' && /usr/local/bin/wp cron event run --all --quiet --path=$PWD --url='http://{{stage}}.{{domain}}/'"
+  with_dict:    wp_cron_path
   when:         item.key == stage
 
 - name:         Generate init.d for installed evolution services
