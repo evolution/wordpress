@@ -1,0 +1,5 @@
+---
+wp_cron_path:
+  local: /vagrant/web/wp
+  staging: "/var/www/{{domain}}/staging/*/current/wp"
+  production: "/var/www/{{domain}}/production/master/current/wp"

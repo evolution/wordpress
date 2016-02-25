@@ -6,6 +6,16 @@
     removes:    /etc/cron.daily/logrotate
   sudo:         yes
 
+- name:         Set up wpcron via user-level crontab
+  cron:
+  args:
+    name:       "wpcron for {{stage}}"
+    user:       deploy
+    job:        "cd {{item.value}} && /usr/local/bin/wp core is-installed --path=$PWD --url='http://{{stage}}.{{domain}}/' && /usr/local/bin/wp cron event run --all --quiet --path=$PWD --url='http://{{stage}}.{{domain}}/'"
+  with_dict:    wp_cron_path
+  when:         item.key == stage
+  sudo:         yes
+
 - name:         Generate init.d for installed evolution services
   template:     src=evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
   sudo:         yes
