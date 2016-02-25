@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.3.7
+    - Implemented WPcron via system crontab ([#105](https://github.com/evolution/wordpress/pull/105))
+    - Updated ansible 2 support ([#106](https://github.com/evolution/wordpress/pull/106))
 - v1.3.6
     - Added ESI cache ttl support ([#102](https://github.com/evolution/wordpress/pull/102))
 - v1.3.5
