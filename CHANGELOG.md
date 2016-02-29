@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.8
+    - Bug fixes for import script, alongside Cambrian [v0.3.0](https://github.com/evolution/wordpress-plugin-cambrian/releases/tag/v0.3.0) ([#107](https://github.com/evolution/wordpress/pull/107))
 - v1.3.7
     - Implemented WPcron via system crontab ([#105](https://github.com/evolution/wordpress/pull/105))
     - Updated ansible 2 support ([#106](https://github.com/evolution/wordpress/pull/106))
