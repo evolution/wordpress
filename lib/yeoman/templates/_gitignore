@@ -53,6 +53,7 @@ bower_components
 node_modules
 backups
 web/wp
+lib/ansible/roles
 
 # Generated file, don't edit above this line
 <%= gitignoreFile %>
