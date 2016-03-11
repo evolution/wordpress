@@ -1,3 +1,4 @@
+docker/virtualhost.conf
 node_modules/
 temp/
 test/temp/
