@@ -13,7 +13,7 @@ require_once(dirname(__FILE__) . '/../Evolution.php');
   .replace("'database_name_here'","Evolution::getDbName('" + props.DB_NAME + "')")
   .replace('username_here',       props.DB_USER)
   .replace('password_here',       props.DB_PASSWORD)
-  .replace('localhost',           props.DB_HOST)
+  .replace("'localhost'",         "Evolution::getDbHost('" + props.DB_HOST + "')")
 
   // Replace WP_DEBUG
   .replace(/define\('WP_DEBUG'.+\);/, "define('WP_DEBUG', Evolution::getEnv() === 'local');")
