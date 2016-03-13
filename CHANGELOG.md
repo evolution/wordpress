@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.3.9
+    - Added maintenance and upgrade documentation
+    - Added Datadog monitoring ([#108](https://github.com/evolution/wordpress/pull/108))
 - v1.3.8
     - Bug fixes for import script, alongside Cambrian [v0.3.0](https://github.com/evolution/wordpress-plugin-cambrian/releases/tag/v0.3.0) ([#107](https://github.com/evolution/wordpress/pull/107))
 - v1.3.7
