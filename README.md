@@ -54,6 +54,8 @@ npm install -g yo generator-evolve
 * [Generating a new site](./docs/TUTORIAL-NEW.md)
 * [Bringing up an existing Evolution site](./docs/TUTORIAL-CLONE.md)
 * [Regenerating an existing Evolution site](./docs/TUTORIAL-UPGRADE.md)
+* [Rebuilding an existing Evolution server](./docs/TUTORIAL-MOVE.md)
+* [Upgrading from an existing Genesis site](./docs/UPGRADE-FAQ.md)
 * [Importing a non Evolution site](./docs/TUTORIAL-IMPORT.md)
 
 ## Managing Remote Environments

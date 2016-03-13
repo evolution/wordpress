@@ -4,5 +4,5 @@
 > Powered by [Evolution WordPress][evolution-wordpress] *v<%- pkg.version %>*
 
 <%- readmeFile %>
-[<%- props.domain %>]: http://<%- props.domain %>/
+[<%- props.domain %>]: http://<%- props.www ? 'www.' : '' %><%- props.domain %>/
 [evolution-wordpress]: https://github.com/evolution/wordpress/

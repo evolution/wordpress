@@ -10,6 +10,12 @@ namespace :evolve do
         end
 
         ansible_path = Dir.pwd + "/lib/ansible"
+
+        galaxy_reqs = "#{ansible_path}/galaxy.yml"
+        if File.exists?(galaxy_reqs)
+          system("ansible-galaxy install -r #{galaxy_reqs} --force")
+        end
+
         play = "ansible-playbook -e stage=#{fetch(:stage)}"
 
         success = ansible_execute("#{play} --user=#{fetch(:user)} #{ansible_path}/provision.yml")

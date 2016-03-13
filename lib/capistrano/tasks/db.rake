@@ -121,6 +121,7 @@ namespace :evolve do
       begin
         raise "Missing sql file!" if args[:sql_file].nil?
         raise "Given sql file does not exist: #{args[:sql_file]}" unless File.exist?(args[:sql_file])
+        sql_size = File.size(args[:sql_file])
 
         invoke "evolve:confirm", "You are about to execute a sql file against \"#{fetch(:stage)}\" database!"
 
@@ -128,8 +129,16 @@ namespace :evolve do
           remote_sql_file = "/tmp/" + DateTime.now.strftime("wpe-exec.%Y-%m-%d.%H%M%S.sql")
           upload! args[:sql_file], remote_sql_file
 
-          execute :mysql, "-uroot -D \"#{fetch(:wp_config)['name']}_#{fetch(:stage)}\" < #{remote_sql_file}"
+          # fetch unmodified max_allowed_packet, then crank it up for import
+          original_map = capture(:mysql, '-uroot', '-NBe', '"SELECT @@GLOBAL.max_allowed_packet"')
+          execute :mysql, '-uroot', '-NBe', "\"SET @@GLOBAL.max_allowed_packet=#{sql_size}\""
+
+          # import sql file, then delete it
+          execute :mysql, '-uroot', "-D \"#{fetch(:wp_config)['name']}_#{fetch(:stage)}\"", "< #{remote_sql_file}"
           execute :rm, remote_sql_file
+
+          # reset max_allowed_packet
+          execute :mysql, '-uroot', '-NBe', "'SET @@GLOBAL.max_allowed_packet=#{original_map}'"
         end
 
         success=true

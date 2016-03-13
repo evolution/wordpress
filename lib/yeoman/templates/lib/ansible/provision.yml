@@ -17,6 +17,7 @@
     <%- props.ssl ? '-' : '#' %> pound             # (Optional) SSL support & decryption<% props.roles.map(function(role) { %>
     <%- role.checked ? '-' : '#' %> <%- role.value %><% }) %>
 <% if (props.newrelic) { %>    - newrelic          # (Optional) New Relic application/server monitoring
+<% } %><% if (props.datadog) { %>    - { role: Datadog.datadog, sudo: yes, when: stage == 'production' } # (Optional) Datadog monitoring support
 <% } %>    # /Optional Features
 
     - cleanup           # (Required) Generate init.d for installed evolution services

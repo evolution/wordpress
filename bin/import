@@ -128,12 +128,12 @@ if (searchDomains.length) {
 var capCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 'wordpress.sql') + ']';
 
 console.log('importing sql via:', chalk.cyan(capCmd));
-cp.execSync(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit'});
+cp.execSync(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit', maxBuffer: 1024*1024});
 
 // list all users via wp-cli
 capCmd = 'bundle exec cap local wp:user:list:--fields=ID,user_login,roles:--format=json';
 console.log('listing users via:', chalk.cyan(capCmd));
-var capOut = cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+var capOut = cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit', maxBuffer: 1024*1024});
 
 // prompt for role of any users lacking one
 var existingUsers = capOut.match(/\s+(\[\{"ID":[^\r\n]+)/);
