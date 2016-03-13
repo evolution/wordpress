@@ -12,6 +12,8 @@ mysql:
   password:     <%= props.DB_PASSWORD %>
   host:         <%= props.DB_HOST %>
 
+<% if (props.datadog) { %>datadog_api_key: '<%= props.datadog %>'<% } %>
+
 # php__memory_limit:
 
 # apache__start_servers:
