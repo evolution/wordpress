@@ -13,7 +13,9 @@ namespace :evolve do
 
         galaxy_reqs = "#{ansible_path}/galaxy.yml"
         if File.exists?(galaxy_reqs)
-          system("ansible-galaxy install -r #{galaxy_reqs} --force")
+          if File.size(galaxy_reqs) > 3
+            system("ansible-galaxy install -r #{galaxy_reqs} --force")
+          end
         end
 
         play = "ansible-playbook -e stage=#{fetch(:stage)}"
