@@ -13,7 +13,7 @@ namespace :evolve do
 
         galaxy_reqs = "#{ansible_path}/galaxy.yml"
         if File.exists?(galaxy_reqs)
-          if File.size(galaxy_reqs) > 3
+          unless File.read(galaxy_reqs).strip.empty?
             system("ansible-galaxy install -r #{galaxy_reqs} --force")
           end
         end
