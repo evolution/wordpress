@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.10
+    - Fixed bug with ansible-galaxy and empty roles file ([#112](https://github.com/evolution/wordpress/pull/112))
 - v1.3.9
     - Added maintenance and upgrade documentation
     - Added Datadog monitoring ([#108](https://github.com/evolution/wordpress/pull/108))
