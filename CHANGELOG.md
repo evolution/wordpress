@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.11
+    - Bypassed ansible get_url SNI issue ([#114](https://github.com/evolution/wordpress/pull/114))
 - v1.3.10
     - Fixed bug with ansible-galaxy and empty roles file ([#112](https://github.com/evolution/wordpress/pull/112))
 - v1.3.9
