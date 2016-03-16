@@ -1,7 +1,7 @@
-- name:       Install wp-cli
-  get_url:
-    url:      https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    dest:     /usr/local/bin/wp
-    mode:     0755
-    force:    yes
-  sudo:       true
+- name:       Fetch latest wp-cli
+  command:    wget -N -O /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  sudo:       yes
+
+- name:       Ensure wp-cli is executable
+  file:       path=/usr/local/bin/wp state=file mode=0755
+  sudo:       yes
