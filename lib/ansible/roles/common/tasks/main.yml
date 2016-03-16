@@ -9,11 +9,11 @@
   debug:          var=new_hostname
 
 - name:           Fetch kernel purging script
-  get_url:
-    url:          https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py
-    dest:         /tmp/purge-kernels.py
-    mode:         0755
-    force:        yes
+  command:        wget -N -O /tmp/purge-kernels.py https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py
+  sudo:           yes
+
+- name:           Ensure script is executable
+  file:           path=/tmp/purge-kernels.py state=file mode=0755
   sudo:           yes
 
 - name:           Purge kernels as necessary
