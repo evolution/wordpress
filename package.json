@@ -14,7 +14,7 @@
     "deasync": "^0.1.0",
     "inquirer": "^0.8.5",
     "replace": "^0.3.0",
-    "adm-zip": "^0.4.7",
+    "yauzl": "^2.5.0",
     "glob": "^4.0.4"
   },
   "devDependencies": {
