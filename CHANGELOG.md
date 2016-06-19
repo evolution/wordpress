@@ -1,5 +1,9 @@
 # Changelog
 
+- v1.3.12
+    - Replaced zip lib and added known host checks in importer ([#122](https://github.com/evolution/wordpress/pull/122))
+    - Use google public dns nameservers ([#118](https://github.com/evolution/wordpress/pull/118))
+    - Documented datadog generator prompt ([#123](https://github.com/evolution/wordpress/pull/123))
 - v1.3.11
     - Bypassed ansible get_url SNI issue ([#114](https://github.com/evolution/wordpress/pull/114))
 - v1.3.10
