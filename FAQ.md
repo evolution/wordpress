@@ -55,3 +55,14 @@ The authenticity of host 'local.mytestsite.net (192.168.12.345)' can't be establ
 RSA key fingerprint is bd:ae:df:28:36:37:0b:6c:3c:60:57:09:2b:af:5f:5d.
 Are you sure you want to continue connecting (yes/no)? 
 ```
+
+### SSH Error "unix_listener...too long for Unix domain socket"
+
+This is a [known issue](https://github.com/ansible/ansible/issues/11536#issuecomment-153030743) with openssh and ansible, evidently usually seen on OSX El Capitan.
+
+You can work around this by changing the following in your ansible config:
+
+```
+[ssh_connection]
+control_path = %(directory)s/%%h-%%r
+```
