@@ -9,5 +9,5 @@
 
 - name:           Install global node modules
   command:        npm install -g {{ item }}
-  with_items:     node_modules
+  with_items:     "{{ node_modules }}"
   sudo:           yes

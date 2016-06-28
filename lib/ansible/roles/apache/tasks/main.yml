@@ -1,18 +1,18 @@
 ---
 - name:           Install Apache packages
   apt:            pkg={{ item }} state=present
-  with_items:     apache_packages
+  with_items:     "{{ apache_packages }}"
   sudo:           yes
 
 - name:           Enable Apache modules
   apache2_module: name={{ item }} state=present
-  with_items:     apache_modules
+  with_items:     "{{ apache_modules }}"
   sudo:           yes
   notify:         restart apache
 
 - name:           Disable Apache modules
   apache2_module: name={{ item }} state=absent
-  with_items:     apache_disabled_modules
+  with_items:     "{{ apache_disabled_modules }}"
   sudo:           yes
   notify:         restart apache
 
@@ -81,14 +81,14 @@
 
 - name:           Create apache vhosts
   template:       src=virtualhost dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf mode=0644
-  with_nested_dict: apache_vhosts # see ansible/ansible#9563
+  with_nested_dict: "{{ apache_vhosts }}" # see ansible/ansible#9563
   when:           item.key_0 == stage
   notify:         restart apache
   sudo:           true
 
 - name:           Enable apache vhosts
   command:        a2ensite {{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
-  with_nested_dict: apache_vhosts
+  with_nested_dict: "{{ apache_vhosts }}"
   when:           item.key_0 == stage
   notify:         restart apache
   sudo:           true

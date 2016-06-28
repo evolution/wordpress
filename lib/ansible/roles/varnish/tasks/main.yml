@@ -1,7 +1,7 @@
 ---
 - name:           Install Varnish packages
   apt:            pkg={{ item }} state=present
-  with_items:     varnish_packages
+  with_items:     "{{ varnish_packages }}"
   sudo:           yes
 
 - name:           Create Varnish directory structure
@@ -52,7 +52,7 @@
 
 - name:           Change VirtualHosts from 80 => 8080
   lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
-  with_nested_dict: apache_vhosts
+  with_nested_dict: "{{ apache_vhosts }}"
   when:           item.key_0 == stage
   notify:
     - restart apache
