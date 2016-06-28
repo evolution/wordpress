@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.14
+    - Fixed php config path ([#128](https://github.com/evolution/wordpress/pull/128))
 - v1.3.13
     - Fixed some ansible deprecation warnings ([#127](https://github.com/evolution/wordpress/pull/127))
     - Added another FAQ entry
