@@ -12,3 +12,5 @@ php_packages:
   - php5-gd
   - php5-mcrypt
   - php5-dev
+
+php_conf_path: '/etc/php5/mods-available'
