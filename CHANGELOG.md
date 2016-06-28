@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.3.13
+    - Fixed some ansible deprecation warnings ([#127](https://github.com/evolution/wordpress/pull/127))
+    - Added another FAQ entry
 - v1.3.12
     - Replaced zip lib and added known host checks in importer ([#122](https://github.com/evolution/wordpress/pull/122))
     - Use google public dns nameservers ([#118](https://github.com/evolution/wordpress/pull/118))
