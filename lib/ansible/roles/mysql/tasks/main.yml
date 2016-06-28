@@ -1,7 +1,7 @@
 ---
 - name:           Install MySQL packages
   apt:            pkg={{ item }} state=present
-  with_items:     mysql_packages
+  with_items:     "{{ mysql_packages }}"
   sudo:           yes
 
 - name:           Update my.conf's bind-address

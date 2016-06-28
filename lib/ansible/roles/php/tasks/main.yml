@@ -1,7 +1,7 @@
 ---
 - name:           Install PHP packages
   apt:            pkg={{ item }}
-  with_items:     php_packages
+  with_items:     "{{ php_packages }}"
   sudo:           yes
 
 - shell:          ls -1d /etc/php5/conf.d 2>/dev/null || ls -1d /etc/php5/mods-available
@@ -12,14 +12,14 @@
 
 - name:           Install PECL packages
   command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates={{ php_conf.stdout }}/{{ item if item is string else item.name }}.ini
-  with_items:     pecl_packages
+  with_items:     "{{ pecl_packages }}"
   sudo:           yes
 
 - name:           Enable PECL packages
   lineinfile:     line="extension={{ item if item is string else item.name }}.so"
                   dest="{{ php_conf.stdout }}/{{ item if item is string else item.name }}.ini"
                   create=yes
-  with_items:     pecl_packages
+  with_items:     "{{ pecl_packages }}"
   sudo:           yes
 
 - name:           Calculate PHP memory_limit

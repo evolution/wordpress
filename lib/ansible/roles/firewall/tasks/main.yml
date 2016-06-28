@@ -13,7 +13,7 @@
 
 - name:           Install firewall packages
   apt:            pkg={{ item }} state=present
-  with_items:     firewall_packages
+  with_items:     "{{ firewall_packages }}"
   sudo:           yes
 
 - name:           Install iptables init script + rulesets

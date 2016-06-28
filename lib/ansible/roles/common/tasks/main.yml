@@ -50,7 +50,7 @@
 
 - name:           Install common packages
   apt:            pkg={{ item }} state=present
-  with_items:     common_packages
+  with_items:     "{{ common_packages }}"
   sudo:           yes
 
 - name:           Update `hostname`
