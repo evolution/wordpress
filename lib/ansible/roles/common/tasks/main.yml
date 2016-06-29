@@ -22,12 +22,12 @@
   sudo:           yes
   when:           dynamic_resolv.stdout != ""
 
-- name:           Fetch kernel purging script
-  command:        wget -N -O /tmp/purge-kernels.py https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py
-  sudo:           yes
+# see evolution/wordpress#126
+- name:           Fetch kernel purging script (on control machine)
+  local_action:   get_url dest=/tmp/purge-kernels.py url=https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py force=yes
 
-- name:           Ensure script is executable
-  file:           path=/tmp/purge-kernels.py state=file mode=0755
+- name:           Copy purging script to remote
+  copy:           src=/tmp/purge-kernels.py dest=/tmp/purge-kernels.py force=yes mode=0755
   sudo:           yes
 
 - name:           Purge kernels as necessary
