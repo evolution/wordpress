@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.3.15
+    - Fixed a whackamole get_url bug that kept coming back ([#129](https://github.com/evolution/wordpress/pull/129))
 - v1.3.14
     - Fixed php config path ([#128](https://github.com/evolution/wordpress/pull/128))
 - v1.3.13
