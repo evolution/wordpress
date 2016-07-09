@@ -1,5 +1,9 @@
 # Changelog
 
+- v1.3.16
+    - Fixed ssh fingerprint issue for local vagrant rebuilds ([#130](https://github.com/evolution/wordpress/pull/130))
+    - Added reference docs for theme and plugin development ([#132](https://github.com/evolution/wordpress/pull/132))
+    - Role for newrelic should only run for prod stage ([#133](https://github.com/evolution/wordpress/pull/133))
 - v1.3.15
     - Fixed a whackamole get_url bug that kept coming back ([#129](https://github.com/evolution/wordpress/pull/129))
 - v1.3.14
