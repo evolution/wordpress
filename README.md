@@ -34,8 +34,9 @@ Evolution is intended for use in a POSIX environment, such as Linux or Mac OS. W
 
 You will need:
 
-* [Vagrant](https://www.vagrantup.com/downloads.html) 1.1+
-* [Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)
+* [Vagrant](https://www.vagrantup.com/downloads.html) 1.8+
+  * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 5+
+  * [Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)
 * [npm](https://docs.npmjs.com/getting-started/installing-node)
 * [Bundler](http://bundler.io/)
 * [Ansible](http://docs.ansible.com/intro_installation.html) 1.6+
