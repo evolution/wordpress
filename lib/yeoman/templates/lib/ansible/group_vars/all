@@ -35,3 +35,13 @@ mail__postmaster: no-reply@<%= props.domain %>
 # swap__path: /swapfile
 # swap__swappiness: 10
 # swap__vfs_cache_pressure: 50
+
+ansistrano_deploy_to: "/var/www/{{ domain }}/{{ stage }}/{{ ansistrano_git_branch }}"
+ansistrano_shared_paths: ['web/wp-content/uploads']
+ansistrano_keep_releases: 2
+ansistrano_deploy_via: "git"
+ansistrano_allow_anonymous_stats: no
+ansistrano_git_identity_key_path: "files/ssh/id_rsa"
+ansistrano_before_setup_tasks_file: "{{ playbook_dir }}/../../bower_components/evolution-wordpress/lib/ansistrano/before-setup-tasks.yml"
+ansistrano_after_update_code_tasks_file: "{{ playbook_dir }}/../../bower_components/evolution-wordpress/lib/ansistrano/after-update-code-tasks.yml"
+ansistrano_remove_rolled_back: yes

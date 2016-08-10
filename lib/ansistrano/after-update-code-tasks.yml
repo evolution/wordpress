@@ -1,0 +1,5 @@
+---
+- name: Install bower dependencies
+  command: bower install --config.interactive=false
+  args:
+    chdir: "{{ ansistrano_release_path.stdout_lines[0] }}"

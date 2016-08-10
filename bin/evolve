@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import argparse
 import datetime
 import getpass
-import getopt
 import json
 import os
 import os.path
 import pipes
+import re
 import socket
 import subprocess
 import sys
@@ -15,51 +16,61 @@ import termcolor
 
 class Evolve:
     def __init__(self):
-        # separate any command line opts from args
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], '')
-        except getopt.GetoptError as err:
-            pass
+        # handle arguments & flags
+        parser = argparse.ArgumentParser(prog='./bin/evolve')
+        parser.add_argument('stage', help='environment against which to run given action')
+        parser.add_argument('action', help='action to run against given stage')
+        parser.add_argument('-v','--verbose', action='count', help='increase verbosity')
+        parser.add_argument('-e','--extra-vars', action='append', help='provide key=value pairs or JSON document')
+        self.arguments = parser.parse_args()
+        self._extra_vars()
 
-        # usage statement when missing args
-        if len(args) < 2:
-            print('Usage: ./bin/evolve <stage> <action> [args...]')
-            sys.exit(1)
-
-        # seperate arguments and expose them for dependency injection
-        self.stage = args.pop(0)
-        self.action = args.pop(0)
-        self.arguments = args
-
-        self.announce('running "%s" task in the "%s" stage' % (self.action, self.stage))
+        self.announce_verbose('Parsed args:', self.arguments)
 
         # determine paths
         self.working_path = os.getcwd()
         self.ansible_path = os.path.join(self.working_path, 'lib/ansible')
-        self.tasks_path = os.path.join(os.path.dirname(__file__), '../lib/tasks')
+        self.actions_path = os.path.join(os.path.dirname(__file__), '../lib/actions')
+
+        self.announce_verbose('Paths:', {
+            'working_path': self.working_path,
+            'ansible_path': self.ansible_path,
+            'actions_path': self.actions_path,
+        })
+
+        # expose positional arguments for simpler dependency injection
+        self.stage = self.arguments.stage
+        self.action = self.arguments.action
+
+        self.announce('Loading "%s" action in the "%s" stage' % (self.action, self.stage))
+        try:
+            action_module = self.import_action(self.action)
+        except ImportError as err:
+            print(termcolor.colored('Unknown action "%s"' % self.action, 'red'), file=sys.stderr)
+            sys.exit(1)
 
         # install galaxy roles
         # todo: bypass --force unless roles are older than X?
         self.call(['ansible-galaxy', 'install', '-r', os.path.join(self.ansible_path, 'galaxy.yml'), '--force'])
 
         # import and instantiate action
-        sys.path.append(self.tasks_path)
         try:
-            self.import_action(self.action)
-        except ImportError as err:
-            print(termcolor.colored('Unknown action "%s"' % self.action, 'red'), file=sys.stderr)
-            sys.exit(2)
+            self.init_action(action_module)
         except Exception as err:
             print(termcolor.colored('The "%s" action failed: %s' % (self.action, err), 'red'), file=sys.stderr)
-            self.log_action(False, ' '.join([self.action] + args))
+            self.log_action(False, self.action)
         else:
-            self.log_action(True, ' '.join([self.action] + args))
+            self.log_action(True, self.action)
 
     def announce(self, message):
         '''
         Prints a colored announcement across the terminal.
         '''
         print(termcolor.colored("\n! %s" % message, 'green'))
+
+    def announce_verbose(self, label, *args):
+        if self.arguments.verbose > 3:
+            print(termcolor.colored(label, 'magenta'), *args)
 
     def call(self, *args):
         '''
@@ -75,9 +86,15 @@ class Evolve:
         Runs a command, or piped series of commands, ignoring standard input/output and returning a returncode after completion.
         '''
         command = self._normalize_commands(args)
-        # TODO: instead of subprocess.PIPE, should open & provide file descriptors (to temp files?)
-        # TODO: alternatively, use subprocess.Popen with Popen.communicate?
-        return subprocess.call(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self.announce_verbose('Background process:', termcolor.colored("$ %s" % command, 'yellow'))
+
+        proc = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = proc.communicate()
+
+        result = { 'stdout': output[0], 'returncode': proc.returncode }
+        self.announce_verbose('Background result:', result)
+
+        return result
 
     def _normalize_commands(self, args):
         '''
@@ -145,11 +162,33 @@ class Evolve:
         built_prompt = "\n\a? %s: " % prompt
         return getpass.getpass(termcolor.colored(built_prompt, 'white', 'on_blue'))
 
+    def _extra_vars(self):
+        if self.arguments.extra_vars:
+            extra_vars = {}
+            for pair in self.arguments.extra_vars:
+                m = re.match(r'^([\w-]+)=([^=]+)$', pair)
+                if m:
+                    extra_vars[m.group(1)] = m.group(2)
+                else:
+                    try:
+                        parsed = json.loads(pair)
+                    except ValueError as err:
+                        raise ValueError('%s: %s' % (err, pair))
+                    extra_vars.update(parsed)
+            self.arguments.extra_vars = extra_vars
+
     def import_action(self, action):
         '''
-        Imports an module (expected to be in the tasks path), and instantiates its ActionClass.
+        Imports an module (adding actions path to system paths if necessary) and returns it.
         '''
-        action_module = __import__(action)
+        if self.actions_path not in sys.path:
+            sys.path.append(self.actions_path)
+        return __import__(action)
+
+    def init_action(self, action_module):
+        '''
+        Initializes an ActionClass from the given module.
+        '''
         action_module.ActionClass(self)
 
     def playbook(self, playbook, extra_vars=None, extra_args=None):
