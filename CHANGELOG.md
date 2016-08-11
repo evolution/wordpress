@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.4.0
+    - Added distro & version check in provisioning ([#137](https://github.com/evolution/wordpress/pull/137))
 - v1.3.16
     - Fixed ssh fingerprint issue for local vagrant rebuilds ([#130](https://github.com/evolution/wordpress/pull/130))
     - Added reference docs for theme and plugin development ([#132](https://github.com/evolution/wordpress/pull/132))
