@@ -29,8 +29,14 @@ class Evolve:
 
         # determine paths
         self.working_path = os.getcwd()
-        self.ansible_path = os.path.join(self.working_path, 'lib/ansible')
-        self.actions_path = os.path.join(os.path.dirname(__file__), '../lib/actions')
+        self.ansible_path = [
+            os.path.join(self.working_path, 'lib/ansible'),
+            os.path.join(os.path.dirname(__file__), '../lib/ansible/playbooks'),
+        ]
+        self.actions_path = [
+            os.path.join(self.working_path, 'lib/actions'),
+            os.path.join(os.path.dirname(__file__), '../lib/actions'),
+        ]
 
         self.announce_verbose('Paths:', {
             'working_path': self.working_path,
@@ -51,7 +57,11 @@ class Evolve:
 
         # install galaxy roles
         # todo: bypass --force unless roles are older than X?
-        self.call(['ansible-galaxy', 'install', '-r', os.path.join(self.ansible_path, 'galaxy.yml'), '--force'])
+        requirements_path = self.playbook_path('galaxy.yml')
+        if requirements_path:
+            self.call(['ansible-galaxy', 'install', '-r', requirements_path, '--force'])
+        else:
+            raise RuntimeError('Could not find requirements file %s in paths: %s' % (playbook, os.pathsep.join(self.ansible_path)))
 
         # import and instantiate action
         try:
@@ -181,8 +191,9 @@ class Evolve:
         '''
         Imports an module (adding actions path to system paths if necessary) and returns it.
         '''
-        if self.actions_path not in sys.path:
-            sys.path.append(self.actions_path)
+        for path in self.actions_path:
+            if path not in sys.path:
+                sys.path.append(path)
         return __import__(action)
 
     def init_action(self, action_module):
@@ -211,9 +222,21 @@ class Evolve:
                 call_args += extra_args
 
         # append playbook filepath
-        call_args.append(os.path.join(self.ansible_path, playbook))
+        playbook_path = self.playbook_path(playbook)
+        if playbook_path:
+            call_args.append(playbook_path)
+        else:
+            raise RuntimeError('Could not find playbook %s in paths: %s' % (playbook, os.pathsep.join(self.ansible_path)))
 
         self.call(call_args)
+
+    def playbook_path(self, playbook):
+        '''
+        Finds the given playbook file in ansible paths, and returns it.
+        '''
+        for path in self.ansible_path:
+            if os.path.isfile(os.path.join(path, playbook)):
+                return os.path.join(path, playbook)
 
     def log_action(self, success, message):
         '''

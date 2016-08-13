@@ -11,12 +11,16 @@ class ActionClass:
 
         try:
             evolve.playbook('provision.yml', extra_vars, '--user=deploy')
-        except subprocess.CalledProcessError:
-            evolve.announce('Unable to provision with SSH publickey for deploy user')
+        except subprocess.CalledProcessError as err:
+            # only prompt for user reprovisioning if host failed or unreachable
+            if any(x in err for x in ['returned non-zero exit status 3', 'returned non-zero exit status 2']):
+                evolve.announce('Unable to provision with SSH publickey for deploy user')
 
-            # connect as intermediate user, and set up deploy user
-            username = evolve.single_input('user to provision as (root)', lambda u: not u or re.match(r"^[a-z_][a-z0-9_-]*[$]?", u, re.I)) or 'root'
-            evolve.playbook('user.yml', extra_vars, ['--user=%s' % username, '--ask-pass', '--ask-sudo-pass'])
+                # connect as intermediate user, and set up deploy user
+                username = evolve.single_input('user to provision as (root)', lambda u: not u or re.match(r"^[a-z_][a-z0-9_-]*[$]?", u, re.I)) or 'root'
+                evolve.playbook('user.yml', extra_vars, ['--user=%s' % username, '--ask-pass', '--ask-sudo-pass'])
 
-            # provision as usual
-            evolve.playbook('provision.yml', extra_vars, '--user=deploy')
+                # provision as usual
+                evolve.playbook('provision.yml', extra_vars, '--user=deploy')
+            else:
+                raise err
