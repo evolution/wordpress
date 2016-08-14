@@ -30,12 +30,12 @@ class Evolve:
         # determine paths
         self.working_path = os.getcwd()
         self.ansible_path = [
-            os.path.join(self.working_path, 'lib/ansible'),
-            os.path.join(os.path.dirname(__file__), '../lib/ansible/playbooks'),
+            os.path.abspath(os.path.join(self.working_path, 'lib/ansible')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/ansible/playbooks')),
         ]
         self.actions_path = [
-            os.path.join(self.working_path, 'lib/actions'),
-            os.path.join(os.path.dirname(__file__), '../lib/actions'),
+            os.path.abspath(os.path.join(self.working_path, 'lib/actions')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/actions')),
         ]
 
         self.announce_verbose('Paths:', {
@@ -173,8 +173,11 @@ class Evolve:
         return getpass.getpass(termcolor.colored(built_prompt, 'white', 'on_blue'))
 
     def _extra_vars(self):
+        '''
+        Initializes a dictionary of extra variables, to be passed on to ansible.
+        '''
+        extra_vars = {}
         if self.arguments.extra_vars:
-            extra_vars = {}
             for pair in self.arguments.extra_vars:
                 m = re.match(r'^([\w-]+)=([^=]+)$', pair)
                 if m:
@@ -185,7 +188,25 @@ class Evolve:
                     except ValueError as err:
                         raise ValueError('%s: %s' % (err, pair))
                     extra_vars.update(parsed)
-            self.arguments.extra_vars = extra_vars
+
+        extra_vars['stage'] = self.arguments.stage
+
+        # infer branch currently checked out (for non prod stages), defaulting to master
+        if 'branch' not in extra_vars:
+            extra_vars['branch'] = 'master'
+            if extra_vars['stage'] != 'production':
+                result = self.bg_call(['git', 'branch'])
+                matched = re.search(r'^[*] (\S+)\s', result['stdout'], re.M)
+                if matched and matched.group(1) != 'master':
+                    extra_vars['branch'] = matched.group(1)
+
+        self.arguments.extra_vars = extra_vars
+
+    def get_extra_vars(self):
+        '''
+        Returns a copy of the extra_vars dictionary.
+        '''
+        return self.arguments.extra_vars.copy()
 
     def import_action(self, action):
         '''
