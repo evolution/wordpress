@@ -4,3 +4,5 @@ test/temp/
 vendor/
 composer.phar
 *.pyc
+lib/ansible/playbooks/*.retry
+lib/ansible/roles/carlosbuenosvinos.ansistrano-*
