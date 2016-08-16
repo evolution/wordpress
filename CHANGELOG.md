@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.4.1
+    - Added ssh control path in ansible.cfg ([#139](https://github.com/evolution/wordpress/pull/139))
 - v1.4.0
     - Added distro & version check in provisioning ([#137](https://github.com/evolution/wordpress/pull/137))
 - v1.3.16
