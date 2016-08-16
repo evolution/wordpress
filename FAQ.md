@@ -58,11 +58,11 @@ Are you sure you want to continue connecting (yes/no)?
 
 ### SSH Error "unix_listener...too long for Unix domain socket"
 
-This is a [known issue](https://github.com/ansible/ansible/issues/11536#issuecomment-153030743) with openssh and ansible, evidently usually seen on OSX El Capitan.
+This is a [known issue](https://github.com/ansible/ansible/issues/11536#issuecomment-153030743) with openssh and ansible, evidently usually seen on OSX El Capitan. It is ideally remedied by the **control_path** in `ansible.cfg` that evolution generates (as of v1.4.1).
 
-You can work around this by changing the following in your ansible config:
+If a custom control path is already set in your `ansible.cfg` and you still encounter this issue, you can work around this with a shorter control path, eg using `%C` (if your version of ssh supports it):
 
 ```
 [ssh_connection]
-control_path = %(directory)s/%%h-%%r
+control_path = %(directory)s/%%C
 ```
