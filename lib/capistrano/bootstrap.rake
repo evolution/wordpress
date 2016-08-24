@@ -36,4 +36,9 @@ namespace :deploy do
   before :started, :release_permissions do
     invoke "evolve:permissions"
   end
+
+  after :finished, :release_permissions do
+    invoke "evolve:permissions"
+  end
 end
+
