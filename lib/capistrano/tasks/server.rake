@@ -81,10 +81,9 @@ namespace :evolve do
         execute :sudo, "find -L #{deploy_to}/releases/*/web -type f -exec chmod 664 {} \\;"
 
         if test :ls, "#{deploy_to}/releases/*/web/wp-content"
-          # Ensure wp-content directories are owned by deploy
-          execute :sudo, "find -L #{deploy_to}/releases/*/web/wp-content -type d -exec chown deploy {} \\;"
           # Ensure upload directory is owned by deploy and writeable by Apache
-          execute :sudo, "find -L #{deploy_to}/shared/web/wp-content/ -type d -exec chown deploy:www-data {} \\; -exec chmod -R 755 {} \\;"
+          execute :sudo, "find -L #{deploy_to}/releases/*/web/wp-content -type d -exec chown deploy:www-data {} \\;"
+          execute :sudo, "find -L #{deploy_to}/releases/*/web/wp-content/uploads/ -type d -exec chmod g+w {} \\;"
         end
       end
     end
