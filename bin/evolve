@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import datetime
 import getpass
+import importlib
 import json
 import os
 import os.path
@@ -17,6 +18,8 @@ import yaml
 
 class Evolve:
     def __init__(self):
+        raw_args = list(sys.argv)
+
         # handle arguments & flags
         parser = argparse.ArgumentParser(prog='./bin/evolve')
         parser.add_argument('stage', help='environment against which to run given action')
@@ -26,6 +29,7 @@ class Evolve:
         self.arguments = parser.parse_args()
         self._extra_vars()
 
+        self.announce_verbose('Raw args:', raw_args)
         self.announce_verbose('Parsed args:', self.arguments)
 
         # determine paths
@@ -72,9 +76,9 @@ class Evolve:
             self.init_action(action_module)
         except Exception as err:
             print(termcolor.colored('The "%s" action failed: %s' % (self.action, err), 'red'), file=sys.stderr)
-            self.log_action(False, self.action)
+            self.log_action(False, ' '.join(raw_args[1:]))
         else:
-            self.log_action(True, self.action)
+            self.log_action(True, ' '.join(raw_args[1:]))
 
     def announce(self, message):
         '''
@@ -233,7 +237,20 @@ class Evolve:
         for path in self.actions_path:
             if path not in sys.path:
                 sys.path.append(path)
-        return __import__(action)
+
+        if '.' in action:
+            package, module = action.rsplit('.', 1)
+            module = '.%s' % module
+        else:
+            module = action
+            package = None
+
+        self.announce_verbose('From package %s %s' % (
+            termcolor.colored(package, 'yellow'),
+            termcolor.colored(module, 'green')
+        ))
+
+        return importlib.import_module(module, package)
 
     def init_action(self, action_module):
         '''
@@ -241,7 +258,7 @@ class Evolve:
         '''
         action_module.ActionClass(self)
 
-    def playbook(self, playbook, extra_vars=None, extra_args=None):
+    def playbook(self, playbook, extra_vars=None, extra_args=None, bg=False):
         '''
         Runs an ansible playbook, with optional json encoded extra_vars and optional extra arguments.
         '''
@@ -267,7 +284,10 @@ class Evolve:
         else:
             raise RuntimeError('Could not find playbook %s in paths: %s' % (playbook, os.pathsep.join(self.ansible_path)))
 
-        self.call(call_args)
+        if bg:
+            self.bg_call(call_args)
+        else:
+            self.call(call_args)
 
     def playbook_path(self, playbook):
         '''
@@ -292,7 +312,7 @@ class Evolve:
         }
 
         try:
-            self.playbook('log.yml', extra_vars)
+            self.playbook('log.yml', extra_vars, bg=True)
         except subprocess.CalledProcessError as err:
             print(termcolor.colored('Failed to log action to remote: %s' % err, 'red'), file=sys.stderr)
 
