@@ -13,6 +13,7 @@ import socket
 import subprocess
 import sys
 import termcolor
+import yaml
 
 class Evolve:
     def __init__(self):
@@ -47,6 +48,9 @@ class Evolve:
         # expose positional arguments for simpler dependency injection
         self.stage = self.arguments.stage
         self.action = self.arguments.action
+
+        # load ansible group_vars/all and group_vars/{{stage}} (if exists)
+        self.load_group_vars()
 
         self.announce('Loading "%s" action in the "%s" stage' % (self.action, self.stage))
         try:
@@ -207,6 +211,20 @@ class Evolve:
         Returns a copy of the extra_vars dictionary.
         '''
         return self.arguments.extra_vars.copy()
+
+    def load_group_vars(self):
+        self.group_vars = {}
+        vars_files = [
+            os.path.join(self.ansible_path[0], 'group_vars/all'),
+            os.path.join(self.ansible_path[0], 'group_vars/%s' % self.stage),
+        ]
+
+        for vars_file in vars_files:
+            if os.path.isfile(vars_file):
+                f = open(vars_file)
+                loaded = yaml.safe_load(f)
+                f.close()
+                self.group_vars.update(loaded)
 
     def import_action(self, action):
         '''

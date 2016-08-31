@@ -45,3 +45,5 @@ ansistrano_git_identity_key_path: "files/ssh/id_rsa"
 ansistrano_before_setup_tasks_file: "{{ playbook_dir }}/../../ansistrano/before-setup-tasks.yml"
 ansistrano_after_update_code_tasks_file: "{{ playbook_dir }}/../../ansistrano/after-update-code-tasks.yml"
 ansistrano_remove_rolled_back: yes
+
+wp_path: "{{ ansistrano_deploy_to }}/current/web/wp"
