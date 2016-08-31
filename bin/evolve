@@ -24,6 +24,7 @@ class Evolve:
         parser = argparse.ArgumentParser(prog='./bin/evolve')
         parser.add_argument('stage', help='environment against which to run given action')
         parser.add_argument('action', help='action to run against given stage')
+        parser.add_argument('command', nargs='?', default=None, help='optional (string quoted) subcommand for given action')
         parser.add_argument('-v','--verbose', action='count', help='increase verbosity')
         parser.add_argument('-e','--extra-vars', action='append', help='provide key=value pairs or JSON document')
         self.arguments = parser.parse_args()
@@ -113,6 +114,23 @@ class Evolve:
         self.announce_verbose('Background result:', result)
 
         return result
+
+    def exec_process(self, command):
+        executable = command[0]
+
+        if os.access(executable, os.X_OK):
+            resolved = executable
+        else:
+            for path in os.environ['PATH'].split(os.pathsep):
+                joined = os.path.join(path, executable)
+                if os.access(joined, os.X_OK):
+                    resolved = joined
+                    break
+
+        if resolved:
+            os.execv(resolved, command)
+        else:
+            raise RuntimeError('Could not find %s in PATH %s' % (executable, os.environ['PATH']))
 
     def _normalize_commands(self, args):
         '''
