@@ -1,9 +1,6 @@
-import datetime
 import os
 import os.path
-import re
 import subprocess
-import sys
 
 class ActionClass:
     def __init__(self, evolve):
@@ -16,8 +13,8 @@ class ActionClass:
             'deploy@%s.%s' % (extra_vars['stage'], evolve.group_vars['domain']),
         ]
 
-        if evolve.arguments.command:
-            command.append(evolve.arguments.command)
+        if evolve.command:
+            command.append(evolve.command)
             try:
                 evolve.call(command)
             except subprocess.CalledProcessError as err:

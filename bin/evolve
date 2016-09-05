@@ -53,6 +53,7 @@ class Evolve:
         # expose positional arguments for simpler dependency injection
         self.stage = self.arguments.stage
         self.action = self.arguments.action
+        self.command = self.arguments.command
 
         # load ansible group_vars/all and group_vars/{{stage}} (if exists)
         self.load_group_vars()
@@ -250,7 +251,7 @@ class Evolve:
 
     def import_action(self, action):
         '''
-        Imports an module (adding actions path to system paths if necessary) and returns it.
+        Imports a module (adding actions path to system paths if necessary) and returns it.
         '''
         for path in self.actions_path:
             if path not in sys.path:
