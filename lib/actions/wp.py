@@ -1,9 +1,3 @@
-import datetime
-import os
-import os.path
-import re
-import subprocess
-import sys
 
 class ActionClass:
     def __init__(self, evolve):
@@ -19,6 +13,7 @@ class ActionClass:
             evolve.command,
             '--path="%s"' % evolve.group_vars['wp_path'],
             '--url="http://%s.%s/"' % (extra_vars['stage'], evolve.group_vars['domain']),
+            '--color',
         ])
 
         evolve.init_action(ssh_module)

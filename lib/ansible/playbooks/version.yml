@@ -1,0 +1,17 @@
+---
+- hosts:                "{{ stage }}"
+
+  tasks:
+    - name:     Retrieve service version
+      command:  service evolution-wordpress version
+      register: provisioned_version
+      sudo:     yes
+
+    - debug:
+        msg: "Last generated with: {{generated_version}}"
+
+    - debug:
+        msg: "Currently bower installed with: {{local_version}}"
+
+    - debug:
+        msg: "Stage '{{stage}}' last provisioned with: {{provisioned_version.stdout|regex_replace('\\A[\\s\\S]*?Evolution Wordpress ([\\w.-]+)[\\s\\S]*?\\Z', '\\1')}}"
