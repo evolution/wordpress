@@ -73,6 +73,14 @@
   ignore_errors:  true
   sudo:           yes
 
+- set_fact:
+    wordpress__xmlrpc_allow: false
+  when: wordpress__xmlrpc_allow is undefined
+
+- set_fact:
+    wordpress__xmlrpc_whitelist: false
+  when: wordpress__xmlrpc_whitelist is undefined
+
 - name:           Disable default apache site
   command:        a2dissite {{ apache_default_vhost.stdout }} removes=/etc/apache2/sites-enabled/{{ apache_default_vhost.stdout }}
   notify:         restart apache
