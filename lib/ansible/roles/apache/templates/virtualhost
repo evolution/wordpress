@@ -95,24 +95,20 @@
 {% if wordpress__xmlrpc_allow %}
     # Enable XML-RPC unconditionally
     <files xmlrpc.php>
-        Order allow,deny
-        Allow from all
+        Require all granted
     </files>
 {% elif wordpress__xmlrpc_whitelist %}
-    # Enable XML-RPC for the following SetEnvIf conditions
-{% for whitelist_regex, whitelist_varname in wordpress__xmlrpc_whitelist.iteritems() %}
-    SetEnvIf {{ whitelist_varname }} "{{ whitelist_regex }}" allow_wp_xmlrpc
-{% endfor %}
+    # Enable XML-RPC for only the following Require conditions
     <files xmlrpc.php>
-        Order deny,allow
-        Deny from all
-        Allow from env=allow_wp_xmlrpc
+        Require all denied
+{% for whitelist_condition in wordpress__xmlrpc_whitelist %}
+        Require {{ whitelist_condition }}
+{% endfor %}
     </files>
 {% else %}
     # Disable XML-RPC unconditionally
     <files xmlrpc.php>
-        Order allow,deny
-        Deny from all
+        Require all denied
     </files>
 {% endif %}
 

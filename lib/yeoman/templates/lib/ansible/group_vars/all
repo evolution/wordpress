@@ -24,7 +24,7 @@ mysql:
 
 # wordpress__xmlrpc_allow: false
 # wordpress__xmlrpc_whitelist:
-#   '^127[.]0[.]0[.]1$': 'Remote_Addr'
+#   - "local"
 
 mail__postmaster: no-reply@<%= props.domain %>
 

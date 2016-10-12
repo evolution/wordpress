@@ -13,6 +13,10 @@ apache_modules:
   - setenvif
   - filter
   - mime
+  - authz_core
+  - authz_host
+  - authz_user
+  - authz_groupfile
 
 apache_disabled_modules:
   - autoindex
