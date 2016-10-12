@@ -22,6 +22,10 @@ mysql:
 # apache__max_clients:
 # apache__max_requests_per_child:
 
+# wordpress__xmlrpc_allow: false
+# wordpress__xmlrpc_whitelist:
+#   - "local"
+
 mail__postmaster: no-reply@<%= props.domain %>
 
 # iptables__ipv6: 0
