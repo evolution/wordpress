@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.4.3
+    - Added optional override of xml-rpc blocking ([#147](https://github.com/evolution/wordpress/pull/147))
 - v1.4.2
     - Fixed non-integer swapfile sizes ([#142](https://github.com/evolution/wordpress/pull/142))
     - Fixed handling of forwarded IP addresses ([#145](https://github.com/evolution/wordpress/pull/145))
