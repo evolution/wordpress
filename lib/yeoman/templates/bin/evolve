@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+IMPORTER_PATH="$( dirname "$0" )/../bower_components/evolution-wordpress"
+IMPORTER_SCRIPT="$IMPORTER_PATH/bin/evolve"
+
+chmod +x "$IMPORTER_SCRIPT"
+
+$IMPORTER_SCRIPT "$@"

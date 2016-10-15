@@ -1,0 +1,6 @@
+---
+- hosts:                "{{ stage }}"
+  gather_facts:         yes
+
+  roles:
+    - { role: "carlosbuenosvinos.ansistrano-{{ deploy_mode }}" }

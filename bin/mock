@@ -77,10 +77,9 @@ helpers.testDirectory(outputDir, function(err) {
         fs.writeFileSync(certPath, cert);
       }
 
-      fs.appendFileSync(outputDir + '/lib/capistrano/deploy.rb', [
+      fs.appendFileSync(outputDir + '/lib/ansible/group_vars/all', [
         '',
-        '# Added for testing purposes',
-        'set :repo_url,      ' + (
+        'ansistrano_git_repo: ' + (
           isCI
           ? '"file:///vagrant/.git"'
           : '"https://github.com/evolution/wordpress-example.git"'

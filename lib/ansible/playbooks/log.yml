@@ -1,0 +1,20 @@
+---
+- hosts:                "{{ stage }}"
+  gather_facts:         yes
+
+  vars:
+    log_dir:            "/var/log/evolution"
+    log_file:           "{{ log_dir }}/wordpress.log"
+
+  tasks:
+    - name:             Ensure log directory exists and is owned by remote user
+      file:             path={{ log_dir }} state=directory mode=0644 owner={{ ansible_ssh_user }}
+      sudo:             yes
+
+    - name:             Ensure log file exists and is owned by remote user
+      file:             path={{ log_file }} state=touch mode=0644 owner={{ ansible_ssh_user }}
+      sudo:             yes
+
+    - name:             Append message to log file
+      lineinfile:       insertafter=EOF dest={{ log_file }} line={{ log_message }}
+      sudo:             yes

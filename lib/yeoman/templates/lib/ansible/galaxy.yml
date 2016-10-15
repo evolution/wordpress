@@ -1,1 +1,3 @@
+- src: carlosbuenosvinos.ansistrano-deploy
+- src: carlosbuenosvinos.ansistrano-rollback
 <% if (props.datadog) { %>- src: Datadog.datadog<% } %>

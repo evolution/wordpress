@@ -6,6 +6,7 @@ lib/ansible/files/ssl/
 <% } %>
 # Application files
 error_log
+lib/ansible/*.retry
 
 # WordPress files
 **/wp-content/cache/**

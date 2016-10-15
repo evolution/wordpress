@@ -1,0 +1,339 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import argparse
+import datetime
+import getpass
+import importlib
+import json
+import os
+import os.path
+import pipes
+import re
+import socket
+import subprocess
+import sys
+import termcolor
+import yaml
+
+class Evolve:
+    def __init__(self):
+        raw_args = list(sys.argv)
+
+        # handle arguments & flags
+        parser = argparse.ArgumentParser(prog='./bin/evolve')
+        parser.add_argument('stage', help='environment against which to run given action')
+        parser.add_argument('action', help='action to run against given stage')
+        parser.add_argument('command', nargs='?', default=None, help='optional (string quoted) subcommand for given action')
+        parser.add_argument('-v','--verbose', action='count', help='increase verbosity')
+        parser.add_argument('-e','--extra-vars', action='append', help='provide key=value pairs or JSON document')
+        self.arguments = parser.parse_args()
+        self._extra_vars()
+
+        self.announce_verbose('Raw args:', raw_args)
+        self.announce_verbose('Parsed args:', self.arguments)
+
+        # determine paths
+        self.working_path = os.getcwd()
+        self.ansible_path = [
+            os.path.abspath(os.path.join(self.working_path, 'lib/ansible')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/ansible/playbooks')),
+        ]
+        self.actions_path = [
+            os.path.abspath(os.path.join(self.working_path, 'lib/actions')),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/actions')),
+        ]
+
+        self.announce_verbose('Paths:', {
+            'working_path': self.working_path,
+            'ansible_path': self.ansible_path,
+            'actions_path': self.actions_path,
+        })
+
+        # expose positional arguments for simpler dependency injection
+        self.stage = self.arguments.stage
+        self.action = self.arguments.action
+        self.command = self.arguments.command
+
+        # load ansible group_vars/all and group_vars/{{stage}} (if exists)
+        self.load_group_vars()
+
+        self.announce('Loading "%s" action in the "%s" stage' % (self.action, self.stage))
+        try:
+            action_module = self.import_action(self.action)
+        except ImportError as err:
+            print(termcolor.colored('Unknown action "%s"' % self.action, 'red'), file=sys.stderr)
+            sys.exit(1)
+
+        # install galaxy roles
+        # todo: bypass --force unless roles are older than X?
+        requirements_path = self.playbook_path('galaxy.yml')
+        if requirements_path:
+            self.call(['ansible-galaxy', 'install', '-r', requirements_path, '--force'])
+        else:
+            raise RuntimeError('Could not find requirements file %s in paths: %s' % (playbook, os.pathsep.join(self.ansible_path)))
+
+        # import and instantiate action
+        try:
+            self.init_action(action_module)
+        except Exception as err:
+            print(termcolor.colored('The "%s" action failed: %s' % (self.action, err), 'red'), file=sys.stderr)
+            self.log_action(False, ' '.join(raw_args[1:]))
+        else:
+            self.log_action(True, ' '.join(raw_args[1:]))
+
+    def announce(self, message):
+        '''
+        Prints a colored announcement across the terminal.
+        '''
+        print(termcolor.colored("\n! %s" % message, 'green'))
+
+    def announce_verbose(self, label, *args):
+        if self.arguments.verbose > 3:
+            print(termcolor.colored(label, 'magenta'), *args)
+
+    def call(self, *args):
+        '''
+        Prints and runs a command, or piped series of commands, inheriting standard input/output and returning after completion.
+        Throws subprocess.CalledProcessError if returncode was nonzero.
+        '''
+        command = self._normalize_commands(args)
+        print(termcolor.colored("$ %s\n" % command, 'yellow'))
+        return subprocess.check_call(command, shell=True)
+
+    def bg_call(self, *args):
+        '''
+        Runs a command, or piped series of commands, ignoring standard input/output and returning a returncode after completion.
+        '''
+        command = self._normalize_commands(args)
+        self.announce_verbose('Background process:', termcolor.colored("$ %s" % command, 'yellow'))
+
+        proc = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = proc.communicate()
+
+        result = { 'stdout': output[0], 'returncode': proc.returncode }
+        self.announce_verbose('Background result:', result)
+
+        return result
+
+    def exec_process(self, command):
+        executable = command[0]
+
+        if os.access(executable, os.X_OK):
+            resolved = executable
+        else:
+            for path in os.environ['PATH'].split(os.pathsep):
+                joined = os.path.join(path, executable)
+                if os.access(joined, os.X_OK):
+                    resolved = joined
+                    break
+
+        if resolved:
+            os.execv(resolved, command)
+        else:
+            raise RuntimeError('Could not find %s in PATH %s' % (executable, os.environ['PATH']))
+
+    def _normalize_commands(self, args):
+        '''
+        Normalizes and escapes one or more commands (as lists), piping each into the command following it.
+        '''
+        groups = []
+
+        for command in args:
+            # remove any None args
+            command = filter(lambda a: a != None, command)
+            # quote each arg for shell metacharacters
+            command = map(pipes.quote, command)
+            # flatten args to string command
+            groups.append(' '.join(command))
+
+        # flatten commands to pipe chain
+        return ' | '.join(groups)
+
+    def single_input(self, prompt, cb):
+        '''
+        Prompts for a single line of input, validating with a given callback.
+        '''
+        built_prompt = "\n? %s: " % prompt
+        while True:
+            result = raw_input(termcolor.colored(built_prompt, 'cyan'))
+
+            try:
+                if cb(result):
+                    return result
+            except:
+                pass
+
+    def multi_input(self, prompt, choices):
+        '''
+        Prompts from a given list of choices.
+        '''
+        built_prompt = termcolor.colored("\n? %s:\n" % prompt, 'cyan')
+
+        for i, choice in enumerate(choices):
+            choices[i] = choice.lower()
+            built_prompt += " %s %s\n" % (
+                termcolor.colored("[%i]" % (i+1), 'grey', 'on_cyan'),
+                termcolor.colored(choice.lower(), 'cyan')
+            )
+
+        built_prompt += termcolor.colored("> ", 'cyan')
+
+        while True:
+            result = raw_input(built_prompt)
+
+            try:
+                test_index = int(result)
+                if 1 <= test_index <= len(choices):
+                    return choices[test_index-1]
+            except (ValueError, IndexError, TypeError):
+                pass
+
+            if result.lower() in choices:
+                return result.lower()
+
+    def password_input(self, prompt):
+        '''
+        Prompts for a password (which is not shown).
+        '''
+        built_prompt = "\n\a? %s: " % prompt
+        return getpass.getpass(termcolor.colored(built_prompt, 'white', 'on_blue'))
+
+    def _extra_vars(self):
+        '''
+        Initializes a dictionary of extra variables, to be passed on to ansible.
+        '''
+        extra_vars = {}
+        if self.arguments.extra_vars:
+            for pair in self.arguments.extra_vars:
+                m = re.match(r'^([\w-]+)=([^=]+)$', pair)
+                if m:
+                    extra_vars[m.group(1)] = m.group(2)
+                else:
+                    try:
+                        parsed = json.loads(pair)
+                    except ValueError as err:
+                        raise ValueError('%s: %s' % (err, pair))
+                    extra_vars.update(parsed)
+
+        extra_vars['stage'] = self.arguments.stage
+
+        # infer branch currently checked out (for non prod stages), defaulting to master
+        if 'branch' not in extra_vars:
+            extra_vars['branch'] = 'master'
+            if extra_vars['stage'] != 'production':
+                result = self.bg_call(['git', 'branch'])
+                matched = re.search(r'^[*] (\S+)\s', result['stdout'], re.M)
+                if matched and matched.group(1) != 'master':
+                    extra_vars['branch'] = matched.group(1)
+
+        self.arguments.extra_vars = extra_vars
+
+    def get_extra_vars(self):
+        '''
+        Returns a copy of the extra_vars dictionary.
+        '''
+        return self.arguments.extra_vars.copy()
+
+    def load_group_vars(self):
+        self.group_vars = {}
+        vars_files = [
+            os.path.join(self.ansible_path[0], 'group_vars/all'),
+            os.path.join(self.ansible_path[0], 'group_vars/%s' % self.stage),
+        ]
+
+        for vars_file in vars_files:
+            if os.path.isfile(vars_file):
+                f = open(vars_file)
+                loaded = yaml.safe_load(f)
+                f.close()
+                self.group_vars.update(loaded)
+
+    def import_action(self, action):
+        '''
+        Imports a module (adding actions path to system paths if necessary) and returns it.
+        '''
+        for path in self.actions_path:
+            if path not in sys.path:
+                sys.path.append(path)
+
+        if '.' in action:
+            package, module = action.rsplit('.', 1)
+            module = '.%s' % module
+        else:
+            module = action
+            package = None
+
+        self.announce_verbose('From package %s %s' % (
+            termcolor.colored(package, 'yellow'),
+            termcolor.colored(module, 'green')
+        ))
+
+        return importlib.import_module(module, package)
+
+    def init_action(self, action_module):
+        '''
+        Initializes an ActionClass from the given module.
+        '''
+        action_module.ActionClass(self)
+
+    def playbook(self, playbook, extra_vars=None, extra_args=None, bg=False):
+        '''
+        Runs an ansible playbook, with optional json encoded extra_vars and optional extra arguments.
+        '''
+        call_args = ['ansible-playbook']
+
+        # add extra_vars encoded as json
+        if extra_vars is not None:
+            call_args += ['-e', json.dumps(extra_vars)]
+
+        # add extra args...
+        if extra_args is not None:
+            # append, if a scalar string
+            if isinstance(extra_args, basestring):
+                call_args.append(extra_args)
+            # otherwise add as a list-like
+            else:
+                call_args += extra_args
+
+        # append playbook filepath
+        playbook_path = self.playbook_path(playbook)
+        if playbook_path:
+            call_args.append(playbook_path)
+        else:
+            raise RuntimeError('Could not find playbook %s in paths: %s' % (playbook, os.pathsep.join(self.ansible_path)))
+
+        if bg:
+            self.bg_call(call_args)
+        else:
+            self.call(call_args)
+
+    def playbook_path(self, playbook):
+        '''
+        Finds the given playbook file in ansible paths, and returns it.
+        '''
+        for path in self.ansible_path:
+            if os.path.isfile(os.path.join(path, playbook)):
+                return os.path.join(path, playbook)
+
+    def log_action(self, success, message):
+        '''
+        Writes a log entry to a remote server, via a specialized ansible playbook.
+        '''
+        local_user = getpass.getuser()
+        local_host = socket.gethostname()
+        local_time = datetime.datetime.today().strftime('%c')
+        status = 'Success' if success else 'Failure'
+
+        extra_vars = {
+            'stage': self.stage,
+            'log_message': '\t'.join([local_time, local_user, message, status])
+        }
+
+        try:
+            self.playbook('log.yml', extra_vars, bg=True)
+        except subprocess.CalledProcessError as err:
+            print(termcolor.colored('Failed to log action to remote: %s' % err, 'red'), file=sys.stderr)
+
+if __name__ == "__main__":
+    Evolve()
