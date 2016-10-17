@@ -13,6 +13,7 @@ namespace :evolve do
     desc "Uploads local uploads to remote"
     task :files do
       invoke "evolve:files:up"
+      invoke "evolve:permissions"
     end
   end
 end
