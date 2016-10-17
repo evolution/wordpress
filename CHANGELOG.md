@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.4.4
+    - Fixed wp content and uploads permissions ([#140](https://github.com/evolution/wordpress/pull/140))
+    - Fixed wp path for staging/prod wp-cron jobs ([#149](https://github.com/evolution/wordpress/pull/149))
 - v1.4.3
     - Added optional override of xml-rpc blocking ([#147](https://github.com/evolution/wordpress/pull/147))
 - v1.4.2
