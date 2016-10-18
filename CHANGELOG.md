@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.4.5
+    - Fixed bug with ansible 2.1.2 and private keys ([#150](https://github.com/evolution/wordpress/pull/150))
 - v1.4.4
     - Fixed wp content and uploads permissions ([#140](https://github.com/evolution/wordpress/pull/140))
     - Fixed wp path for staging/prod wp-cron jobs ([#149](https://github.com/evolution/wordpress/pull/149))
