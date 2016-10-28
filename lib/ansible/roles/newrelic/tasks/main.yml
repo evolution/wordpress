@@ -15,7 +15,7 @@
     - newrelic-sysmond
 
 - name:           Configure PHP agent license key and app name
-  lineinfile:     dest={{ php_conf.stdout }}/newrelic.ini regexp="^{{ item.key }}" line="{{ item.key }} = '{{ item.value }}'"
+  lineinfile:     dest={{ php_conf_path }}/newrelic.ini regexp="^{{ item.key }}" line="{{ item.key }} = '{{ item.value }}'"
   sudo:           yes
   with_dict:
     newrelic.appname: "{{ domain }} ({{ stage }})"

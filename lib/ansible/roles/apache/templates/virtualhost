@@ -89,12 +89,25 @@
         Deny from all
     </Files>
 {% endif %}
-
-    # Disable XML-RPC
+{% if wordpress__xmlrpc_allow %}
+    # Enable XML-RPC unconditionally
     <files xmlrpc.php>
-        Order allow,deny
-        Deny from all
+        Require all granted
     </files>
+{% elif wordpress__xmlrpc_whitelist %}
+    # Enable XML-RPC for only the following Require conditions
+    <files xmlrpc.php>
+        Require all denied
+{% for whitelist_condition in wordpress__xmlrpc_whitelist %}
+        Require {{ whitelist_condition }}
+{% endfor %}
+    </files>
+{% else %}
+    # Disable XML-RPC unconditionally
+    <files xmlrpc.php>
+        Require all denied
+    </files>
+{% endif %}
 
     # Deny access to all .htaccess files
     <Files ~ "^.*\.(?i:hta)">

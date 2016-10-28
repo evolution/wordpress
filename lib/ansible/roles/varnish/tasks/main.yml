@@ -1,7 +1,7 @@
 ---
 - name:           Install Varnish packages
   apt:            pkg={{ item }} state=present
-  with_items:     varnish_packages
+  with_items:     "{{ varnish_packages }}"
   sudo:           yes
 
 - name:           Create Varnish directory structure
@@ -30,8 +30,21 @@
     - restart apache
     - restart varnish
 
-- name:           Enable apache module "rpaf"
-  command:        a2enmod rpaf
+- stat:           path=/etc/apache2/mods-enabled/rpaf.load
+  register:       rpaf_load
+
+- name:           Disable apache module "rpaf" (if installed)
+  command:        a2dismod rpaf
+  when:           rpaf_load.stat.exists
+  sudo:           yes
+  notify:         restart apache
+
+- name:           Configure apache module "remoteip"
+  copy:           src=remoteip.conf dest=/etc/apache2/mods-available/remoteip.conf mode=0644
+  sudo:           yes
+
+- name:           Enable apache module "remoteip"
+  command:        a2enmod remoteip
   sudo:           yes
   notify:         restart apache
 
@@ -52,7 +65,7 @@
 
 - name:           Change VirtualHosts from 80 => 8080
   lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
-  with_nested_dict: apache_vhosts
+  with_nested_dict: "{{ apache_vhosts }}"
   when:           item.key_0 == stage
   notify:
     - restart apache

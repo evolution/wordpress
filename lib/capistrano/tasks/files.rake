@@ -56,7 +56,10 @@ namespace :evolve do
             run_locally do
               execute fetch(:rsync_cmd)
             end
+
           end
+
+          invoke "evolve:permissions"
         else
           warn "!! No local uploads to sync...skipping"
         end

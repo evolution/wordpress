@@ -13,12 +13,14 @@ namespace :evolve do
 
         galaxy_reqs = "#{ansible_path}/galaxy.yml"
         if File.exists?(galaxy_reqs)
-          system("ansible-galaxy install -r #{galaxy_reqs} --force")
+          unless File.read(galaxy_reqs).strip.empty?
+            system("ansible-galaxy install -r #{galaxy_reqs} --force")
+          end
         end
 
         play = "ansible-playbook -e stage=#{fetch(:stage)}"
 
-        success = ansible_execute("#{play} --user=#{fetch(:user)} #{ansible_path}/provision.yml")
+        success = ansible_execute("#{play} --user=#{fetch(:user)} --private-key=#{ansible_path}/files/ssh/id_rsa #{ansible_path}/provision.yml")
 
         unless success
           error "\n\nUnable to provision with SSH publickey for \"#{fetch(:user)}\" user"
@@ -26,7 +28,7 @@ namespace :evolve do
           set :provision_user, ask('user to provision as', 'root')
 
           ansible_execute("#{play} --user=#{fetch(:provision_user)} --ask-pass --ask-sudo-pass #{ansible_path}/user.yml")
-          ansible_execute("#{play} --user=#{fetch(:user)} #{ansible_path}/provision.yml")
+          ansible_execute("#{play} --user=#{fetch(:user)} --private-key=#{ansible_path}/files/ssh/id_rsa #{ansible_path}/provision.yml")
         end
       end
 

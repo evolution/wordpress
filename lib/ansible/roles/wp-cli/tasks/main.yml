@@ -1,7 +1,7 @@
-- name:       Install wp-cli
-  get_url:
-    url:      https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    dest:     /usr/local/bin/wp
-    mode:     0755
-    force:    yes
-  sudo:       true
+# see evolution/wordpress#126
+- name:         Fetch latest wp-cli (on control machine)
+  local_action: get_url dest=/tmp/wp-cli url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar force=yes
+
+- name:         Copy latest wp-cli to remote
+  copy:         src=/tmp/wp-cli dest=/usr/local/bin/wp force=yes mode=0755
+  sudo:         yes

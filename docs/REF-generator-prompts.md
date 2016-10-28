@@ -7,6 +7,7 @@
 * [Domain name](#domain-name)
 * [WWW or bare domain](#www-or-bare-domain)
 * [New Relic license key](#new-relic-license-key)
+* [Datadog license key](#datadog-license-key)
 * [Optional features](#optional-features)
 * [Wordpress version](#wordpress-version)
 * [Wordpress table prefix](#wordpress-table-prefix)
@@ -56,6 +57,10 @@ A redirect is also created in `web/.htaccess` to send requests for your bare dom
 ### New Relic license key
 
 When provided a license key, this will automatically set up [server monitoring](http://newrelic.com/server-monitoring) and the [PHP agent](https://docs.newrelic.com/docs/agents/php-agent/getting-started/new-relic-php) through New Relic. **The default for this is to skip New Relic installation.**
+
+### Datadog license key
+
+When provided a license key, this will automatically set up [the base agent](https://github.com/DataDog/ansible-datadog) for Datadog monitoring, via ansible-galaxy. **The default for this is to skip Datadog installation.**
 
 ### Optional features
 

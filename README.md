@@ -36,8 +36,9 @@ Evolution is intended for use in a POSIX environment, such as Linux or Mac OS. W
 
 You will need:
 
-* [Vagrant](https://www.vagrantup.com/downloads.html) 1.6+
-* ~~[Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)~~
+* [Vagrant](https://www.vagrantup.com/downloads.html) 1.8+
+  * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 5+
+  * [Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)
 * [Node](https://nodejs.org/en/download/) 4.0+
 * [Bundler](http://bundler.io/)
 * [Ansible](http://docs.ansible.com/intro_installation.html) 2.0+
@@ -57,6 +58,7 @@ npm install -g yo generator-evolve
 * [Rebuilding an existing Evolution server](./docs/TUTORIAL-MOVE.md)
 * [Upgrading from an existing Genesis site](./docs/UPGRADE-FAQ.md)
 * [Importing a non Evolution site](./docs/TUTORIAL-IMPORT.md)
+* [Caveats for developing themes and plugins](./docs/REF-caveats-constants.md)
 
 ## Managing Remote Environments
 

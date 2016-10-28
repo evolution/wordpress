@@ -1,4 +1,8 @@
 ---
+- name:         Test distro and version, as we only support specifically Ubuntu 14
+  fail:         msg="{{ansible_distribution}} {{ansible_distribution_version}} is not supported"
+  when:         ansible_distribution != "Ubuntu" or ansible_distribution_major_version != "14"
+
 - name:         Test existance of evolution init script
   stat:         path=/etc/init.d/evolution-wordpress
   register:     evo_init

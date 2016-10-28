@@ -1,5 +1,38 @@
 # Changelog
 
+- v1.4.5
+    - Fixed bug with ansible 2.1.2 and private keys ([#150](https://github.com/evolution/wordpress/pull/150))
+- v1.4.4
+    - Fixed wp content and uploads permissions ([#140](https://github.com/evolution/wordpress/pull/140))
+    - Fixed wp path for staging/prod wp-cron jobs ([#149](https://github.com/evolution/wordpress/pull/149))
+- v1.4.3
+    - Added optional override of xml-rpc blocking ([#147](https://github.com/evolution/wordpress/pull/147))
+- v1.4.2
+    - Fixed non-integer swapfile sizes ([#142](https://github.com/evolution/wordpress/pull/142))
+    - Fixed handling of forwarded IP addresses ([#145](https://github.com/evolution/wordpress/pull/145))
+- v1.4.1
+    - Added ssh control path in ansible.cfg ([#139](https://github.com/evolution/wordpress/pull/139))
+- v1.4.0
+    - Added distro & version check in provisioning ([#137](https://github.com/evolution/wordpress/pull/137))
+- v1.3.16
+    - Fixed ssh fingerprint issue for local vagrant rebuilds ([#130](https://github.com/evolution/wordpress/pull/130))
+    - Added reference docs for theme and plugin development ([#132](https://github.com/evolution/wordpress/pull/132))
+    - Role for newrelic should only run for prod stage ([#133](https://github.com/evolution/wordpress/pull/133))
+- v1.3.15
+    - Fixed a whackamole get_url bug that kept coming back ([#129](https://github.com/evolution/wordpress/pull/129))
+- v1.3.14
+    - Fixed php config path ([#128](https://github.com/evolution/wordpress/pull/128))
+- v1.3.13
+    - Fixed some ansible deprecation warnings ([#127](https://github.com/evolution/wordpress/pull/127))
+    - Added another FAQ entry
+- v1.3.12
+    - Replaced zip lib and added known host checks in importer ([#122](https://github.com/evolution/wordpress/pull/122))
+    - Use google public dns nameservers ([#118](https://github.com/evolution/wordpress/pull/118))
+    - Documented datadog generator prompt ([#123](https://github.com/evolution/wordpress/pull/123))
+- v1.3.11
+    - Bypassed ansible get_url SNI issue ([#114](https://github.com/evolution/wordpress/pull/114))
+- v1.3.10
+    - Fixed bug with ansible-galaxy and empty roles file ([#112](https://github.com/evolution/wordpress/pull/112))
 - v1.3.9
     - Added maintenance and upgrade documentation
     - Added Datadog monitoring ([#108](https://github.com/evolution/wordpress/pull/108))

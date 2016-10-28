@@ -11,7 +11,7 @@ var chalk     = require('chalk');
 var deasync   = require('deasync');
 var inquirer  = require('inquirer');
 var replace   = require('replace');
-var AdmZip    = require('adm-zip');
+var yauzl     = require('yauzl');
 
 // Evolution site working directory
 var siteDirectory  = process.cwd();
@@ -40,151 +40,195 @@ var extractedPath = path.join(os.tmpdir(), path.basename(answers.zipfile, '.zip'
 fs.emptyDirSync(extractedPath);
 
 console.log('Extracting', chalk.yellow(answers.zipfile), 'to', chalk.green(extractedPath));
+var extractedFiles = 0,
+    extractedDirs  = 0;
 
-var zip = new AdmZip(answers.zipfile);
-zip.extractAllTo(extractedPath, true);
+yauzl.open(answers.zipfile, {lazyEntries: true}, function(err, zipfile) {
+  if (err) throw err;
+  zipfile.readEntry();
+  zipfile.on('entry', function(entry) {
+    var extractedName = path.join(extractedPath, entry.fileName);
+    process.stdout.write("Extracted " + chalk.green(extractedFiles) + " files and " + chalk.green(extractedDirs) + " directories\r");
 
-// read the manifest
-var manifest = JSON.parse(fs.readFileSync(path.join(extractedPath, 'cambrian-manifest.json')).toString());
-
-// get sql dump
-var extractedSql = path.join(extractedPath, 'wordpress.sql');
-
-// necessary cleanup of sql dump, when coming from multisite
-if (manifest.is_multisite) {
-  // replace subsite table prefix with new global table prefix
-  var subsiteTablePrefix = manifest.get_blog_prefix;
-  var wpConfig = fs.readFileSync(path.join(siteDirectory, 'web', 'wp-config.php')).toString();
-
-  var tablePrefix = wpConfig.match(/table_prefix\s*=\s*(?:'|")([^'"]+)(?:'|")/);
-  tablePrefix = tablePrefix == null ? 'wp_' : tablePrefix[1];
-
-  console.log('db cleanup: replacing', chalk.yellow(subsiteTablePrefix), 'with', chalk.green(tablePrefix));
-
-  filterSql('`' + regexEscape(subsiteTablePrefix), '`' + tablePrefix, extractedSql);
-
-  // replace multisite uploads path
-  var uploadPath = 'uploads/';
-  var subsiteUploadPath = uploadPath + 'sites/'+manifest.blogid+'/';
-
-  console.log('db cleanup: replacing', chalk.yellow(subsiteUploadPath), 'with', chalk.green(uploadPath));
-
-  filterSql(regexEscape(subsiteUploadPath), 'uploads/', extractedSql);
-
-  // append cleanup sql to file
-  var appendedSql = [
-    '-- delete any usermeta specific to the other subsites',
-    'delete from '+tablePrefix+'usermeta where meta_key regexp "^'+regexEscape(tablePrefix)+'([0-9]+)_";',
-    '-- duplicate the '+tablePrefix+'usermeta structure in a working data table,',
-    '-- but add a unique index for filtering out duplicates',
-    'create table _fix_usermeta like '+tablePrefix+'usermeta;',
-    'alter table _fix_usermeta add unique(user_id, meta_key);',
-    '-- copy the site-specific usermeta, keeping only the last of each duplicate',
-    'insert into _fix_usermeta',
-    '    select * from '+tablePrefix+'usermeta',
-    '    where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
-    '    order by user_id, meta_key, umeta_id',
-    '    on duplicate key update umeta_id=values(umeta_id), meta_value=values(meta_value);',
-    '-- remove the first of each duplicate',
-    'delete from '+tablePrefix+'usermeta',
-    'where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
-    'and not exists (select * from _fix_usermeta where umeta_id = '+tablePrefix+'usermeta.umeta_id);',
-    '-- remove that working data table',
-    'drop table _fix_usermeta;',
-    '-- rename any site-specific options',
-    'update wp_options join (',
-    '    select option_id as oid, replace(option_name, "'+subsiteTablePrefix+'", "'+tablePrefix+'") as oname',
-    '    from wp_options',
-    '    where option_name like "'+subsiteTablePrefix+'%"',
-    ') as new_opts',
-    'set option_name=new_opts.oname',
-    'where option_id=new_opts.oid;',
-  ];
-
-  fs.appendFileSync(path.join(extractedPath, 'wordpress.sql'), appendedSql.join("\n"));
-}
-
-// strip domains from (network_)?(home|site)_url, and search/replace them in sql dump with domain from group_vars
-var searchDomains = [];
-
-['home_url','site_url','network_home_url','network_site_url'].forEach(function(value) {
-  var match = manifest[value].match(/:\/\/([^\/]+)/);
-  if (match) {
-    var escapedMatch = regexEscape(match[1]);
-    if (searchDomains.indexOf(escapedMatch) < 0)
-      searchDomains.push(escapedMatch);
-  }
-});
-
-if (searchDomains.length) {
-  var siteDomain = 'local.' + fs.readFileSync(path.join(siteDirectory, 'lib', 'ansible', 'group_vars', 'all')).toString().match(/domain:[ \t]+([^\n]+)/)[1];
-
-  console.log('domain cleanup: replacing', chalk.yellow(searchDomains.join('|')), 'with', chalk.green(siteDomain));
-
-  filterSql('(' + searchDomains.join('|') + ')', siteDomain, extractedSql);
-}
-
-// run sql against db
-var capCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 'wordpress.sql') + ']';
-
-console.log('importing sql via:', chalk.cyan(capCmd));
-cp.execSync(capCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit', maxBuffer: 1024*1024});
-
-// list all users via wp-cli
-capCmd = 'bundle exec cap local wp:user:list:--fields=ID,user_login,roles:--format=json';
-console.log('listing users via:', chalk.cyan(capCmd));
-var capOut = cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit', maxBuffer: 1024*1024});
-
-// prompt for role of any users lacking one
-var existingUsers = capOut.match(/\s+(\[\{"ID":[^\r\n]+)/);
-if (existingUsers) {
-  JSON.parse(existingUsers[1]).forEach(function(user) {
-    if (!user.hasOwnProperty('roles') || user.roles == '') {
-      try {
-        inquirerPrompt([
-          {
-            type: 'list',
-            name: 'role',
-            message: 'User '+chalk.green(user.user_login)+' has no role...please assign one:',
-            choices: [
-              'subscriber',
-              'contributor',
-              'author',
-              'editor',
-              'administrator',
-            ]
-          }
-        ]);
-      }
-      catch(e) {
-        answers = e;
-      }
-
-      capCmd = 'bundle exec cap local wp:user:add-role:'+user.ID+':'+answers.role;
-      console.log('assigning user role via:', chalk.cyan(capCmd));
-      cp.execSync(capCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit'});
+    if (/\/$/.test(entry.fileName)) {
+      // create directories (names ending in '/')
+      extractedDirs++;
+      fs.mkdirs(extractedName, function(err) {
+        if (err) throw err;
+        zipfile.readEntry();
+      });
+    } else {
+      // write files via streams
+      extractedFiles++;
+      zipfile.openReadStream(entry, function(err, readStream) {
+        if (err) throw err;
+        // ensure parent directory exists
+        fs.mkdirs(path.dirname(extractedName), function(err) {
+          if (err) throw err;
+          readStream.pipe(fs.createWriteStream(extractedName));
+          readStream.on('end', function() {
+            zipfile.readEntry();
+          });
+        });
+      });
     }
   });
+  zipfile.on('end', function (err) {
+    if (err) console.log('Zip ended with an error:', chalk.red(err));
+    console.log('Extracted zip!');
+    // gjve it a second to finish writing the last entry...
+    setTimeout(function() {
+      zipPostProcessing();
+    }, 1000);
+  })
+});
+
+function zipPostProcessing() {
+  // read the manifest
+  var manifest = JSON.parse(fs.readFileSync(path.join(extractedPath, 'cambrian-manifest.json')).toString());
+
+  // get sql dump
+  var extractedSql = path.join(extractedPath, 'wordpress.sql');
+
+  // necessary cleanup of sql dump, when coming from multisite
+  if (manifest.is_multisite) {
+    // replace subsite table prefix with new global table prefix
+    var subsiteTablePrefix = manifest.get_blog_prefix;
+    var wpConfig = fs.readFileSync(path.join(siteDirectory, 'web', 'wp-config.php')).toString();
+
+    var tablePrefix = wpConfig.match(/table_prefix\s*=\s*(?:'|")([^'"]+)(?:'|")/);
+    tablePrefix = tablePrefix == null ? 'wp_' : tablePrefix[1];
+
+    console.log('db cleanup: replacing', chalk.yellow(subsiteTablePrefix), 'with', chalk.green(tablePrefix));
+
+    filterSql('`' + regexEscape(subsiteTablePrefix), '`' + tablePrefix, extractedSql);
+
+    // replace multisite uploads path
+    var uploadPath = 'uploads/';
+    var subsiteUploadPath = uploadPath + 'sites/'+manifest.blogid+'/';
+
+    console.log('db cleanup: replacing', chalk.yellow(subsiteUploadPath), 'with', chalk.green(uploadPath));
+
+    filterSql(regexEscape(subsiteUploadPath), 'uploads/', extractedSql);
+
+    // append cleanup sql to file
+    var appendedSql = [
+      '-- delete any usermeta specific to the other subsites',
+      'delete from '+tablePrefix+'usermeta where meta_key regexp "^'+regexEscape(tablePrefix)+'([0-9]+)_";',
+      '-- duplicate the '+tablePrefix+'usermeta structure in a working data table,',
+      '-- but add a unique index for filtering out duplicates',
+      'create table _fix_usermeta like '+tablePrefix+'usermeta;',
+      'alter table _fix_usermeta add unique(user_id, meta_key);',
+      '-- copy the site-specific usermeta, keeping only the last of each duplicate',
+      'insert into _fix_usermeta',
+      '    select * from '+tablePrefix+'usermeta',
+      '    where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
+      '    order by user_id, meta_key, umeta_id',
+      '    on duplicate key update umeta_id=values(umeta_id), meta_value=values(meta_value);',
+      '-- remove the first of each duplicate',
+      'delete from '+tablePrefix+'usermeta',
+      'where meta_key like "'+sqlLikeEscape(tablePrefix)+'%"',
+      'and not exists (select * from _fix_usermeta where umeta_id = '+tablePrefix+'usermeta.umeta_id);',
+      '-- remove that working data table',
+      'drop table _fix_usermeta;',
+      '-- rename any site-specific options',
+      'update wp_options join (',
+      '    select option_id as oid, replace(option_name, "'+subsiteTablePrefix+'", "'+tablePrefix+'") as oname',
+      '    from wp_options',
+      '    where option_name like "'+subsiteTablePrefix+'%"',
+      ') as new_opts',
+      'set option_name=new_opts.oname',
+      'where option_id=new_opts.oid;',
+    ];
+
+    fs.appendFileSync(path.join(extractedPath, 'wordpress.sql'), appendedSql.join("\n"));
+  }
+
+  // strip domains from (network_)?(home|site)_url, and search/replace them in sql dump with domain from group_vars
+  var searchDomains = [];
+  var siteDomain = 'local.' + fs.readFileSync(path.join(siteDirectory, 'lib', 'ansible', 'group_vars', 'all')).toString().match(/domain:[ \t]+([^\n]+)/)[1];
+
+  ['home_url','site_url','network_home_url','network_site_url'].forEach(function(value) {
+    var match = manifest[value].match(/:\/\/([^\/]+)/);
+    if (match) {
+      var escapedMatch = regexEscape(match[1]);
+      if (searchDomains.indexOf(escapedMatch) < 0)
+        searchDomains.push(escapedMatch);
+    }
+  });
+
+  if (searchDomains.length) {
+    console.log('domain cleanup: replacing', chalk.yellow(searchDomains.join('|')), 'with', chalk.green(siteDomain));
+
+    filterSql('(' + searchDomains.join('|') + ')', siteDomain, extractedSql);
+  }
+
+  // remove known host, only as necessary
+  var execMaxBuffer = 1024*1024*1024;
+  var cpCmd = '(ssh-keygen -F ' + siteDomain + ' && ssh-keygen -R ' + siteDomain + ') || :';
+  console.log('checking for (and removing) any existing known host:', chalk.cyan(cpCmd));
+  cp.execSync(cpCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit', maxBuffer: execMaxBuffer});
+
+  // run sql against db
+  cpCmd = 'bundle exec cap local evolve:db:exec[' + path.join(extractedPath, 'wordpress.sql') + ']';
+  console.log('importing sql via:', chalk.cyan(cpCmd));
+  cp.execSync(cpCmd, {cwd: siteDirectory, env: util._extend(process.env, {evolution_non_interactive: 1}), stdio: 'inherit', maxBuffer: execMaxBuffer});
+
+  // list all users via wp-cli
+  cpCmd = 'bundle exec cap local wp:user:list:--fields=ID,user_login,roles:--format=json';
+  console.log('listing users via:', chalk.cyan(cpCmd));
+  var capOut = cp.execSync(cpCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit', maxBuffer: execMaxBuffer});
+
+  // prompt for role of any users lacking one
+  var existingUsers = capOut.match(/\s+(\[\{"ID":[^\r\n]+)/);
+  if (existingUsers) {
+    JSON.parse(existingUsers[1]).forEach(function(user) {
+      if (!user.hasOwnProperty('roles') || user.roles == '') {
+        try {
+          inquirerPrompt([
+            {
+              type: 'list',
+              name: 'role',
+              message: 'User '+chalk.green(user.user_login)+' has no role...please assign one:',
+              choices: [
+                'subscriber',
+                'contributor',
+                'author',
+                'editor',
+                'administrator',
+              ]
+            }
+          ]);
+        }
+        catch(e) {
+          answers = e;
+        }
+
+        cpCmd = 'bundle exec cap local wp:user:add-role:'+user.ID+':'+answers.role;
+        console.log('assigning user role via:', chalk.cyan(cpCmd));
+        cp.execSync(cpCmd, {cwd: siteDirectory, env: process.env, stdio: 'inherit', maxBuffer: execMaxBuffer});
+      }
+    });
+  }
+
+  // Copying Themes / Plugins / Uploads
+  var pluginsPath = path.join(extractedPath, 'plugins');
+  console.log('installing plugins from', chalk.cyan(pluginsPath));
+  fs.copySync(pluginsPath, path.join(siteDirectory, 'web', 'wp-content', 'plugins'), {clobber: true});
+
+  var themesPath = path.join(extractedPath, 'themes');
+  console.log('installing themes from', chalk.cyan(themesPath));
+  fs.copySync(themesPath, path.join(siteDirectory, 'web', 'wp-content', 'themes'), {clobber: true});
+
+  var uploadsPath = path.join(extractedPath, 'uploads');
+  if (manifest.is_multisite) {
+    uploadsPath = path.join(uploadsPath, 'sites', manifest.blogid);
+  }
+  console.log('installing uploads from', chalk.cyan(uploadsPath));
+  fs.copySync(uploadsPath, path.join(siteDirectory, 'web', 'wp-content', 'uploads'), {clobber: true});
+
+  console.log(chalk.green('looks like we\'re done here!'));
 }
-
-// Copying Themes / Plugins / Uploads
-var pluginsPath = path.join(extractedPath, 'plugins');
-console.log('installing plugins from', chalk.cyan(pluginsPath));
-fs.copySync(pluginsPath, path.join(siteDirectory, 'web', 'wp-content', 'plugins'), {clobber: true});
-
-var themesPath = path.join(extractedPath, 'themes');
-console.log('installing themes from', chalk.cyan(themesPath));
-fs.copySync(themesPath, path.join(siteDirectory, 'web', 'wp-content', 'themes'), {clobber: true});
-
-var uploadsPath = path.join(extractedPath, 'uploads');
-if (manifest.is_multisite) {
-  uploadsPath = path.join(uploadsPath, 'sites', manifest.blogid);
-}
-console.log('installing uploads from', chalk.cyan(uploadsPath));
-fs.copySync(uploadsPath, path.join(siteDirectory, 'web', 'wp-content', 'uploads'), {clobber: true});
-
-console.log(chalk.green('looks like we\'re done here!'));
-
 
 function regexEscape(input) {
   return input.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");

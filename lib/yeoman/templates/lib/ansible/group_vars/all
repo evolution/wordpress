@@ -13,7 +13,7 @@ mysql:
   password:     <%- props.DB_PASSWORD %>
   host:         <%- props.DB_HOST %>
 
-<% if (props.datadog) { %>datadog_api_key: '<%= props.datadog %>'<% } %>
+<% if (props.datadog) { %>datadog_api_key: '<%- props.datadog %>'<% } %>
 
 # php__memory_limit:
 
@@ -22,6 +22,10 @@ mysql:
 # apache__max_spare_servers:
 # apache__max_clients:
 # apache__max_requests_per_child:
+
+# wordpress__xmlrpc_allow: false
+# wordpress__xmlrpc_whitelist:
+#   - "local"
 
 mail__postmaster: no-reply@<%- props.domain %>
 
