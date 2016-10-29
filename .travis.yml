@@ -15,6 +15,7 @@ before_install:
   - nvm --version
   - npm install
   # ruby setup (for capistrano)
+  - rvm install 1.9.3
   - rvm use 1.9.3
   - gem install bundler
   - ruby --version
