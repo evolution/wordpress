@@ -2,13 +2,13 @@
 
 'use strict'
 
-var AdmZip  = require('adm-zip');
 var fs      = require('fs-extra');
 var glob    = require('glob');
 var inWords = require('in-words').en;
 var path    = require('path');
 var request = require('request');
 var util    = require('util');
+var yauzl   = require('yauzl');
 
 console.log('Evolution WordPress - npm `postinstall` Script\n');
 
@@ -100,14 +100,56 @@ function extract(username, repo, version, directory, cb) {
     .on('error', function (err) { cb(err); })
     .pipe(fs.createWriteStream(zipName+'.zip'))
     .on('close', function () {
-      var zip = new AdmZip(zipName+'.zip');
-      zip.extractAllTo(zipName, true);
-      fs.unlinkSync(zipName+'.zip');
+      console.log('Extracting '+zipName+'.zip to', zipName);
+      var extractedFiles = 0,
+          extractedDirs  = 0;
+      fs.emptyDirSync(zipName);
+      yauzl.open(zipName+'.zip', {lazyEntries: true}, function(err, zipfile) {
+        if (err) throw err;
 
-      var entryDir = glob.sync(path.join(zipName, '*/'))[0];
-      fs.copySync(entryDir, directory, {clobber:true});
-      fs.removeSync(zipName);
+        zipfile.readEntry();
+        zipfile.on('entry', function(entry) {
+          var extractedName = path.join(zipName, entry.fileName);
+          process.stdout.write("Extracted " + extractedFiles + " files and " + extractedDirs + " directories\r");
 
-      cb();
+          if (/\/$/.test(entry.fileName)) {
+            // create directories (names ending in '/')
+            extractedDirs++;
+            fs.mkdirs(extractedName, function(err) {
+              if (err) throw err;
+              zipfile.readEntry();
+            });
+          } else {
+            // write files via streams
+            extractedFiles++;
+            zipfile.openReadStream(entry, function(err, readStream) {
+              if (err) throw err;
+              // ensure parent directory exists
+              fs.mkdirs(path.dirname(extractedName), function(err) {
+                if (err) throw err;
+                readStream.pipe(fs.createWriteStream(extractedName));
+                readStream.on('end', function() {
+                  zipfile.readEntry();
+                });
+              });
+            });
+          }
+        });
+        zipfile.on('end', function (err) {
+          if (err) console.log('Zip ended with an error:', err);
+          console.log('Extracted zip!');
+          // gjve it a second to finish writing the last entry...
+          setTimeout(function() {
+            fs.unlinkSync(zipName+'.zip');
+
+            var entryDir = glob.sync(path.join(zipName, '*/'))[0];
+            fs.copySync(entryDir, directory, {clobber:true});
+            fs.removeSync(zipName);
+
+            cb();
+          }, 1000);
+        })
+
+      });
     });
 };
