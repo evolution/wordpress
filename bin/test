@@ -2,6 +2,7 @@
 
 'use strict'
 
+var dns   = require('dns');
 var glob  = require('glob');
 var Mocha = require('mocha');
 var path  = require('path');
@@ -16,10 +17,14 @@ glob.sync('**/*.js', {
   mocha.addFile(path.join(testDir, file));
 });
 
-mocha
-  .bail(true)
-  .reporter('spec')
-  .timeout(0)
-  .ui('bdd')
-  .run(process.exit)
-;
+dns.lookup('example.com', function(err, address, family) {
+  process.env.EXAMPLE_COM = address;
+
+  mocha
+    .bail(true)
+    .reporter('spec')
+    .timeout(0)
+    .ui('bdd')
+    .run(process.exit)
+  ;
+});
