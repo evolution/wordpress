@@ -1,12 +1,12 @@
 'use strict';
 
 var assert  = require('assert');
-var Browser = require('zombie');
+var Browser = require('../../lib/node/nightmare');
 var fs      = require('fs');
 var exec    = require('child_process').exec;
 
 var testFile = '/vagrant/web/wp-content/uploads/uploads_sync_test.jpg';
-var testUrl  = 'http://production.example.com/wp-content/uploads/uploads_sync_test.jpg';
+var testUrl  = `http://${process.env.EXAMPLE_COM}/wp-content/uploads/uploads_sync_test.jpg`;
 
 describe('cap production evolve:files:up', function(done) {
   it('may need to remove uploads', function(done) {
@@ -31,12 +31,14 @@ describe('cap production evolve:files:up', function(done) {
     var browser = new Browser();
 
     browser
-      .visit(testUrl)
-      .then(function() {
-        assert(false, "Url unexpectedly exists")
+      .goto(testUrl, {'Host':'production.example.com'})
+      .end()
+      .then(function(result) {
+        assert.equal(404, result.code)
+        done()
       })
       .catch(function(error) {
-        done();
+        done(error);
       })
     ;
   });
@@ -63,8 +65,10 @@ describe('cap production evolve:files:up', function(done) {
     var browser = new Browser();
 
     browser
-      .visit(testUrl)
-      .then(function() {
+      .goto(testUrl, {'Host':'production.example.com'})
+      .end()
+      .then(function(result) {
+        assert.notEqual(404, result.code)
         done();
       })
       .catch(function(error) {

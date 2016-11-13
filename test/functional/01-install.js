@@ -1,7 +1,7 @@
 'use strict';
 
 var assert    = require('assert');
-var Browser   = require('zombie');
+var Browser   = require('../../lib/node/nightmare');
 var fs        = require('fs');
 var path      = require('path');
 
@@ -10,34 +10,24 @@ describe('Mock site', function() {
     var browser = new Browser();
 
     browser
-      .visit('http://local.example.com/wp/wp-admin/install.php')
-      .then(function() {
-        if (browser.button('Continue')) {
-          browser.select('language', 'English (United States)');
-
-          return browser.pressButton('Continue');
-        }
-      })
-      .then(function() {
-        if (browser.button('Hide')) {
-          return browser.pressButton('Hide');
-        }
-      })
-      .then(function() {
-        if (browser.button('Install WordPress')) {
-          browser
-            .fill('Site Title',       'Evolution WordPress Test')
-            .fill('Username',         'test')
-            .fill('admin_password',   'test')
-            .fill('admin_password2',  'test')
-            .fill('admin_email',      'test@example.com')
-            .uncheck('blog_public')
-          ;
-
-          return browser.pressButton('Install WordPress');
-        }
-      })
-      .then(done, done)
+      .goto(`http://${process.env.EXAMPLE_COM}/wp/wp-admin/install.php`, {'Host':'local.example.com'})
+      .select('select[name=language]', '')
+      .click('form[action$="?step=1"] input[type=submit]')
+      .wait('form[action$="?step=2"]')
+      .click('button.wp-hide-pw')
+      .type('input[name=weblog_title]', 'Evolution WordPress Test')
+      .type('input[name=user_name]', 'test')
+      .type('input[name=admin_password]', 'test')
+      .check('input[name=pw_weak]')
+      .type('input[name=admin_email]', 'test@example.com')
+      .uncheck('input[name=blog_public]')
+      .click('form[action$="?step=2"] input[type=submit]')
+      .wait('a[href$="/wp-login.php"]')
+      .end()
+      .then(done)
+      .catch(function(error) {
+        done();
+      });
     ;
   });
 
@@ -45,11 +35,15 @@ describe('Mock site', function() {
     var browser = new Browser();
 
     browser
-      .visit('http://local.example.com/wp/wp-admin/install.php')
-      .then(function() {
-        assert.equal('Log In', browser.text('a.button'));
+      .goto(`http://${process.env.EXAMPLE_COM}/wp/wp-admin/install.php`, {'Host':'local.example.com'})
+      .evaluate(function() {
+        return document.querySelector('a[href$="/wp-login.php"]').href
       })
-      .then(done, done)
+      .end()
+      .then(function(link) {
+        assert.equal(link, 'http://local.example.com/wp/wp-login.php');
+        done();
+      })
     ;
   })
 });

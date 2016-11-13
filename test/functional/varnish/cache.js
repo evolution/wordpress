@@ -1,18 +1,25 @@
 'use strict';
 
 var assert    = require('assert');
-var Browser   = require('zombie');
+var Browser   = require('../../../lib/node/nightmare');
 
 describe('Varnish', function() {
   it('should access backend', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://example.com/')
-      .then(null, function() {
-        assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
+      .goto(`http://${process.env.EXAMPLE_COM}/`, {'Host':'example.com'})
+      .evaluate(function() {
+        return document.title;
       })
-      .then(done, done)
+      .end()
+      .then(function(title) {
+        assert.equal(title, 'Evolution WordPress Test – Just another WordPress site');
+        done()
+      })
+      .catch(function(error) {
+        done(error)
+      })
     ;
   });
 
@@ -21,11 +28,15 @@ describe('Varnish', function() {
       var browser = new Browser();
 
       browser
-        .visit('http://example.com/')
-        .then(null, function() {
-          assert.equal('cached', browser.resources[0].response.headers['x-cache']);
+        .goto(`http://${process.env.EXAMPLE_COM}/`, {'Host':'example.com'})
+        .end()
+        .then(function(result) {
+          assert.equal(result.headers['x-cache'], 'cached')
+          done()
         })
-        .then(done, done)
+        .catch(function(error) {
+          done(error)
+        })
       ;
     });
   });
@@ -35,19 +46,19 @@ describe('Varnish', function() {
       var browser = new Browser();
 
       browser
-        .visit('http://example.com/wp-admin')
-        .then(null, function() {
-          assert(browser.resources.browser.getCookie('wordpress_test_cookie'));
+        .goto(`http://${process.env.EXAMPLE_COM}/`, {
+          'Host':'example.com',
+          'Cookie':'wordpress_test_cookie=WP+Cookie+check',
         })
-        .then(null, function() {
-          return browser.visit('http://example.com/');
+        .end()
+        .then(function(result) {
+          assert.equal(result.headers['age'], '0')
+          assert.equal(result.headers['x-cache'], 'uncached')
+          done()
         })
-        .then(null, function() {
-          assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
-          assert.equal(0, browser.resources[0].response.headers.age);
-          assert.equal('uncached', browser.resources[0].response.headers['x-cache']);
+        .catch(function(error) {
+          done(error)
         })
-        .then(done, done)
       ;
     });
   });
@@ -56,62 +67,64 @@ describe('Varnish', function() {
     it('should ignore tracking cookies for cache', function(done) {
       var browser = new Browser();
 
-      browser.setCookie({
-        name: '_test',
-        value: +new Date(),
-        domain: 'example.com',
-        path: '/',
-      });
-
       browser
-        .visit('http://example.com/')
-        .then(null, function() {
-          assert(browser.getCookie('_test'));
-          assert(browser.resources[0].response.headers.age);
-          assert.equal('cached', browser.resources[0].response.headers['x-cache']);
+        .goto(`http://${process.env.EXAMPLE_COM}/`, {
+          'Host':'example.com',
+          'Cookie':`_test=${new Date()}`,
         })
-        .then(done, done)
+        .end()
+        .then(function(result) {
+          assert(result.headers['age'])
+          assert.equal(result.headers['x-cache'], 'cached')
+          done()
+        })
+        .catch(function(error) {
+          done(error)
+        })
       ;
     });
   });
 
   describe('with an application cookies', function() {
-    var cookie  = {
-      name: 'test',
-      value: +new Date(),
-      domain: 'example.com',
-      path: '/',
-    };
+    var cookie  = `test=${new Date()}`;
 
     it('should not be cached initially', function(done) {
       var browser = new Browser();
 
-      browser.setCookie(cookie);
-
       browser
-        .visit('http://example.com/')
-        .then(null, function() {
-          assert(browser.getCookie('test'));
-          assert.equal(0, browser.resources[0].response.headers.age);
-          assert.equal('uncached', browser.resources[0].response.headers['x-cache']);
+        .goto(`http://${process.env.EXAMPLE_COM}/`, {
+          'Host':'example.com',
+          'Cookie':cookie,
         })
-        .then(done, done)
+        .end()
+        .then(function(result) {
+          assert.equal(result.headers['age'], '0')
+          assert.equal(result.headers['x-cache'], 'uncached')
+          done()
+        })
+        .catch(function(error) {
+          done(error)
+        })
       ;
     });
 
     it('should be subsequently cached', function(done) {
       var browser = new Browser();
 
-      browser.setCookie(cookie);
-
       browser
-        .visit('http://example.com/')
-        .then(null, function() {
-          assert(browser.getCookie('test'));
-          assert(browser.resources[0].response.headers.age);
-          assert.equal('cached', browser.resources[0].response.headers['x-cache']);
+        .goto(`http://${process.env.EXAMPLE_COM}/`, {
+          'Host':'example.com',
+          'Cookie':cookie,
         })
-        .then(done, done)
+        .end()
+        .then(function(result) {
+          assert(result.headers['age'])
+          assert.equal(result.headers['x-cache'], 'cached')
+          done()
+        })
+        .catch(function(error) {
+          done(error)
+        })
       ;
     });
   });
