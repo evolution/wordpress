@@ -17,7 +17,7 @@
 
 - name:           Add Nodesource 4.x repos
   apt_repository: repo={{item}} state=present update_cache=yes
-  with_items:     node_repos
+  with_items:     "{{ node_repos }}"
   sudo:           yes
 
 - name:           Install node
