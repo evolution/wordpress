@@ -48,10 +48,10 @@ before_install:
   - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H www.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H example.com >> $HOME/.ssh/known_hosts
+  # configure virtual display server (for headless tests)
+  - "export DISPLAY=':99.0'"
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x24"
 install:
-  - echo "Configure virtual display server (for headless tests)"
-  - export DISPLAY=':99.0'
-  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - echo "Provision locally and fix permissions afterward"
   - sudo $PWD/bin/provision
   - sudo chown -Rf $USER:$USER $HOME/.ansible
