@@ -23,6 +23,7 @@ before_install:
   - gem --version
   - bundle --version
   # python setup (for ansible)
+  - sudo pip install urllib3 pyopenssl ndg-httpsclient pyasn1
   - sudo pip install ansible
   - python --version
   - pip --version
