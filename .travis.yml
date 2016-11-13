@@ -57,7 +57,7 @@ install:
   - sudo chown -Rf $USER:$USER $HOME/.ansible
   - echo "Install Composer dependencies"
   - curl -sS https://getcomposer.org/installer | php
-  - php composer.phar install -n --dev
+  - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
   - npm test
