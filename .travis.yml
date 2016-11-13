@@ -35,11 +35,9 @@ before_install:
   # copy our local evolution-wordpress as npm dependency
   - mkdir -p /vagrant/node_modules
   - cp -RP $PWD /vagrant/node_modules/evolution-wordpress
-  # invoke local provision (as default user with elevated permissions)
+  # set up local provisioner
   - sudo cp $PWD/.travis.provision.bin $PWD/bin/provision
   - sudo chmod +x $PWD/bin/provision
-  - sudo $PWD/bin/provision
-  - sudo chown -Rf $USER:$USER $HOME/.ansible
   # mock vagrant binary (for parity with local/remote stages)
   - sudo cp $PWD/.travis.vagrant.bin /bin/vagrant
   - sudo chmod +x /bin/vagrant
@@ -50,6 +48,9 @@ before_install:
   # install composer (for phpunit)
   - curl -sS https://getcomposer.org/installer | php
 install:
+  - echo "Provision locally and fix permissions afterward"
+  - sudo $PWD/bin/provision
+  - sudo chown -Rf $USER:$USER $HOME/.ansible
   - echo "Install Composer dependencies"
   - php composer.phar install --dev
 script:
