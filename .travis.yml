@@ -1,6 +1,9 @@
 sudo: required
 dist: trusty
 language: generic
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/vendor
 addons:
   hosts:
     - example.com
@@ -57,4 +60,4 @@ install:
   - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
-  - DEBUG=nightmare xvfb-run --server-args="-screen 0 1024x768x24" npm test
+  - DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" npm test
