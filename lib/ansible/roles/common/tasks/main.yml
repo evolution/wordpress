@@ -23,7 +23,7 @@
   when:           dynamic_resolv.stdout != ""
 
 # see evolution/wordpress#126
-- name:           Fetch kernel purging script (on control machine)
+- name:           Fetch kernel purging script (from control)
   local_action:   get_url dest=/tmp/purge-kernels.py url=https://raw.githubusercontent.com/EvanK/ubuntu-purge-kernels/master/purge-kernels.py force=yes
   when:           not lookup('env','CI')
 
