@@ -13,6 +13,7 @@ addons:
   apt:
     packages:
       - xvfb
+      - libgconf2-dev
 before_install:
   # node setup (for yeoman)
   - nvm install 4.0
