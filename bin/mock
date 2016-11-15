@@ -7,8 +7,7 @@ var exec    = require('child_process').exec;
 var helpers = require('yeoman-test');
 var path    = require('path');
 
-var libDir        = path.normalize(path.join(__dirname, '..'));
-var outputDir     = path.join(libDir, 'temp');
+var outputDir     = path.join(__dirname, '..', 'temp');
 var privatePath   = path.join(outputDir, '/lib/ansible/files/ssh/id_rsa');
 var privateKey    = fs.existsSync(privatePath) ? fs.readFileSync(privatePath) : null;
 var publicPath    = path.join(outputDir, '/lib/ansible/files/ssh/id_rsa.pub');
@@ -121,7 +120,7 @@ helpers.testDirectory(outputDir, function(err) {
             new RegExp('("evolution-wordpress":[ ]*)"[^"]+"'),
             [
               '$1',
-              `"file:${libDir}"`,
+              `"evolution/wordpress#${process.env.TRAVIS_COMMIT}"`,
             ].join('')
           )
         ;
