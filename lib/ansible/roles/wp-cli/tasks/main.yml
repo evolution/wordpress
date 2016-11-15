@@ -1,14 +1,10 @@
 # see evolution/wordpress#126
 - name:         Fetch latest wp-cli (from control)
   local_action: get_url dest=/tmp/wp-cli url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar force=yes
-  when:         not lookup('env','CI')
 
 - name:         Copy latest wp-cli to remote
   copy:         src=/tmp/wp-cli dest=/usr/local/bin/wp force=yes mode=0755
   sudo:         yes
-  when:         not lookup('env','CI')
 
-- name:         Fetch latest wp-cli
-  get_url:      dest=/usr/local/bin/wp url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar force=yes mode=0755
-  sudo:         yes
-  when:         lookup('env','CI')
+- name:         Remove latest wp-cli in tmp (from control)
+  local_action: file dest=/tmp/wp-cli state=absent

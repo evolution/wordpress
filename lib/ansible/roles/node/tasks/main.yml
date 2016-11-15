@@ -10,17 +10,13 @@
 
 - name:           Fetch Nodesource apt key (from control)
   local_action:   get_url dest=/tmp/ns4x.gpg.key url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key force=yes
-  when:           not lookup('env','CI')
 
 - name:           Add Nodesource apt key
   apt_key:        data="{{ lookup('file', '/tmp/ns4x.gpg.key') }}" state=present
   sudo:           yes
-  when:           not lookup('env','CI')
 
-- name:           Add Nodesource apt key
-  apt_key:        url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
-  sudo:           yes
-  when:           lookup('env','CI')
+- name:           Remove Nodesource apt key in tmp (from control)
+  local_action:   file dest=/tmp/ns4x.gpg.key state=absent
 
 - name:           Add Nodesource 4.x repos
   apt_repository: repo={{item}} state=present update_cache=yes
