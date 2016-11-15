@@ -61,4 +61,4 @@ install:
   - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
-  - travis_wait DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" npm test
+  - DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" npm test

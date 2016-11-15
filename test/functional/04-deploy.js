@@ -12,16 +12,26 @@ describe('cap production deploy', function(done) {
     });
 
     child.stdout.on('data', function (data) {
-      output += data.toString();
+      if (process.env.TRAVIS) {
+        console.log(data.toString());
+      } else {
+        output += data.toString();
+      }
     });
 
     child.stderr.on('data', function (data) {
-      output += data.toString();
+      if (process.env.TRAVIS) {
+        console.log(data.toString());
+      } else {
+        output += data.toString();
+      }
     });
 
     child.on('exit', function (code) {
       if (code) {
-        console.error(output);
+        if (!process.env.TRAVIS) {
+          console.error(output);
+        }
         done(new Error('exited with ' + code));
       } else {
         done();
