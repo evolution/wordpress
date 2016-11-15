@@ -16,6 +16,7 @@ addons:
       - libgconf2-dev
 env:
   global:
+    - DEBUG: "nightmare:*,electron:*"
     - DISPLAY: ":99.0"
 before_install:
   # node setup (for yeoman)
@@ -55,6 +56,8 @@ before_install:
   - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H www.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H example.com >> $HOME/.ssh/known_hosts
+  # run xvfb as background service
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x24"
 install:
   - echo "Provision locally and fix permissions afterward"
   - sudo $PWD/bin/provision
@@ -64,4 +67,4 @@ install:
   - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
-  - DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" ./bin/test
+  - ./bin/test
