@@ -114,7 +114,7 @@ helpers.testDirectory(outputDir, function(err) {
 
       fs.writeFileSync(outputDir + '/Vagrantfile', vagrantFile);
 
-      // use local path for evolution, instead of npm registry package
+      // since we've yet to publish to npm, use local abs path for evolution
       if (isCI) {
         var packageJson = fs.readFileSync(outputDir + '/package.json', 'utf8')
           .replace(
