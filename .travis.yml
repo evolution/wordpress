@@ -14,6 +14,9 @@ addons:
     packages:
       - xvfb
       - libgconf2-dev
+env:
+  global:
+    - DISPLAY: ":99.0"
 before_install:
   # node setup (for yeoman)
   - nvm install 4.0
@@ -61,4 +64,4 @@ install:
   - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
-  - DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" npm test
+  - DEBUG=nightmare:*,electron:* xvfb-run --server-args="-screen 0 1024x768x24" ./bin/test
