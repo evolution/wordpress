@@ -3,7 +3,10 @@ dist: trusty
 language: generic
 cache:
   directories:
+  - $HOME/.rvm
+  - $HOME/.nvm
   - $TRAVIS_BUILD_DIR/vendor
+  - $TRAVIS_BUILD_DIR/node_modules
 addons:
   hosts:
     - example.com
