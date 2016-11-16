@@ -114,9 +114,8 @@ helpers.testDirectory(outputDir, function(err) {
 
       fs.writeFileSync(outputDir + '/Vagrantfile', vagrantFile);
 
-      // since we've yet to publish to npm, use local abs path for evolution
       var committish;
-      if(isCI) {
+      if (isCI) {
         committish = process.env.TRAVIS_COMMIT;
       } else {
         committish = cp.execSync('git rev-parse --verify HEAD', { cwd: libDir })

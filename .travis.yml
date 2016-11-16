@@ -16,11 +16,17 @@ addons:
       - libgconf2-dev
 env:
   global:
-    - DEBUG: "nightmare:*,electron:*"
     - DISPLAY: ":99.0"
+  matrix:
+    - ANSIBLE_VERSION: "2.0.2"
+    - ANSIBLE_VERSION: "2.1.3"
+    - ANSIBLE_VERSION: "2.2.0"
+    - NODE_VERSION: "4.0"
+    - NODE_VERSION: "5.0"
+    - NODE_VERSION: "6.0"
 before_install:
   # node setup (for yeoman)
-  - nvm install 4.0
+  - nvm install $NODE_VERSION
   - node --version
   - npm --version
   - nvm --version
@@ -35,7 +41,7 @@ before_install:
   - bundle --version
   # python setup (for ansible)
   - sudo pip install urllib3 pyopenssl ndg-httpsclient pyasn1
-  - sudo pip install ansible
+  - sudo pip install ansible==$ANSIBLE_VERSION
   - python --version
   - pip --version
   - ansible --version
