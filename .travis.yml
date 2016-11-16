@@ -18,9 +18,6 @@ env:
   global:
     - DISPLAY: ":99.0"
   matrix:
-    - ANSIBLE_VERSION="2.0.2" NODE_VERSION="4.0"
-    - ANSIBLE_VERSION="2.0.2" NODE_VERSION="5.0"
-    - ANSIBLE_VERSION="2.0.2" NODE_VERSION="6.0"
     - ANSIBLE_VERSION="2.1.3" NODE_VERSION="4.0"
     - ANSIBLE_VERSION="2.1.3" NODE_VERSION="5.0"
     - ANSIBLE_VERSION="2.1.3" NODE_VERSION="6.0"
@@ -28,12 +25,6 @@ env:
     - ANSIBLE_VERSION="2.2.0" NODE_VERSION="5.0"
     - ANSIBLE_VERSION="2.2.0" NODE_VERSION="6.0"
 before_install:
-  # node setup (for yeoman)
-  - nvm install $NODE_VERSION
-  - node --version
-  - npm --version
-  - nvm --version
-  - npm install
   # ruby setup (for capistrano)
   - rvm install 1.9.3
   - rvm use 1.9.3
@@ -42,6 +33,12 @@ before_install:
   - rvm --version
   - gem --version
   - bundle --version
+  # node setup (for yeoman)
+  - nvm install $NODE_VERSION
+  - node --version
+  - npm --version
+  - nvm --version
+  - npm install
   # python setup (for ansible)
   - sudo pip install urllib3 pyopenssl ndg-httpsclient pyasn1
   - sudo pip install ansible==$ANSIBLE_VERSION
