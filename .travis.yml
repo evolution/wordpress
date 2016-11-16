@@ -16,14 +16,11 @@ addons:
       - libgconf2-dev
 env:
   global:
+    # DEBUG: "nightmare:*,electron:*"
     - DISPLAY: ":99.0"
   matrix:
-    - ANSIBLE_VERSION="2.1.3" NODE_VERSION="4.0"
-    - ANSIBLE_VERSION="2.1.3" NODE_VERSION="5.0"
-    - ANSIBLE_VERSION="2.1.3" NODE_VERSION="6.0"
-    - ANSIBLE_VERSION="2.2.0" NODE_VERSION="4.0"
-    - ANSIBLE_VERSION="2.2.0" NODE_VERSION="5.0"
-    - ANSIBLE_VERSION="2.2.0" NODE_VERSION="6.0"
+    - ANSIBLE_VERSION: "2.1.3"
+    - ANSIBLE_VERSION: "2.2.0"
 before_install:
   # ruby setup (for capistrano)
   - rvm install 1.9.3
@@ -34,7 +31,7 @@ before_install:
   - gem --version
   - bundle --version
   # node setup (for yeoman)
-  - nvm install $NODE_VERSION
+  - nvm install 4.0
   - node --version
   - npm --version
   - nvm --version
