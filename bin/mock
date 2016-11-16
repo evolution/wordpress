@@ -3,11 +3,12 @@
 'use strict'
 
 var fs      = require('fs-extra');
-var exec    = require('child_process').exec;
+var cp      = require('child_process');
 var helpers = require('yeoman-test');
 var path    = require('path');
 
-var outputDir     = path.join(__dirname, '..', 'temp');
+var libDir        = path.normalize(path.join(__dirname, '..'));
+var outputDir     = path.join(libDir, 'temp');
 var privatePath   = path.join(outputDir, '/lib/ansible/files/ssh/id_rsa');
 var privateKey    = fs.existsSync(privatePath) ? fs.readFileSync(privatePath) : null;
 var publicPath    = path.join(outputDir, '/lib/ansible/files/ssh/id_rsa.pub');
@@ -39,7 +40,7 @@ helpers.testDirectory(outputDir, function(err) {
   }
 
   console.log('Executing `%s`', prep.join(' && '));
-  exec(prep.join(' && '), function(err, stdout, stderr) {
+  cp.exec(prep.join(' && '), function(err, stdout, stderr) {
     if (err) {
       throw err;
     }
@@ -114,19 +115,25 @@ helpers.testDirectory(outputDir, function(err) {
       fs.writeFileSync(outputDir + '/Vagrantfile', vagrantFile);
 
       // since we've yet to publish to npm, use local abs path for evolution
-      if (isCI) {
-        var packageJson = fs.readFileSync(outputDir + '/package.json', 'utf8')
-          .replace(
-            new RegExp('("evolution-wordpress":[ ]*)"[^"]+"'),
-            [
-              '$1',
-              `"evolution/wordpress#${process.env.TRAVIS_COMMIT}"`,
-            ].join('')
-          )
-        ;
-
-        fs.writeFileSync(outputDir + '/package.json', packageJson);
+      var committish;
+      if(isCI) {
+        committish = process.env.TRAVIS_COMMIT;
+      } else {
+        committish = cp.execSync('git rev-parse --verify HEAD', { cwd: libDir })
+          .toString().trim();
       }
+
+      var packageJson = fs.readFileSync(outputDir + '/package.json', 'utf8')
+        .replace(
+          new RegExp('("evolution-wordpress":[ ]*)"[^"]+"'),
+          [
+            '$1',
+            `"evolution/wordpress#${committish}"`,
+          ].join('')
+        )
+      ;
+
+      fs.writeFileSync(outputDir + '/package.json', packageJson);
 
       var wrap = [
         'git add .',
@@ -140,7 +147,7 @@ helpers.testDirectory(outputDir, function(err) {
       }
 
       console.log('Executing `%s`', wrap.join(' && '));
-      exec(wrap.join(' && '), { cwd: outputDir });
+      cp.exec(wrap.join(' && '), { cwd: outputDir });
     });
   });
 });
