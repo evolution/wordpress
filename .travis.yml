@@ -38,6 +38,8 @@ before_install:
   - node --version
   - npm --version
   - nvm --version
+  - npm install -g yo@1.8.0
+  - yo --version
   - npm install
   # python setup (for ansible)
   - sudo pip install urllib3 pyopenssl ndg-httpsclient pyasn1
