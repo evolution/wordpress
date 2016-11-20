@@ -22,6 +22,7 @@ env:
     # DEBUG: "nightmare:*,electron:*"
     - DISPLAY: ":99.0"
   matrix:
+    # ANSIBLE_VERSION: "2.0.2"
     - ANSIBLE_VERSION: "2.1.3"
     - ANSIBLE_VERSION: "2.2.0"
 before_install:
