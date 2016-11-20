@@ -1,4 +1,6 @@
 ---
+node_modules:
+  - bower
 node_repos:
   - deb https://deb.nodesource.com/node_4.x trusty main
   - deb-src https://deb.nodesource.com/node_4.x trusty main
