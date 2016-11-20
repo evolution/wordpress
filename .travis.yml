@@ -38,7 +38,7 @@ before_install:
   - node --version
   - npm --version
   - nvm --version
-  - npm install -g yo@1.8.0
+  - npm install -g yo@1.7.1
   - yo --version
   - npm install
   # python setup (for ansible)
