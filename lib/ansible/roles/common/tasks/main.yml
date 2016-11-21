@@ -15,11 +15,11 @@
 
 - name:           Update nameservers in resolv.conf
   replace:        dest=/etc/resolv.conf regexp="(nameserver [\w\d.:]+\n?)+" replace="nameserver 8.8.8.8\nnameserver 8.8.4.4\n\1"
-  sudo:           yes
+  become:         true
 
 - name:           Update nameservers in dhclient.conf
   lineinfile:     dest=/etc/dhcp/dhclient.conf regexp="^#?prepend domain-name-servers " line="prepend domain-name-servers 8.8.8.8, 8.8.4.4;"
-  sudo:           yes
+  become:         true
   when:           dynamic_resolv.stdout != ""
 
 # see evolution/wordpress#126
@@ -28,13 +28,13 @@
 
 - name:           Copy purging script to remote
   copy:           src=/tmp/purge-kernels.py dest=/tmp/purge-kernels.py force=yes mode=0755
-  sudo:           yes
+  become:         true
 
 - name:           Purge kernels as necessary
   command:        /tmp/purge-kernels.py
   register:       purgekernels_result
   ignore_errors:  yes
-  sudo:           yes
+  become:         true
   when:           not lookup('env','CI')
 
 - name:           Remove kernel purging script in tmp (from control)
@@ -45,30 +45,30 @@
 
 - name:           Update apt cache
   apt:            update_cache=yes cache_valid_time="{{ 60 * 60 * 24 }}"
-  sudo:           yes
+  become:         true
 
 - name:           Autoremove unused packages
   shell:          DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
-  sudo:           yes
+  become:         true
 
 - name:           Install common packages
   apt:            pkg={{ item }} state=present
   with_items:     "{{ common_packages }}"
-  sudo:           yes
+  become:         true
 
 - name:           Update `hostname`
   hostname:       name="{{ new_hostname }}"
-  sudo:           yes
+  become:         true
   when:           old_hostname != new_hostname
 
 - name:           Update /etc/hosts
   replace:        dest=/etc/hosts backup=yes regexp={{ old_hostname | replace(".", "[.]") }} replace={{ new_hostname }}
-  sudo:           yes
+  become:         true
   when:           old_hostname != new_hostname
 
 - name:           Configure logrotate for evolution logs
   copy:           src=logrotate dest=/etc/logrotate.d/evolution mode=0644
-  sudo:           yes
+  become:         true
 
 - name:           Test for git protocol (git://) connectivity
   command:        curl -v -m 10 http://github.com:9418/

@@ -1,7 +1,7 @@
 ---
 - name:           Install apg (for cryptkeys)
   apt:            name=apg state=present
-  sudo:           yes
+  become:         true
 
 - name:           Generate session cryptkey
   shell:          apg -m 32 | sed 's/[^a-zA-Z0-9]//g'
@@ -26,9 +26,9 @@
 
 - name:           Generate ini config for extension
   template:       src=suhosin.ini.j2 dest={{ suhosin.ini }}
-  sudo:           yes
+  become:         true
 
 - name:           Enable extension
   command:        php5enmod suhosin
-  sudo:           yes
+  become:         true
   notify:         restart apache

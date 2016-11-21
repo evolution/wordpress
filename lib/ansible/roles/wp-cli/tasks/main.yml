@@ -4,7 +4,7 @@
 
 - name:         Copy latest wp-cli to remote
   copy:         src=/tmp/wp-cli dest=/usr/local/bin/wp force=yes mode=0755
-  sudo:         yes
+  become:       true
 
 - name:         Remove latest wp-cli in tmp (from control)
   local_action: file dest=/tmp/wp-cli state=absent

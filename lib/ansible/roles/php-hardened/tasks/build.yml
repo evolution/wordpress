@@ -1,12 +1,12 @@
 ---
 - name:           Fetch stable source
   get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz validate_certs=False
-  sudo:           yes
+  become:         true
 
 - name:           Hash source for checksum
   shell:          sha1sum /tmp/src-suhosin.tar.gz
   register:       suhosin_shahash
-  sudo:           yes
+  become:         true
 
 - debug:          var=suhosin_shahash.stdout
 
@@ -15,17 +15,17 @@
 
 - name:           Expand source package
   unarchive:      src=/tmp/src-suhosin.tar.gz dest=/tmp/ copy=no
-  sudo:           yes
+  become:         true
 
 - shell:          ls -1d /tmp/suhosin*
   register:       suhosin_srcdir
-  sudo:           yes
+  become:         true
 
 - debug:          var=suhosin_srcdir.stdout
 
 - name:           Compile and install extension
   command:        "{{ item }} chdir={{ suhosin_srcdir.stdout }}"
-  sudo:           yes
+  become:         true
   with_items:
   - phpize
   - ./configure
@@ -34,4 +34,4 @@
 
 - name:           Clean up after ourselves
   shell:          rm -rf /tmp/*suhosin*
-  sudo:           yes
+  become:         true

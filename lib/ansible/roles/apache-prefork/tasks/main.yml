@@ -2,4 +2,4 @@
 - name:           Override apache prefork module config
   template:       src=prefork.conf dest=/etc/apache2/mods-available/mpm_prefork.conf backup=yes mode=0644
   when:           apache_version.stdout == '2.4'
-  sudo:           yes
+  become:         true

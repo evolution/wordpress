@@ -2,16 +2,16 @@
 # https://launchpad.net/~unleashedtech/+archive/ubuntu/pound-2.7
 - name:       Register pound 2.7 ppa
   apt_repository: repo='ppa:unleashedtech/pound-2.7'
-  sudo:       true
+  become:     true
 
 - name:       Install pound package
   apt:        pkg=pound state=latest update_cache=yes
-  sudo:       true
+  become:     true
 
 - name:       Copy pound configuration file
   template:   src=pound.cfg dest=/etc/pound/pound.cfg mode=0644
   notify:     restart pound
-  sudo:       true
+  become:     true
 
 - name:       Copy SSL certificates
   copy:       src=./files/ssl/{{ item }}.{{ domain }}.pem dest=/etc/pound/{{ item }}.{{ domain }}.pem mode=0644
@@ -20,26 +20,26 @@
     - staging
     - production
   notify:     restart pound
-  sudo:       true
+  become:     true
 
 - name:       Enable pound
   lineinfile: regexp='^startup=0' line='startup=1' dest=/etc/default/pound backup=yes
   notify:     restart pound
-  sudo:       yes
+  become:     true
 
 - name:       Configure HTTPS Forwarded Proto detection in Apache (2.2)
   copy:       content="SetEnvIf X-Forwarded-Proto ^https$ HTTPS=on\n" dest=/etc/apache2/conf.d/https-forwarded-proto.conf mode=0644
   notify:     restart apache
   when:       apache_version.stdout == '2.2'
-  sudo:       true
+  become:     true
 
 - name:       Configure HTTPS Forwarded Proto detection in Apache (2.4)
   copy:       content="SetEnvIf X-Forwarded-Proto ^https$ HTTPS=on\n" dest=/etc/apache2/conf-available/https-forwarded-proto.conf mode=0644
   when:       apache_version.stdout == '2.4'
-  sudo:       true
+  become:     true
 
 - name:       Enable canonical config (2.4)
   command:    a2enconf https-forwarded-proto
   notify:     restart apache
   when:       apache_version.stdout == '2.4'
-  sudo:       yes
+  become:     true

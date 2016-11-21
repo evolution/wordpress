@@ -1,22 +1,22 @@
 ---
 - name:           Install repository key
   apt_key:        url=https://download.newrelic.com/548C16BF.gpg state=present
-  sudo:           yes
+  become:         true
 
 - name:           Configure repository source list
   apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
-  sudo:           yes
+  become:         true
 
 - name:           Install PHP agent and sys monitor
   apt:            name={{ item }} state=latest update_cache=yes
-  sudo:           yes
+  become:         true
   with_items:
     - newrelic-php5
     - newrelic-sysmond
 
 - name:           Configure PHP agent license key and app name
   lineinfile:     dest={{ php_conf_path }}/newrelic.ini regexp="^{{ item.key }}" line="{{ item.key }} = '{{ item.value }}'"
-  sudo:           yes
+  become:         true
   with_dict:
     newrelic.appname: "{{ domain }} ({{ stage }})"
     newrelic.license: "{{ newrelic_api_key }}"
@@ -24,5 +24,5 @@
 
 - name:           Configure and start sys monitor
   command:        nrsysmond-config --set license_key={{ newrelic_api_key }}
-  sudo:           yes
+  become:         true
   notify:         restart newrelic-sysmond

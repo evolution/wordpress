@@ -2,19 +2,19 @@
 - name:           Install PHP packages
   apt:            pkg={{ item }}
   with_items:     "{{ php_packages }}"
-  sudo:           yes
+  become:         true
 
 - name:           Install PECL packages
   command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates={{ php_conf_path }}/{{ item if item is string else item.name }}.ini
   with_items:     "{{ pecl_packages }}"
-  sudo:           yes
+  become:         true
 
 - name:           Enable PECL packages
   lineinfile:     line="extension={{ item if item is string else item.name }}.so"
                   dest="{{ php_conf_path }}/{{ item if item is string else item.name }}.ini"
                   create=yes
   with_items:     "{{ pecl_packages }}"
-  sudo:           yes
+  become:         true
 
 - name:           Calculate PHP memory_limit
   command:        echo "{{ 256 if ansible_memtotal_mb > 2048 else 128 }}"
@@ -24,12 +24,12 @@
 
 - name:           Update php.ini's date.timezone
   lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*date\.timezone' line='date.timezone = "America/Chicago"'
-  sudo:           yes
+  become:         true
 
 - name:           Update php.ini's memory_limit
   lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*memory_limit' line='memory_limit = {{ calc_php_memory_limit.stdout if calc_php_memory_limit.stdout is defined else php__memory_limit }}M'
-  sudo:           yes
+  become:         true
 
 - name:           Update php.ini's upload_max_filesize
   lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*upload_max_filesize' line='upload_max_filesize = 16M'
-  sudo:           yes
+  become:         true
