@@ -19,10 +19,10 @@
   sudo:           yes
   with_dict:
     newrelic.appname: "{{ domain }} ({{ stage }})"
-    newrelic.license: "{{ monitoring.newrelic }}"
+    newrelic.license: "{{ newrelic_api_key }}"
   notify:         restart apache
 
 - name:           Configure and start sys monitor
-  command:        nrsysmond-config --set license_key={{ monitoring.newrelic }}
+  command:        nrsysmond-config --set license_key={{ newrelic_api_key }}
   sudo:           yes
   notify:         restart newrelic-sysmond
