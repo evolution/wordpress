@@ -25,11 +25,9 @@ namespace :deploy do
   end
   after :updated, :bower_install do
     on roles(:web) do
-      within release_path do
-        bower_exists = test "[ -f ./bower.json ]"
-        if bower_exists
-          execute "bower install"
-        end
+      bower_exists = test "[ -f #{release_path}/bower.json ]"
+      if bower_exists
+        execute "cd #{release_path} && bower install"
       end
     end
   end
