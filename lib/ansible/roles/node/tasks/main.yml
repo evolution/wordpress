@@ -1,33 +1,49 @@
 ---
-- name:           Remove old node repository if necessary
-  apt_repository: repo='ppa:chris-lea/node.js' state=absent
-  become:         true
+- name: Remove old node repository if necessary
+  apt_repository:
+    repo: 'ppa:chris-lea/node.js'
+    state: absent
+  become: true
 
-- name:           Ensure removal of old node source lists
-  shell:          rm -f /etc/apt/sources.list.d/chris-lea-node_js-*.list
-  ignore_errors:  true
-  become:         true
+- name: Ensure removal of old node source lists
+  shell: rm -f /etc/apt/sources.list.d/chris-lea-node_js-*.list
+  ignore_errors: true
+  become: true
 
-- name:           Fetch Nodesource apt key (from control)
-  local_action:   get_url dest=/tmp/ns4x.gpg.key url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key force=yes
+- name: Fetch Nodesource apt key (from control)
+  local_action:
+    module: get_url
+    dest: /tmp/ns4x.gpg.key
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    force: yes
 
-- name:           Add Nodesource apt key
-  apt_key:        data="{{ lookup('file', '/tmp/ns4x.gpg.key') }}" state=present
-  become:         true
+- name: Add Nodesource apt key
+  apt_key:
+    data: "{{ lookup('file', '/tmp/ns4x.gpg.key') }}"
+    state: present
+  become: true
 
-- name:           Remove Nodesource apt key in tmp (from control)
-  local_action:   file dest=/tmp/ns4x.gpg.key state=absent
+- name: Remove Nodesource apt key in tmp (from control)
+  local_action:
+    module: file
+    dest: /tmp/ns4x.gpg.key
+    state: absent
 
-- name:           Add Nodesource 4.x repos
-  apt_repository: repo={{item}} state=present update_cache=yes
-  with_items:     "{{ node_repos }}"
-  become:         true
+- name: Add Nodesource 4.x repos
+  apt_repository:
+    repo: "{{item}}"
+    state: present
+    update_cache: yes
+  with_items: "{{ node_repos }}"
+  become: true
 
-- name:           Install node
-  apt:            pkg=nodejs state=present
-  become:         true
+- name: Install node
+  apt:
+    pkg: nodejs
+    state: present
+  become: true
 
-- name:           Install global node modules
-  command:        npm install -g {{ item }}
-  with_items:     "{{ node_modules }}"
-  become:         true
+- name: Install global node modules
+  command: npm install -g {{ item }}
+  with_items: "{{ node_modules }}"
+  become: true

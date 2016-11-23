@@ -1,21 +1,35 @@
 ---
-- name:           Install MySQL packages
-  apt:            pkg={{ item }} state=present
-  with_items:     "{{ mysql_packages }}"
-  become:         true
+- name: Install MySQL packages
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items: "{{ mysql_packages }}"
+  become: true
 
-- name:           Update my.conf's bind-address
-  lineinfile:     dest=/etc/mysql/my.cnf backup=yes regexp=^bind-address line='bind-address = 0.0.0.0'
-  become:         true
+- name: Update my.conf's bind-address
+  lineinfile:
+    dest: /etc/mysql/my.cnf
+    backup: yes
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  become: true
 
-- name:           Restart mysql
-  service:        name=mysql state=restarted
-  become:         true
+- name: Restart mysql
+  service:
+    name: mysql
+    state: restarted
+  become: true
 
-- name:           Create MySQL database
-  mysql_db:       name="{{ mysql.name }}_{{ stage }}"
-  become:         true
+- name: Create MySQL database
+  mysql_db:
+    name: "{{ mysql.name }}_{{ stage }}"
+  become: true
 
-- name:           Create MySQL user
-  mysql_user:     name={{ mysql.user }} host={{ mysql.host }} password={{ mysql.password }} priv="{{ mysql.name }}_{{ stage }}.*:GRANT,ALL" append_privs=yes
-  become:         true
+- name: Create MySQL user
+  mysql_user:
+    name: "{{ mysql.user }}"
+    host: "{{ mysql.host }}"
+    password: "{{ mysql.password }}"
+    priv: "{{ mysql.name }}_{{ stage }}.*:GRANT,ALL"
+    append_privs: yes
+  become: true

@@ -1,21 +1,29 @@
 ---
-- name:           Install Varnish packages
-  apt:            pkg={{ item }} state=present
-  with_items:     "{{ varnish_packages }}"
-  become:         true
+- name: Install Varnish packages
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items: "{{ varnish_packages }}"
+  become: true
 
-- name:           Create Varnish directory structure
-  file:           path={{ item }} state=directory mode=0644
-  become:         true
+- name: Create Varnish directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0644'
+  become: true
   with_items:
     - /etc/varnish
     - /etc/varnish/conf.d
     - /etc/varnish/conf.d/fetch
     - /etc/varnish/conf.d/receive
 
-- name:           Copy Varnish configuration files
-  copy:           src=etc-varnish/{{ item }} dest=/etc/varnish/{{ item }} mode=0644
-  become:         true
+- name: Copy Varnish configuration files
+  copy:
+    src: etc-varnish/{{ item }}
+    dest: /etc/varnish/{{ item }}
+    mode: '0644'
+  become: true
   with_items:
     - conf.d/fetch/wordpress.vcl
     - conf.d/receive/wordpress.vcl
@@ -23,51 +31,69 @@
     - custom.backend.vcl
     - production.vcl
 
-- name:           Copy Varnish script
-  copy:           src=etc-default-varnish dest=/etc/default/varnish mode=0644
-  become:         true
+- name: Copy Varnish script
+  copy:
+    src: etc-default-varnish
+    dest: /etc/default/varnish
+    mode: '0644'
+  become: true
   notify:
     - restart apache
     - restart varnish
 
-- stat:           path=/etc/apache2/mods-enabled/rpaf.load
-  register:       rpaf_load
+- stat:
+    path: /etc/apache2/mods-enabled/rpaf.load
+  register: rpaf_load
 
-- name:           Disable apache module "rpaf" (if installed)
-  command:        a2dismod rpaf
-  when:           rpaf_load.stat.exists
-  become:         true
-  notify:         restart apache
+- name: Disable apache module "rpaf" (if installed)
+  command: a2dismod rpaf
+  when: rpaf_load.stat.exists
+  become: true
+  notify: restart apache
 
-- name:           Configure apache module "remoteip"
-  copy:           src=remoteip.conf dest=/etc/apache2/mods-available/remoteip.conf mode=0644
-  become:         true
+- name: Configure apache module "remoteip"
+  copy:
+    src: remoteip.conf
+    dest: /etc/apache2/mods-available/remoteip.conf
+    mode: '0644'
+  become: true
 
-- name:           Enable apache module "remoteip"
-  command:        a2enmod remoteip
-  become:         true
-  notify:         restart apache
+- name: Enable apache module "remoteip"
+  command: a2enmod remoteip
+  become: true
+  notify: restart apache
 
-- name:           Change Apache NameVirtualHost 80 => 8080 (2.2)
-  lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:8080' dest=/etc/apache2/ports.conf backup=yes
+- name: Change Apache NameVirtualHost 80 => 8080 (2.2)
+  lineinfile:
+    regexp: '^NameVirtualHost'
+    line: 'NameVirtualHost *:8080'
+    dest: /etc/apache2/ports.conf
+    backup: yes
   notify:
     - restart apache
     - restart varnish
-  when:           apache_version.stdout == '2.2'
-  become:         true
+  when: apache_version.stdout == '2.2'
+  become: true
 
-- name:           Change Apache Listen 80 => 8080
-  lineinfile:     regexp='^Listen' line='Listen 8080' dest=/etc/apache2/ports.conf backup=yes
+- name: Change Apache Listen 80 => 8080
+  lineinfile:
+    regexp: '^Listen'
+    line: 'Listen 8080'
+    dest: /etc/apache2/ports.conf
+    backup: yes
   notify:
     - restart apache
     - restart varnish
-  become:         true
+  become: true
 
-- name:           Change VirtualHosts from 80 => 8080
-  lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
+- name: Change VirtualHosts from 80 => 8080
+  lineinfile:
+    regexp: '^<VirtualHost \*:80>'
+    line: '<VirtualHost *:8080>'
+    dest: /etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
   with_nested_dict: "{{ apache_vhosts }}"
-  when:           item.key_0 == stage
+  when: item.key_0 == stage
   notify:
     - restart apache
     - restart varnish
-  become:         true
+  become: true

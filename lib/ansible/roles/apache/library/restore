@@ -56,10 +56,16 @@ options:
 
 EXAMPLES = """
 # Restore oldest available backup of apache mod config
-- restore: path=/etc/apache2/mods-available/mpm_prefork.conf backup=no which=oldest
+- restore:
+    path: /etc/apache2/mods-available/mpm_prefork.conf
+    backup: no
+    which: oldest
 
 # Restore newest available backup of service config, whilst backing up current file
-- restore: path=/etc/default/varnish backup=yes which=newest
+- restore:
+    path: /etc/default/varnish
+    backup: yes
+    which: newest
 """
 
 def main():

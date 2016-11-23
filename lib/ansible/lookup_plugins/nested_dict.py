@@ -53,11 +53,11 @@ Would be flattened into an array of shallow dicts, with each original key denote
 
 The nested keys and value of each are then exposed to an iterative task:
 
-    - name:               "Remind us what holidays are this month"
+    - name: "Remind us what holidays are this month"
       debug:
-        msg:              "Remember {{value}} on {{key_1}} {{'%02d'|format(key_2)}} in the year {{key_0}}"
-      when:               key_1 == current_month
-      with_nested_dict:   holidays_by_year_month_day
+        msg: "Remember {{value}} on {{key_1}} {{'%02d'|format(key_2)}} in the year {{key_0}}"
+      when: key_1 == current_month
+      with_nested_dict: holidays_by_year_month_day
 
 """
 class LookupModule(LookupBase):

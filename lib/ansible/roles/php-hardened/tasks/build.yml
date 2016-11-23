@@ -1,37 +1,48 @@
 ---
-- name:           Fetch stable source
-  get_url:        url={{ suhosin.url }} dest=/tmp/src-suhosin.tar.gz validate_certs=False
-  become:         true
+- name: Fetch stable source
+  get_url:
+    url: "{{ suhosin.url }}"
+    dest: /tmp/src-suhosin.tar.gz
+    validate_certs: False
+  become: true
 
-- name:           Hash source for checksum
-  shell:          sha1sum /tmp/src-suhosin.tar.gz
-  register:       suhosin_shahash
-  become:         true
+- name: Hash source for checksum
+  shell: sha1sum /tmp/src-suhosin.tar.gz
+  register: suhosin_shahash
+  become: true
 
-- debug:          var=suhosin_shahash.stdout
+- debug:
+    var: suhosin_shahash.stdout
 
-- fail:           msg="Suhosin source failed SHA1 hash"
-  when:           suhosin_shahash.stdout.find('{{ suhosin.sha }}') == -1
+- fail:
+    msg: "Suhosin source failed SHA1 hash"
+  when: suhosin_shahash.stdout.find('{{ suhosin.sha }}') == -1
 
-- name:           Expand source package
-  unarchive:      src=/tmp/src-suhosin.tar.gz dest=/tmp/ copy=no
-  become:         true
+- name: Expand source package
+  unarchive:
+    src: /tmp/src-suhosin.tar.gz
+    dest: /tmp/
+    copy: no
+  become: true
 
-- shell:          ls -1d /tmp/suhosin*
-  register:       suhosin_srcdir
-  become:         true
+- shell: ls -1d /tmp/suhosin*
+  register: suhosin_srcdir
+  become: true
 
-- debug:          var=suhosin_srcdir.stdout
+- debug:
+    var: suhosin_srcdir.stdout
 
-- name:           Compile and install extension
-  command:        "{{ item }} chdir={{ suhosin_srcdir.stdout }}"
-  become:         true
+- name: Compile and install extension
+  command: "{{ item }}"
+  args:
+    chdir: "{{ suhosin_srcdir.stdout }}"
+  become: true
   with_items:
   - phpize
   - ./configure
   - make
   - make install
 
-- name:           Clean up after ourselves
-  shell:          rm -rf /tmp/*suhosin*
-  become:         true
+- name: Clean up after ourselves
+  shell: rm -rf /tmp/*suhosin*
+  become: true

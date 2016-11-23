@@ -1,12 +1,17 @@
 ---
-- name:           Install mail package
-  apt:            pkg=postfix state=present
-  become:         true
+- name: Install mail package
+  apt:
+    pkg: postfix
+    state: present
+  become: true
 
-- name:           Generate /etc/aliases
-  template:       src=aliases dest=/etc/aliases mode=0644
-  become:         true
+- name: Generate /etc/aliases
+  template:
+    src: aliases
+    dest: /etc/aliases
+    mode: '0644'
+  become: true
 
-- name:           Update mail aliases
-  command:        newaliases
-  become:         true
+- name: Update mail aliases
+  command: newaliases
+  become: true
