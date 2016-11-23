@@ -3,11 +3,28 @@
   apt_repository:
     repo: 'ppa:chris-lea/node.js'
     state: absent
+  register: old_node
   become: true
 
+- name: Uninstall old node if necessary
+  apt:
+    pkg: nodejs
+    state: absent
+  become: true
+  when: old_node.changed
+
+- name: Find old node source lists to remove
+  shell: ls -1 /etc/apt/sources.list.d/*chris?lea?node_js*.list
+  register: old_source_lists
+  ignore_errors: yes
+  become: true
+  when: old_node.changed
+
 - name: Ensure removal of old node source lists
-  shell: rm -f /etc/apt/sources.list.d/chris-lea-node_js-*.list
-  ignore_errors: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ old_source_lists.stdout_lines | default([]) }}"
   become: true
 
 - name: Fetch Nodesource apt key (from control)
