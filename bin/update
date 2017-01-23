@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+# alias full path to wp-cli executable
+alias wp=/usr/local/bin/wp
+
+# print nothing when verbosity is off
+function vecho {
+    if [ -n "$VERBOSITY" ]; then
+        echo "$@"
+    fi
+}
+
+# redirect command's stdout (but not stderr) when verbosity is off
+function vexec {
+    if [ -n "$VERBOSITY" ]; then
+        echo "\$ $@"
+        "$@"
+    else
+        "$@" > /dev/null
+    fi
+}
+
+# define defaults
+HELP=""
+MAJORITY="--minor"
+VERBOSITY=""
+WP_URL=""
+WP_PATH=""
+
+# parse optstrings
+OPTS=$(getopt -o hmv -l help,major,verbose -n '$0' -- "$@")
+if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
+
+eval set -- "$OPTS"
+
+# interpret optstrings
+while true ; do
+    case "$1" in
+        -h | --help )    HELP="1" ; shift ;;
+        -m |--major )    MAJORITY="" ; shift ;;
+        -v | --verbose ) VERBOSITY="1" ; shift ;;
+        -- )             shift ; break ;;
+        *)               break ;;
+    esac
+done
+
+# interpret positional args
+while (( "$#" )); do
+    # detect and validate path, if necessary
+    if [ -z "$WP_PATH" ] && [ -e "$1/wp-admin" ]; then
+        WP_PATH="$1"
+    # detect url, if necessary
+    elif [ -z "$WP_URL" ] && [ "${1:0:4}" == "http" ]; then
+        WP_URL="$1"
+    fi
+    shift
+done
+
+# display usage, if necessary
+if [ -n "$HELP" ] || [ -z "$WP_URL" ] || [ -z "$WP_PATH" ]; then
+    echo "
+Usage: $0 [-h|--help] [-m|--major] [-v|--verbose] -- <path> <url>
+
+Arguments:
+ path               Local filesystem path to wordpress files
+ url                URL at which wordpress can be reached
+
+Options:
+ -h, --help         Display this usage statement
+ -m, --major        Update wordpress across major releases
+                    (e.g. 4.3 to 4.4.2 instead of 4.3.3)
+ -v, --verbose      Display informative, non-critical output
+"
+    exit 1
+fi
+
+# update wp-cli phar, as necessary
+CLI_UPDATE=$(wp cli check-update --quiet --format=count)
+if [ -n "$CLI_UPDATE" ]; then
+    vecho "Updating WP-CLI (${CLI_UPDATE})"
+    if [ -n "$VERBOSITY" ]; then
+        wp cli check-update
+    fi
+    vexec sudo -u deploy -i -- wp cli update --yes
+else
+    vecho "WP-CLI is latest available"
+fi
+
+# check wordpress is installed in the first place
+wp core is-installed --path="$WP_PATH" --url="$WP_URL" >/dev/null 2>&1
+WP_INSTALLED=$?
+
+# update wordpress core & database, as necessary
+if [ $WP_INSTALLED -eq 0 ]; then
+    vecho "Wordpress installed..."
+    WP_UPDATE=$(wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major} --quiet --format=count)
+    if [ -n "$WP_UPDATE" ]; then
+        vecho "Updating Wordpress (${WP_UPDATE})"
+        if [ -n "$VERBOSITY" ]; then
+            wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major}
+        fi
+
+        vexec wp core update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:-}
+        vexec wp core update-db --path="$WP_PATH" --url="$WP_URL"
+    else
+        vecho "Wordpress is latest available"
+    fi
+else
+    vecho "Wordpress is not installed"
+fi
+
+# display ending cli and core versions, as necessary
+vecho "
+Done!"
+if [ -n "$VERBOSITY" ]; then
+    wp cli version
+    if [ $WP_INSTALLED -eq 0 ]; then
+        wp core version --path="$WP_PATH" --url="$WP_URL"
+    fi
+fi
