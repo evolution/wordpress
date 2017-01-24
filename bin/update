@@ -1,19 +1,30 @@
 #!/usr/bin/env bash
 
+# ansi colors if we're in a terminal
+if [ -t 1 ]; then
+    RED="\e[31m\e[1m"
+    GREEN="\e[32m\e[1m"
+    YELLOW="\e[33m\e[1m"
+    BLUE="\e[34m\e[1m"
+    RESET="\e[0m"
+else
+    export {RED,GREEN,YELLOW,BLUE,RESET}=""
+fi
+
 # alias full path to wp-cli executable
-alias wp=/usr/local/bin/wp
+PATH="/usr/local/bin:$PATH"
 
 # print nothing when verbosity is off
 function vecho {
     if [ -n "$VERBOSITY" ]; then
-        echo "$@"
+        echo -e "$@"
     fi
 }
 
 # redirect command's stdout (but not stderr) when verbosity is off
 function vexec {
     if [ -n "$VERBOSITY" ]; then
-        echo "\$ $@"
+        echo -e "${BLUE}\$ $@${RESET}"
         "$@"
     else
         "$@" > /dev/null
@@ -77,13 +88,13 @@ fi
 # update wp-cli phar, as necessary
 CLI_UPDATE=$(wp cli check-update --quiet --format=count)
 if [ -n "$CLI_UPDATE" ]; then
-    vecho "Updating WP-CLI (${CLI_UPDATE})"
+    vecho "${GREEN}Updating WP-CLI (${CLI_UPDATE})${RESET}"
     if [ -n "$VERBOSITY" ]; then
         wp cli check-update
     fi
     vexec sudo -u deploy -i -- wp cli update --yes
 else
-    vecho "WP-CLI is latest available"
+    vecho "${YELLOW}WP-CLI is latest available${RESET}"
 fi
 
 # check wordpress is installed in the first place
@@ -92,10 +103,10 @@ WP_INSTALLED=$?
 
 # update wordpress core & database, as necessary
 if [ $WP_INSTALLED -eq 0 ]; then
-    vecho "Wordpress installed..."
+    vecho "${GREEN}Wordpress installed...${RESET}"
     WP_UPDATE=$(wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major} --quiet --format=count)
     if [ -n "$WP_UPDATE" ]; then
-        vecho "Updating Wordpress (${WP_UPDATE})"
+        vecho "${GREEN}Updating Wordpress (${WP_UPDATE})${RESET}"
         if [ -n "$VERBOSITY" ]; then
             wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major}
         fi
@@ -103,15 +114,14 @@ if [ $WP_INSTALLED -eq 0 ]; then
         vexec wp core update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:-}
         vexec wp core update-db --path="$WP_PATH" --url="$WP_URL"
     else
-        vecho "Wordpress is latest available"
+        vecho "${YELLOW}Wordpress is latest available${RESET}"
     fi
 else
-    vecho "Wordpress is not installed"
+    vecho "${RED}Wordpress is not installed${RESET}"
 fi
 
 # display ending cli and core versions, as necessary
-vecho "
-Done!"
+vecho "${GREEN}\nDone!${RESET}"
 if [ -n "$VERBOSITY" ]; then
     wp cli version
     if [ $WP_INSTALLED -eq 0 ]; then
