@@ -113,6 +113,12 @@ if [ $WP_INSTALLED -eq 0 ]; then
 
         vexec wp core update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:-}
         vexec wp core update-db --path="$WP_PATH" --url="$WP_URL"
+
+        # update wordpress version in bower.json
+        WP_VERSION=$(wp core version --path="$WP_PATH" --url="$WP_URL")
+        sed -i "s/\(\"wordpress\" *: *\)\"[0-9.]*\"/\1\"${WP_VERSION}\"/" $WP_PATH/../../bower.json
+
+        # todo: stage, commit, and push bower.json change (maybe as a new branch?)
     else
         vecho "${YELLOW}Wordpress is latest available${RESET}"
     fi
@@ -124,7 +130,9 @@ fi
 vecho "${GREEN}\nDone!${RESET}"
 if [ -n "$VERBOSITY" ]; then
     wp cli version
-    if [ $WP_INSTALLED -eq 0 ]; then
+    if [ -n "$WP_VERSION" ]; then
+        echo $WP_VERSION
+    else
         wp core version --path="$WP_PATH" --url="$WP_URL"
     fi
 fi
