@@ -85,6 +85,17 @@ Options:
     exit 1
 fi
 
+# dump vars
+vecho "${BLUE}Working values:
+
+HELP='${HELP}'
+MAJORITY='${MAJORITY}'
+VERBOSITY='${VERBOSITY}'
+WP_URL='${WP_URL}'
+WP_PATH='${WP_PATH}'
+
+${RESET}"
+
 # update wp-cli phar, as necessary
 CLI_UPDATE=$(wp cli check-update --quiet --format=count)
 if [ -n "$CLI_UPDATE" ]; then
