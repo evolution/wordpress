@@ -117,11 +117,16 @@ if [ $WP_INSTALLED -eq 0 ]; then
         # update wordpress version in bower.json
         WP_VERSION=$(wp core version --path="$WP_PATH" --url="$WP_URL")
         sed -i "s/\(\"wordpress\" *: *\)\"[0-9.]*\"/\1\"${WP_VERSION}\"/" $WP_PATH/../../bower.json
-
-        # todo: stage, commit, and push bower.json change (maybe as a new branch?)
     else
         vecho "${YELLOW}Wordpress is latest available${RESET}"
     fi
+
+    # update plugins and themes, as necessary
+    vecho "${GREEN}Updating themes and plugins${RESET}"
+    vexec wp plugin update --all --path="$WP_PATH" --url="$WP_URL"
+    vexec wp theme update --all --path="$WP_PATH" --url="$WP_URL"
+
+    # TODO: stage, commit, and push bower.json, plugins, themes
 else
     vecho "${RED}Wordpress is not installed${RESET}"
 fi
