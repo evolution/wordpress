@@ -137,7 +137,49 @@ if [ $WP_INSTALLED -eq 0 ]; then
     vexec wp plugin update --all --path="$WP_PATH" --url="$WP_URL"
     vexec wp theme update --all --path="$WP_PATH" --url="$WP_URL"
 
-    # TODO: stage, commit, and push bower.json, plugins, themes
+    # determine deployment root (relative to wp path)
+    DEPLOY_ROOT="${WP_PATH}/../.."
+    CHECKOUT_ROOT="/tmp/wp-update"
+
+    # determine branch name and origin url
+    if [ -e "${DEPLOY_ROOT}/.git" ]; then
+        # for local stage nfs mounts
+        GIT_BRANCH=$(cd $DEPLOY_ROOT; git rev-parse --abbrev-ref HEAD)
+        GIT_ORIGIN=$(cd $DEPLOY_ROOT; git config --get remote.origin.url)
+    else
+        # for staging/prod deployments from a bare repo
+        GIT_BRANCH=$(cd $DEPLOY_ROOT/..; basename $(pwd))
+        GIT_ORIGIN=$(cd $DEPLOY_ROOT/../repo; git config --get remote.origin.url)
+    fi
+
+    # ensure a fresh clone of target branch
+    rm -rf $CHECKOUT_ROOT
+    vexec git clone -b $GIT_BRANCH $GIT_ORIGIN $CHECKOUT_ROOT
+
+    # copy any updates to be staged
+    cp -a $DEPLOY_ROOT/bower.json $CHECKOUT_ROOT/bower.json
+    cp -a $DEPLOY_ROOT/web/wp-content/plugins/. $CHECKOUT_ROOT/web/wp-content/plugins/
+    cp -a $DEPLOY_ROOT/web/wp-content/themes/. $CHECKOUT_ROOT/web/wp-content/themes/
+
+    # stage that ish
+    (\
+        cd $CHECKOUT_ROOT ;\
+        git add -A ./bower.json ;\
+        git add -A ./web/wp-content/plugins/ ;\
+        git add -A ./web/wp-content/themes/ \
+    )
+
+    # commit and push any staged changes
+    if (cd $CHECKOUT_ROOT ; git diff-index --quiet HEAD --); then
+        rm -rf $CHECKOUT_ROOT
+    else
+        (\
+            cd $CHECKOUT_ROOT ;\
+            vexec git commit -m "Automatic wordpress update at $(date)" ;\
+            vexec git push origin $GIT_BRANCH \
+        )
+        vecho "${GREEN}Update committed and pushed${RESET}"
+    fi
 else
     vecho "${RED}Wordpress is not installed${RESET}"
 fi
