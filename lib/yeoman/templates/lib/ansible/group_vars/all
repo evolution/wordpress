@@ -23,7 +23,7 @@ mysql:
 # apache__max_requests_per_child:
 
 <% if (props.wp_autoupdate) {
-%>wordpress__autoupdate: true<%
+%>wordpress__autoupdate: <= props.wp_autoupdate %><%
 } else {
 %># wordpress__autoupdate: false<%
 } %>
