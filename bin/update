@@ -48,7 +48,7 @@ eval set -- "$OPTS"
 while true ; do
     case "$1" in
         -h | --help )    HELP="1" ; shift ;;
-        -m |--major )    MAJORITY="" ; shift ;;
+        -m |--major )    MAJORITY="--major" ; shift ;;
         -v | --verbose ) VERBOSITY="1" ; shift ;;
         -- )             shift ; break ;;
         *)               break ;;
@@ -115,14 +115,14 @@ WP_INSTALLED=$?
 # update wordpress core & database, as necessary
 if [ $WP_INSTALLED -eq 0 ]; then
     vecho "${GREEN}Wordpress installed...${RESET}"
-    WP_UPDATE=$(wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major} --quiet --format=count)
+    WP_UPDATE=$(wp core check-update --path="$WP_PATH" --url="$WP_URL" $MAJORITY --quiet --format=count)
     if [ -n "$WP_UPDATE" ]; then
         vecho "${GREEN}Updating Wordpress (${WP_UPDATE})${RESET}"
         if [ -n "$VERBOSITY" ]; then
-            wp core check-update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:- --major}
+            wp core check-update --path="$WP_PATH" --url="$WP_URL" $MAJORITY
         fi
 
-        vexec wp core update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY:-}
+        vexec wp core update --path="$WP_PATH" --url="$WP_URL" ${MAJORITY//--major/}
         vexec wp core update-db --path="$WP_PATH" --url="$WP_URL"
 
         # update wordpress version in bower.json
