@@ -154,7 +154,7 @@ if [ $WP_INSTALLED -eq 0 ]; then
 
     # ensure a fresh clone of target branch
     rm -rf $CHECKOUT_ROOT
-    vexec git clone -b $GIT_BRANCH $GIT_ORIGIN $CHECKOUT_ROOT
+    vexec git clone --quiet -b $GIT_BRANCH $GIT_ORIGIN $CHECKOUT_ROOT
 
     # copy any updates to be staged
     cp -a $DEPLOY_ROOT/bower.json $CHECKOUT_ROOT/bower.json
@@ -176,7 +176,7 @@ if [ $WP_INSTALLED -eq 0 ]; then
         (\
             cd $CHECKOUT_ROOT ;\
             vexec git commit -m "Automatic ${MAJORITY//--/} wordpress update at $(date)" ;\
-            vexec git push origin $GIT_BRANCH \
+            vexec git push --quiet origin $GIT_BRANCH \
         )
         vecho "${GREEN}Update committed and pushed${RESET}"
     fi
