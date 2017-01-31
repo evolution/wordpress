@@ -175,7 +175,7 @@ if [ $WP_INSTALLED -eq 0 ]; then
     else
         (\
             cd $CHECKOUT_ROOT ;\
-            vexec git commit -m "Automatic wordpress update at $(date)" ;\
+            vexec git commit -m "Automatic ${MAJORITY//--/} wordpress update at $(date)" ;\
             vexec git push origin $GIT_BRANCH \
         )
         vecho "${GREEN}Update committed and pushed${RESET}"
