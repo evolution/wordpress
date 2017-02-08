@@ -22,6 +22,11 @@ mysql:
 # apache__max_clients:
 # apache__max_requests_per_child:
 
+<% if (props.wp_autoupdate) {
+%>wordpress__autoupdate: <%= props.wp_autoupdate %><%
+} else {
+%># wordpress__autoupdate: false<%
+} %>
 # wordpress__xmlrpc_allow: false
 # wordpress__xmlrpc_whitelist:
 #   - "local"

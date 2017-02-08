@@ -2,6 +2,7 @@
 
 * [deploy](#deploy)
 * [wp:{command}[:subcommand[..]]](#wpcommandsubcommand)
+* [evolve:update](#evolveupdate)
 * [evolve:provision](#evolveprovision)
 * [evolve:ssh](#evolvessh)
 * [evolve:version](#evolveversion)
@@ -34,6 +35,16 @@ Invokes [wp-cli](http://wp-cli.org/) on the remote environment, with the given c
 Passing parameter flags is not explicitly supported, though `--path` and `--url` are automatically supplied &mdash; additional flags _can_ be crammed into the task name:
 
 	bundle exec cap staging wp:user:list:--format=json
+
+### evolve:update
+
+Invokes server-side [bash updater](https://github.com/evolution/wordpress/blob/master/lib/ansible/roles/cleanup/files/update.sh) to apply available updates for wordpress core, cli, plugins, and themes...subsequently versioning any resulting changes to your git remote.
+
+By default, only minor wordpress core releases are applied (eg, `4.6.1` to `4.6.3`). Major releases can be applied by providing a `major` argument:
+
+```
+bundle exec cap staging evolve:update[major]
+```
 
 ### evolve:provision
 

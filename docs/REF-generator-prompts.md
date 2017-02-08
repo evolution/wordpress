@@ -10,6 +10,7 @@
 * [Datadog license key](#datadog-license-key)
 * [Optional features](#optional-features)
 * [Wordpress version](#wordpress-version)
+* [Wordpress automatic updates](#wordpress-automatic-updates)
 * [Wordpress table prefix](#wordpress-table-prefix)
 * [Database credentials](#database-credentials)
 * [Vagrant IP](#vagrant-ip)
@@ -95,6 +96,12 @@ This installs some command line utilities that are useful for monitoring process
 ### Wordpress version
 
 This determines which version of Wordpress will be fetched from Github and installed as a bower dependency. **The default for this is the latest tagged version.**
+
+### Wordpress automatic updates
+
+This determines whether to, once daily, apply updates for wordpress core, cli, plugins, and themes. This feature is switched **off** by default, but you can choose to apply only _minor_ core releases (eg, `4.6.1` to `4.6.3`) or even _major_ releases (eg, `4.6.1` to `4.7.2`).
+
+Note that automatic updates are staggered across stages -- 12am for staging, 12:10am for prod, 12:20am for local -- in order to avoid simultaneous and conflicting commits pushed to git.
 
 ### Wordpress table prefix
 
