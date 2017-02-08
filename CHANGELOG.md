@@ -1,5 +1,9 @@
 # Changelog
 
+- v1.5.0
+    - Fixed bug with conflicting git remotes ([#152](https://github.com/evolution/wordpress/pull/152))
+    - Added varnish health checking ([#154](https://github.com/evolution/wordpress/pull/154))
+    - Added wordpress manual remote and automatic updating ([#159](https://github.com/evolution/wordpress/pull/159))
 - v1.4.5
     - Fixed bug with ansible 2.1.2 and private keys ([#150](https://github.com/evolution/wordpress/pull/150))
 - v1.4.4
