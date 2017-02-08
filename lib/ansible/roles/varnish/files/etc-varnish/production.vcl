@@ -7,6 +7,16 @@ include "custom.acl.vcl";
 
 # Handle the HTTP request received by the client
 sub vcl_recv {
+    # health check url
+    if (req.url == "/varnish-status") {
+        # allow access only via purge acl
+        if (client.ip ~ purge) {
+            error 200 "OK";
+        } else {
+            error 404 "Not Found";
+        }
+    }
+
     # varnish serves stale (but cacheable) objects while retriving object from backend
     if (req.backend.healthy) {
         set req.grace = 30s;
