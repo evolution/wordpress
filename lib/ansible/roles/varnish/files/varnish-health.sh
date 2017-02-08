@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+# expect a required positional argument
+STAGE_DOMAIN="$1"
+
+# display usage, if necessary
+if [ -z "$STAGE_DOMAIN" ]; then
+    echo "
+Usage: $0 <domain>
+
+Arguments:
+ domain    Stage and domain at which varnish should be checked, eg 'production.example.com'
+"
+    exit 1
+fi
+
 # generate verbose output? (for debugging)
 VERBOSE=
 
@@ -9,7 +23,7 @@ KICK_THRESHOLD=300
 # current timestamp
 NOW=$(date +%s)
 
-STAMP_FILE="/tmp/varnish-check"
+STAMP_FILE="/tmp/varnish-check.${STAGE_DOMAIN}"
 
 function vprint {
     if [ -n "$VERBOSE" ]; then
@@ -18,7 +32,7 @@ function vprint {
 }
 
 function health_check {
-    local http_status=$(/usr/bin/curl -Is -m 1 --max-redirs 0 -w %{http_code} http://{{stage}}.{{domain}}/varnish-status -o /dev/null)
+    local http_status=$(/usr/bin/curl -Is -m 1 --max-redirs 0 -w %{http_code} "http://${STAGE_DOMAIN}/varnish-status" -o /dev/null)
     vprint "Health check returned $http_status"
     [ "$http_status" != "200" ]
 }

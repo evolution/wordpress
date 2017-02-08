@@ -72,14 +72,14 @@
     - restart varnish
   sudo:           true
 
-- name:           Create health checking script
-  template:       src=health-check.sh.j2 dest=/home/deploy/varnish-health.sh owner=deploy group=deploy mode=0755
+- name:           Configure varnish health-checking binary
+  copy:           src=varnish-health.sh dest=/usr/local/bin/varnish-health.sh owner=deploy group=deploy mode=0755
   sudo:           yes
 
 - name:           Create health check cron job
   cron:
   args:
-    name:         "varnish health check"
+    name:         "varnish health check for {{stage}}"
     user:         deploy
-    job:          /home/deploy/varnish-health.sh
+    job:          "/usr/local/bin/varnish-health.sh {{stage}}.{{domain}}"
   sudo:           yes
