@@ -16,6 +16,29 @@
   when:         item.key == stage
   sudo:         yes
 
+- name:         Configure varnish health-checking binary
+  copy:         src=varnish-health.sh dest=/usr/local/bin/varnish-health.sh owner=deploy group=deploy mode=0755
+  when:         role_varnish is defined
+  sudo:         yes
+
+- name:         Disable varnish health checking (as necessary) via user-level crontab
+  cron:
+  args:
+    name:       "varnish health check for {{stage}}"
+    user:       deploy
+    state:      absent
+  when:         role_varnish is not defined
+  sudo:         yes
+
+- name:         Set up varnish health checking via user-level crontab
+  cron:
+  args:
+    name:       "varnish health check for {{stage}}"
+    user:       deploy
+    job:        "/usr/local/bin/varnish-health.sh {{stage}}.{{domain}}"
+  when:         role_varnish is defined
+  sudo:         yes
+
 - name:         Generate init.d for installed evolution services
   template:     src=evolution-init-d dest=/etc/init.d/evolution-wordpress mode=0755
   sudo:         yes

@@ -71,15 +71,3 @@
     - restart apache
     - restart varnish
   sudo:           true
-
-- name:           Configure varnish health-checking binary
-  copy:           src=varnish-health.sh dest=/usr/local/bin/varnish-health.sh owner=deploy group=deploy mode=0755
-  sudo:           yes
-
-- name:           Create health check cron job
-  cron:
-  args:
-    name:         "varnish health check for {{stage}}"
-    user:         deploy
-    job:          "/usr/local/bin/varnish-health.sh {{stage}}.{{domain}}"
-  sudo:           yes
