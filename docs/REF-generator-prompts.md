@@ -103,6 +103,8 @@ This determines whether to, once daily, apply updates for wordpress core, cli, p
 
 Note that automatic updates are staggered across stages -- 12am for staging, 12:10am for prod, 12:20am for local -- in order to avoid simultaneous and conflicting commits pushed to git.
 
+**In order for automatic updates to persist back to the git origin, you will need deploy keys set up via your git provider with write permissions.**
+
 ### Wordpress table prefix
 
 This determines the prefix applied to Wordpress database tables. **The default for this is `wp_`.**

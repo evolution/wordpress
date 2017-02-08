@@ -46,6 +46,8 @@ By default, only minor wordpress core releases are applied (eg, `4.6.1` to `4.6.
 bundle exec cap staging evolve:update[major]
 ```
 
+Note that **committing updates back to git requires a deploy key with write permissions**.
+
 ### evolve:provision
 
 Invokes [Ansible](http://docs.ansible.com/) locally, connecting to and provisioning the remote environment.
