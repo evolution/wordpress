@@ -40,10 +40,17 @@ Passing parameter flags is not explicitly supported, though `--path` and `--url`
 
 Invokes server-side [bash updater](https://github.com/evolution/wordpress/blob/master/lib/ansible/roles/cleanup/files/update.sh) to apply available updates for wordpress core, cli, plugins, and themes...subsequently versioning any resulting changes to your git remote.
 
-By default, only minor wordpress core releases are applied (eg, `4.6.1` to `4.6.3`). Major releases can be applied by providing a `major` argument:
+By default, only minor wordpress core releases are applied (eg, `4.6.1` to `4.6.3`), and _all plugins and themes_ are updated.
+
+These default behaviors can be overridden with an optional string argument:
 
 ```
+# apply major updates
 bundle exec cap staging evolve:update[major]
+# skip plugin and theme updates
+bundle exec cap staging evolve:update[plugins,themes]
+# apply major updates and skip themes (but update plugins)
+bundle exec cap staging evolve:update[major,themes]
 ```
 
 Note that **committing updates back to git requires a deploy key with write permissions**.

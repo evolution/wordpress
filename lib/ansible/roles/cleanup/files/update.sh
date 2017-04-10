@@ -34,12 +34,14 @@ function vexec {
 # define defaults
 HELP=""
 MAJORITY="--minor"
+SKIP_PLUGINS=""
+SKIP_THEMES=""
 VERBOSITY=""
 WP_URL=""
 WP_PATH=""
 
 # parse optstrings
-OPTS=$(getopt -o hmv -l help,major,verbose -n '$0' -- "$@")
+OPTS=$(getopt -o hmptv -l help,major,skip-plugins,skip-themes,verbose -n '$0' -- "$@")
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
 eval set -- "$OPTS"
@@ -47,11 +49,13 @@ eval set -- "$OPTS"
 # interpret optstrings
 while true ; do
     case "$1" in
-        -h | --help )    HELP="1" ; shift ;;
-        -m |--major )    MAJORITY="--major" ; shift ;;
-        -v | --verbose ) VERBOSITY="1" ; shift ;;
-        -- )             shift ; break ;;
-        *)               break ;;
+        -h | --help )         HELP="1" ; shift ;;
+        -m |--major )         MAJORITY="--major" ; shift ;;
+        -p | --skip-plugins ) SKIP_PLUGINS="1" ; shift ;;
+        -t | --skip-themes )  SKIP_THEMES="1" ; shift ;;
+        -v | --verbose )      VERBOSITY="1" ; shift ;;
+        -- )                  shift ; break ;;
+        *)                    break ;;
     esac
 done
 
@@ -90,6 +94,8 @@ vecho "${BLUE}Working values:
 
 HELP='${HELP}'
 MAJORITY='${MAJORITY}'
+SKIP_PLUGINS='${SKIP_PLUGINS}'
+SKIP_THEMES='${SKIP_THEMES}'
 VERBOSITY='${VERBOSITY}'
 WP_URL='${WP_URL}'
 WP_PATH='${WP_PATH}'
@@ -134,8 +140,16 @@ if [ $WP_INSTALLED -eq 0 ]; then
 
     # update plugins and themes, as necessary
     vecho "${GREEN}Updating themes and plugins${RESET}"
-    vexec wp plugin update --all --path="$WP_PATH" --url="$WP_URL"
-    vexec wp theme update --all --path="$WP_PATH" --url="$WP_URL"
+    if [ -z "$SKIP_PLUGINS" ]; then
+        vexec wp plugin update --all --path="$WP_PATH" --url="$WP_URL"
+    else
+        vecho "${YELLOW}Skipping plugins${RESET}"
+    fi
+    if [ -z "$SKIP_THEMES" ]; then
+        vexec wp theme update --all --path="$WP_PATH" --url="$WP_URL"
+    else
+        vecho "${YELLOW}Skipping themes${RESET}"
+    fi
 
     # determine deployment root (relative to wp path)
     DEPLOY_ROOT="${WP_PATH}/../.."

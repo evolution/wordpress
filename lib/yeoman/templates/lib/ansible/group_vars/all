@@ -27,6 +27,8 @@ mysql:
 } else {
 %># wordpress__autoupdate: false<%
 } %>
+# wordpress__autoupdate_skip_plugins: false
+# wordpress__autoupdate_skip_themes: false
 # wordpress__xmlrpc_allow: false
 # wordpress__xmlrpc_whitelist:
 #   - "local"

@@ -47,6 +47,14 @@
     wordpress__autoupdate: false
   when: wordpress__autoupdate is undefined
 
+- set_fact:
+    wordpress__autoupdate_skip_plugins: false
+  when: wordpress__autoupdate_skip_plugins is undefined
+
+- set_fact:
+    wordpress__autoupdate_skip_themes: false
+  when: wordpress__autoupdate_skip_themes is undefined
+
 - name:         Disable wordpress core and cli updates (as necessary) via user-level crontab
   cron:
   args:
@@ -62,7 +70,7 @@
   args:
     name:       "daily wp auto updates for {{stage}}"
     user:       deploy
-    job:        "/usr/local/bin/wp-update {{ '--major' if wordpress__autoupdate == 'major' else '' }} {{ item.value }} http://{{stage}}.{{domain}}/"
+    job:        "/usr/local/bin/wp-update {{ '--major' if wordpress__autoupdate == 'major' else '' }} {{ '--skip-plugins' if wordpress__autoupdate_skip_plugins else '' }} {{ '--skip-themes' if wordpress__autoupdate_skip_themes else '' }} {{ item.value }} http://{{stage}}.{{domain}}/"
     hour:       0
     minute:     "{{ 0 if item.key == 'staging' else 10 if item.key == 'production' else 20 }}"
   with_dict:    "{{ wp_cron_path }}"
