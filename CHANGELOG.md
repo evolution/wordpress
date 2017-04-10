@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.6.0
+    - Added ability to skip plugin/theme updates ([#161](https://github.com/evolution/wordpress/pull/161))
 - v1.5.0
     - Fixed bug with conflicting git remotes ([#152](https://github.com/evolution/wordpress/pull/152))
     - Added varnish health checking ([#154](https://github.com/evolution/wordpress/pull/154))
