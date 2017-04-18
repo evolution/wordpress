@@ -1,0 +1,21 @@
+web:
+  image: evanskaufman/evolution-wordpress:<%= pkg.version %>
+  links:
+    - "db:mysql"
+  ports:
+    - "80:80"
+  hostname: "local"
+  domainname: "<%= props.domain %>"
+  environment:
+    WORDPRESS_DOMAIN: "<%= props.domain %>"
+  volumes:
+    - "./:/vagrant/"
+db:
+  image: "mysql:5.7"
+  environment:
+    MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    MYSQL_DATABASE: "<%= props.DB_NAME %>_local"
+    MYSQL_USER: "<%= props.DB_USER %>"
+    MYSQL_PASSWORD: "<%= props.DB_PASSWORD %>"
+  volumes:
+    - "./docker.sql:/docker-entrypoint-initdb.d/init.sql:ro"

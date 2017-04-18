@@ -12,6 +12,14 @@ class Evolution
         return sprintf('%s_%s', $name, static::getEnv());
     }
 
+    public static function getDbHost($host)
+    {
+        if ($docker_host = getenv('MYSQL_PORT_3306_TCP_ADDR')) {
+            return $docker_host;
+        }
+        return $host;
+    }
+
     public static function getHostname()
     {
         if (isset(self::$hostname)) {
