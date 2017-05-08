@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.6.1
+    - Upgraded mysql to 5.6 ([#164](https://github.com/evolution/wordpress/pull/164))
 - v1.6.0
     - Added ability to skip plugin/theme updates ([#161](https://github.com/evolution/wordpress/pull/161))
 - v1.5.0
