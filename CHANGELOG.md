@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.6.2
+    - Another 5.6 tweak ([#165](https://github.com/evolution/wordpress/pull/165))
 - v1.6.1
     - Upgraded mysql to 5.6 ([#164](https://github.com/evolution/wordpress/pull/164))
 - v1.6.0
