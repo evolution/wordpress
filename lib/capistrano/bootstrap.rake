@@ -33,6 +33,25 @@ set :local_wp_path,   "/vagrant/web/wp"
 
 # fix permissions before deployment
 namespace :deploy do
+  before :starting, :reconcile_git_remotes do
+    bare_repo_path = "#{deploy_to}/repo"
+
+    on roles(:web) do |host|
+      repo_exists = test "[ -f #{bare_repo_path}/HEAD ]"
+
+      if repo_exists
+        server_remote = ''
+        within bare_repo_path do
+          server_remote = capture(:git, :config, '--get', 'remote.origin.url')
+        end
+
+        if fetch(:repo_url) != server_remote
+          execute :rm, '-rf', bare_repo_path
+        end
+      end
+    end
+  end
+
   before :started, :release_permissions do
     invoke "evolve:permissions"
   end

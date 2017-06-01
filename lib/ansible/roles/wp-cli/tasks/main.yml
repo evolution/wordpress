@@ -12,6 +12,15 @@
     dest: /usr/local/bin/wp
     force: yes
     mode: '0755'
+    owner: deploy
+    group: deploy
+  become: true
+
+- name: Ensure deploy can both write and execute wp-cli
+  file:
+    path: /usr/local/bin
+    group: deploy
+    mode: '0775'
   become: true
 
 - name: Remove latest wp-cli in tmp (from control)

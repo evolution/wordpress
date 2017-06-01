@@ -1,5 +1,15 @@
 # Changelog
 
+- v1.6.2
+    - Another 5.6 tweak ([#165](https://github.com/evolution/wordpress/pull/165))
+- v1.6.1
+    - Upgraded mysql to 5.6 ([#164](https://github.com/evolution/wordpress/pull/164))
+- v1.6.0
+    - Added ability to skip plugin/theme updates ([#161](https://github.com/evolution/wordpress/pull/161))
+- v1.5.0
+    - Fixed bug with conflicting git remotes ([#152](https://github.com/evolution/wordpress/pull/152))
+    - Added varnish health checking ([#154](https://github.com/evolution/wordpress/pull/154))
+    - Added wordpress manual remote and automatic updating ([#159](https://github.com/evolution/wordpress/pull/159))
 - v1.4.5
     - Fixed bug with ansible 2.1.2 and private keys ([#150](https://github.com/evolution/wordpress/pull/150))
 - v1.4.4

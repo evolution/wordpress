@@ -16,6 +16,77 @@
   when: item.key == stage
   become: true
 
+- name: Configure varnish health-checking binary
+  copy:
+    src: varnish-health.sh
+    dest: /usr/local/bin/varnish-health.sh
+    owner: deploy
+    group: deploy
+    mode: '0755'
+  when: role_varnish is defined
+  become: true
+
+- name: Disable varnish health checking (as necessary) via user-level crontab
+  cron:
+  args:
+    name: "varnish health check for {{stage}}"
+    user: deploy
+    state: absent
+  when: role_varnish is not defined
+  become: true
+
+- name: Set up varnish health checking via user-level crontab
+  cron:
+  args:
+    name: "varnish health check for {{stage}}"
+    user: deploy
+    job: "/usr/local/bin/varnish-health.sh {{stage}}.{{domain}}"
+  when: role_varnish is defined
+  become: true
+
+- name: Configure wordpress autoupdate binary
+  copy:
+    src: update.sh
+    dest: /usr/local/bin/wp-update
+    owner: deploy
+    group: deploy
+    mode: '0755'
+  become: true
+
+- set_fact:
+    wordpress__autoupdate: false
+  when: wordpress__autoupdate is undefined
+
+- set_fact:
+    wordpress__autoupdate_skip_plugins: false
+  when: wordpress__autoupdate_skip_plugins is undefined
+
+- set_fact:
+    wordpress__autoupdate_skip_themes: false
+  when: wordpress__autoupdate_skip_themes is undefined
+
+- name: Disable wordpress core and cli updates (as necessary) via user-level crontab
+  cron:
+  args:
+    name: "daily wp auto updates for {{stage}}"
+    user: deploy
+    state: absent
+  with_dict: "{{ wp_cron_path }}"
+  when: wordpress__autoupdate == false and item.key == stage
+  become: true
+
+- name: Set up wordpress core and cli updates via user-level crontab
+  cron:
+  args:
+    name: "daily wp auto updates for {{stage}}"
+    user: deploy
+    job: "/usr/local/bin/wp-update {{ '--major' if wordpress__autoupdate == 'major' else '' }} {{ '--skip-plugins' if wordpress__autoupdate_skip_plugins else '' }} {{ '--skip-themes' if wordpress__autoupdate_skip_themes else '' }} {{ item.value }} http://{{stage}}.{{domain}}/"
+    hour: 0
+    minute: "{{ 0 if item.key == 'staging' else 10 if item.key == 'production' else 20 }}"
+  with_dict: "{{ wp_cron_path }}"
+  when: wordpress__autoupdate in ['major','minor'] and item.key == stage
+  become: true
+
 - name: Generate init.d for installed evolution services
   template:
     src: evolution-init-d
