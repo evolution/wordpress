@@ -2,7 +2,7 @@
 
 /* Include Evolution to use with WordPress */
 require_once(dirname(__FILE__) . '/../Evolution.php');
-<%= wpConfigFile
+<%- wpConfigFile
   // Already started PHP
   .replace('<?php', '')
 
@@ -46,6 +46,9 @@ require_once(dirname(__FILE__) . '/../Evolution.php');
 
   // Replace ABSPATH
   .replace(/define\('ABSPATH'.+\);/, "define('ABSPATH', dirname(__FILE__) . '/wp/');")
+
+  // Normalize line endings
+  .replace(/(?:\r\n|\r|\n)/g, "\n")
 %>
 /** Output rewriting for production.DOMAIN or *.staging.DOMAIN **/
 Evolution::rewriteUrls();

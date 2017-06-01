@@ -1,7 +1,7 @@
 'use strict';
 
 var assert  = require('assert');
-var Browser = require('zombie');
+var Browser = require('../../lib/node/nightmare');
 var exec    = require('child_process').exec;
 
 describe('cap production evolve:up:db', function(done) {
@@ -18,11 +18,18 @@ describe('cap production evolve:up:db', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://example.com/')
-      .then(null, function() {
-        assert.equal('Evolution WordPress Test – Just another WordPress site', browser.text('title'));
+      .goto(`http://${process.env.EXAMPLE_COM}/`, {'Host':'example.com'})
+      .evaluate(function() {
+        return document.title;
       })
-      .then(done, done)
+      .end()
+      .then(function(title) {
+        assert.equal(title, 'Evolution WordPress Test – Just another WordPress site');
+        done()
+      })
+      .catch(function(error) {
+        done(error)
+      })
     ;
   });
 
@@ -30,13 +37,14 @@ describe('cap production evolve:up:db', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://example.com/wp/wp-admin/install.php')
-      .then(function() {
-        assert(false, 'expected 403, got ' + browser.statusCode)
+      .goto(`http://${process.env.EXAMPLE_COM}/wp/wp-admin/install.php`, {'Host':'example.com'})
+      .end()
+      .then(function(result) {
+        assert.equal(result.code, 403)
+        done()
       })
       .catch(function(error) {
-        assert.equal(browser.statusCode, 403, "should be forbidden\n" + error);
-        done()
+        done(error)
       })
     ;
   });

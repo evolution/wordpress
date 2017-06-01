@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "<%- props.name %>",
+  "engines": {
+    "node": ">=4"
+  },
+  "dependencies": {
+    "evolution-wordpress": "~2.0.0-alpha"
+  },
+  "scripts": {
+    "postinstall": "node node_modules/evolution-wordpress/bin/postinstall"
+  }
+}

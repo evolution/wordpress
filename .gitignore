@@ -4,6 +4,5 @@ test/temp/
 vendor/
 composer.phar
 *.pyc
-
 .vimrc
-
+.browserData

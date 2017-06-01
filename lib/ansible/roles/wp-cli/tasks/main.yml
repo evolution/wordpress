@@ -1,11 +1,30 @@
 # see evolution/wordpress#126
-- name:         Fetch latest wp-cli (on control machine)
-  local_action: get_url dest=/tmp/wp-cli url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar force=yes
+- name: Fetch latest wp-cli (from control)
+  local_action:
+    module: get_url
+    dest: /tmp/wp-cli
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    force: yes
 
-- name:         Copy latest wp-cli to remote
-  copy:         src=/tmp/wp-cli dest=/usr/local/bin/wp force=yes mode=0755 owner=deploy group=deploy
-  sudo:         yes
+- name: Copy latest wp-cli to remote
+  copy:
+    src: /tmp/wp-cli
+    dest: /usr/local/bin/wp
+    force: yes
+    mode: '0755'
+    owner: deploy
+    group: deploy
+  become: true
 
-- name:         Ensure deploy can both write and execute wp-cli
-  file:         path=/usr/local/bin group=deploy mode=0775
-  sudo:         yes
+- name: Ensure deploy can both write and execute wp-cli
+  file:
+    path: /usr/local/bin
+    group: deploy
+    mode: '0775'
+  become: true
+
+- name: Remove latest wp-cli in tmp (from control)
+  local_action:
+    module: file
+    dest: /tmp/wp-cli
+    state: absent

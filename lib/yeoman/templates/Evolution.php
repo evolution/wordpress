@@ -2,7 +2,7 @@
 
 class Evolution
 {
-    const DOMAIN = '<%= props.domain %>';
+    const DOMAIN = '<%- props.domain %>';
 
     public static $hostname;
     public static $env;

@@ -1,19 +1,18 @@
 ---
-evolve_version: <%= pkg.version %>
-domain:         <%= props.domain %>
-www:            <%= props.www %>
-
-monitoring:
-  newrelic:     '<%= props.newrelic %>'
+evolve_version: <%- pkg.version %>
+wp_version:     <%- props.wordpress %>
+domain:         <%- props.domain %>
+www:            <%- props.www %>
 
 mysql:
-  name:         <%= props.DB_NAME %>
-  user:         <%= props.DB_USER %>
-  password:     <%= props.DB_PASSWORD %>
-  host:         <%= props.DB_HOST %>
+  name:         <%- props.DB_NAME %>
+  user:         <%- props.DB_USER %>
+  password:     <%- props.DB_PASSWORD %>
+  host:         <%- props.DB_HOST %>
 
-<% if (props.datadog) { %>datadog_api_key: '<%= props.datadog %>'<% } %>
-
+<% if (props.newrelic) { %>newrelic_api_key: '<%- props.newrelic %>'
+<% } %><% if (props.datadog) { %>datadog_api_key: '<%- props.datadog %>'
+<% } %>
 # php__memory_limit:
 
 # apache__start_servers:
@@ -33,7 +32,7 @@ mysql:
 # wordpress__xmlrpc_whitelist:
 #   - "local"
 
-mail__postmaster: no-reply@<%= props.domain %>
+mail__postmaster: no-reply@<%- props.domain %>
 
 # iptables__ipv6: 0
 

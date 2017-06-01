@@ -3,15 +3,16 @@
 ### Dependencies
 
 - Composer (`$ curl -sS https://getcomposer.org/installer | php`)
-- Node + NPM
+- Node + npm dev dependencies
 - Vagrant
 
 ### Setup
 
-Install Composer dependencies:
+Install Composer and dependencies:
 
 ```shell
-$ php composer.phar install --dev
+$ curl -sS https://getcomposer.org/installer | php
+$ php composer.phar install
 ```
 
 Install NPM dependencies:
@@ -51,5 +52,7 @@ $ npm test
 ```
 
 Tests will be ran against the new entries in `/etc/hosts`:
-
-> http://local.example.com and http://example.com/
+- local.example.com
+- production.example.com
+- www.example.com
+- example.com

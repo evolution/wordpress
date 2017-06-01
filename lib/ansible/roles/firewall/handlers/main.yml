@@ -1,4 +1,6 @@
 ---
-- name:     restart firewall
-  service:  name=iptables-persistent state=restarted
-  sudo:     yes
+- name: restart firewall
+  service:
+    name: iptables-persistent
+    state: restarted
+  become: true

@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+
+'use strict'
+
+var fs      = require('fs-extra');
+var glob    = require('glob');
+var inWords = require('in-words').en;
+var path    = require('path');
+var request = require('request');
+var util    = require('util');
+var yauzl   = require('yauzl');
+
+console.log('Evolution WordPress - npm `postinstall` Script\n');
+
+// our point of reference on the filesystem
+var siteDir = process.cwd();
+
+// wordpress to install, by argument or groupvar
+var wpVersion = process.argv[2];
+if (!wpVersion) {
+  var groupVars = fs.readFileSync(path.join(siteDir, 'lib/ansible/group_vars/all')).toString();
+  var matched = groupVars.match(/^wp_version\s*:\s*['"]?([\d.]+)/m);
+
+  if (!matched) {
+    throw new Error('Couldn\'t find wordpress version to install');
+  }
+
+  wpVersion = matched[1];
+}
+
+// ensure fresh install
+var installDir = path.join(siteDir, 'web/wp');
+fs.removeSync(installDir);
+
+// install from github
+console.log('Downloading wordpress `%s` to `%s`...', wpVersion, installDir);
+extract('wordpress', 'wordpress', wpVersion, installDir, function (err) {
+  if (err) throw err;
+
+  var toThemeDir   = path.join(siteDir, 'web/wp-content/themes');
+  var fromThemeDir = path.join(siteDir, 'web/wp/wp-content/themes');
+  var latestTheme  = null;
+  var themeExists  = function (parents, name) {
+    var exists = false;
+    parents.forEach(function (directory) {
+      try {
+        if (fs.statSync(path.join(directory, name)).isDirectory()) {
+          exists = true;
+        }
+      } catch (e) {};
+    });
+    return exists;
+  };
+
+  fs.ensureDirSync(toThemeDir);
+
+  for (var testYear = new Date().getFullYear(); testYear > 2009; testYear--) {
+    var testName = inWords(testYear.toString().substr(0, 2))
+                 + inWords(testYear.toString().substr(2, 2))
+    ;
+
+    if (themeExists([toThemeDir, fromThemeDir], testName)) {
+      latestTheme = testName;
+      break;
+    }
+    else {
+      console.log('* No theme ' + testName);
+    }
+  }
+
+  if (latestTheme === null) {
+    if (themeExists([fromThemeDir], 'default')) {
+      latestTheme = 'default';
+    }
+    else {
+      throw new Error(util.format('Could not find WordPress core theme in `%s`', fromThemeDir));
+    }
+  }
+
+  if (themeExists([toThemeDir], latestTheme)) {
+    console.log('* Existing core theme ' + latestTheme);
+  }
+  else {
+    console.log('* Found theme ' + latestTheme);
+
+    var fromTheme = path.join(fromThemeDir, latestTheme);
+    var toTheme   = path.join(toThemeDir, latestTheme);
+
+    console.log('* Moving theme `%s` to `%s`...', path.relative(siteDir, fromTheme), path.relative(siteDir, toTheme));
+    fs.renameSync(fromTheme, toTheme);
+  }
+});
+
+function extract(username, repo, version, directory, cb) {
+  var zipName = path.join(siteDir, [username, repo, version].join('-'));
+  request({
+    url: 'https://github.com/' + username + '/' + repo + '/archive/' + version + '.zip',
+    headers: { 'user-agent': 'https://github.com/request/request' }
+  })
+    .on('error', function (err) { cb(err); })
+    .pipe(fs.createWriteStream(zipName+'.zip'))
+    .on('close', function () {
+      console.log('Extracting '+zipName+'.zip to', zipName);
+      var extractedFiles = 0,
+          extractedDirs  = 0;
+      fs.emptyDirSync(zipName);
+      yauzl.open(zipName+'.zip', {lazyEntries: true}, function(err, zipfile) {
+        if (err) throw err;
+
+        zipfile.readEntry();
+        zipfile.on('entry', function(entry) {
+          var extractedName = path.join(zipName, entry.fileName);
+          process.stdout.write("Extracted " + extractedFiles + " files and " + extractedDirs + " directories\r");
+
+          if (/\/$/.test(entry.fileName)) {
+            // create directories (names ending in '/')
+            extractedDirs++;
+            fs.mkdirs(extractedName, function(err) {
+              if (err) throw err;
+              zipfile.readEntry();
+            });
+          } else {
+            // write files via streams
+            extractedFiles++;
+            zipfile.openReadStream(entry, function(err, readStream) {
+              if (err) throw err;
+              // ensure parent directory exists
+              fs.mkdirs(path.dirname(extractedName), function(err) {
+                if (err) throw err;
+                readStream.pipe(fs.createWriteStream(extractedName));
+                readStream.on('end', function() {
+                  zipfile.readEntry();
+                });
+              });
+            });
+          }
+        });
+        zipfile.on('end', function (err) {
+          if (err) console.log('Zip ended with an error:', err);
+          console.log('Extracted zip!');
+          // gjve it a second to finish writing the last entry...
+          setTimeout(function() {
+            fs.unlinkSync(zipName+'.zip');
+
+            var entryDir = glob.sync(path.join(zipName, '*/'))[0];
+            fs.copySync(entryDir, directory, {clobber:true});
+            fs.removeSync(zipName);
+
+            cb();
+          }, 1000);
+        })
+
+      });
+    });
+};

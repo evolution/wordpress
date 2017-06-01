@@ -2,7 +2,7 @@
 
 ### Why regenerate your site?
 
-Non-breaking changes to Evolution are added across **patch versions** (eg, `v1.0.15` to `v1.0.16`), and are automatically pulled down on `bower install` or deployment to a remote stage.
+Non-breaking changes to Evolution are added across **patch versions** (eg, `v1.0.15` to `v1.0.16`), and are automatically pulled down on `npm install` or deployment to a remote stage.
 
 Breaking changes are added across **minor versions** (eg `v1.0.16` to `v1.1.0`), and require running the generator against your existing site codebase
 
@@ -15,7 +15,7 @@ Bring up your local copy of the site, or [follow the guide](./TUTORIAL-ClONE.md#
 
 ### Regenerating
 
-Now, run the generator and follow [the prompts](./REF-generator-prompts.md) -- it should pre-select the choices for which it was already configured, and install bundler and bower dependencies automatically:
+Now, run the generator and follow [the prompts](./REF-generator-prompts.md) -- it should pre-select the choices for which it was already configured, and install bundler and npm dependencies automatically:
 
 	yo evolve wordpress
 	git status

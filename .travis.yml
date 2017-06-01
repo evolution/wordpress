@@ -1,29 +1,50 @@
 sudo: required
 dist: trusty
 language: generic
+cache:
+  directories:
+  - $HOME/.rvm
+  - $HOME/.nvm
+  - $TRAVIS_BUILD_DIR/vendor
+  - $TRAVIS_BUILD_DIR/node_modules
 addons:
   hosts:
     - example.com
     - local.example.com
     - production.example.com
     - www.example.com
+  apt:
+    packages:
+      - xvfb
+      - libgconf2-dev
+env:
+  global:
+    # DEBUG: "nightmare:*,electron:*"
+    - DISPLAY: ":99.0"
+  matrix:
+    # ANSIBLE_VERSION: "2.0.2"
+    - ANSIBLE_VERSION: "2.1.3"
+    - ANSIBLE_VERSION: "2.2.0"
 before_install:
-  # node setup (for yeoman/bower)
-  - nvm install 0.10
-  - node --version
-  - npm --version
-  - nvm --version
-  - npm install -g bower
-  - npm install
   # ruby setup (for capistrano)
+  - rvm install 1.9.3
   - rvm use 1.9.3
   - gem install bundler
   - ruby --version
   - rvm --version
   - gem --version
   - bundle --version
+  # node setup (for yeoman)
+  - nvm install 4.0
+  - node --version
+  - npm --version
+  - nvm --version
+  - npm install -g yo@1.7.1
+  - yo --version
+  - npm install
   # python setup (for ansible)
-  - sudo pip install ansible==1.9.4
+  - sudo pip install urllib3 pyopenssl ndg-httpsclient pyasn1
+  - sudo pip install ansible==$ANSIBLE_VERSION
   - python --version
   - pip --version
   - ansible --version
@@ -31,14 +52,12 @@ before_install:
   - $PWD/bin/mock
   - sudo mv $PWD/temp /vagrant
   - ln -s /vagrant $PWD/temp
-  # copy our local evolution-wordpress as bower dependency
-  - rm -rf /vagrant/bower_components/evolution-wordpress
-  - cp -RP $PWD /vagrant/bower_components/evolution-wordpress/
-  # invoke local provision (as default user with elevated permissions)
+  # copy our local evolution-wordpress as npm dependency
+  - mkdir -p /vagrant/node_modules
+  - cp -RP $PWD /vagrant/node_modules/evolution-wordpress
+  # set up local provisioner
   - sudo cp $PWD/.travis.provision.bin $PWD/bin/provision
   - sudo chmod +x $PWD/bin/provision
-  - sudo $PWD/bin/provision
-  - sudo chown -Rf $USER:$USER $HOME/.ansible
   # mock vagrant binary (for parity with local/remote stages)
   - sudo cp $PWD/.travis.vagrant.bin /bin/vagrant
   - sudo chmod +x /bin/vagrant
@@ -46,11 +65,15 @@ before_install:
   - ssh-keyscan -H production.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H www.example.com >> $HOME/.ssh/known_hosts
   - ssh-keyscan -H example.com >> $HOME/.ssh/known_hosts
-  # install composer (for phpunit)
-  - curl -sS https://getcomposer.org/installer | php
+  # run xvfb as background service
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x24"
 install:
+  - echo "Provision locally and fix permissions afterward"
+  - sudo $PWD/bin/provision
+  - sudo chown -Rf $USER:$USER $HOME/.ansible
   - echo "Install Composer dependencies"
-  - php composer.phar install --dev
+  - curl -sS https://getcomposer.org/installer | php
+  - php composer.phar install -n --dev -vv
 script:
   - ./vendor/bin/phpunit
-  - npm test
+  - ./bin/test

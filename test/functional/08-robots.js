@@ -1,18 +1,25 @@
 'use strict';
 
 var assert  = require('assert');
-var Browser = require('zombie');
+var Browser = require('../../lib/node/nightmare');
 
-describe('robots.txt', function(done) {
+describe(`robots.txt`, function(done) {
   it('on local, should disallow all', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://local.example.com/robots.txt')
-      .then(function() {
-        assert(!!browser.text().match('# Block everything...'));
+      .goto(`http://${process.env.EXAMPLE_COM}/robots.txt`, {'Host':'local.example.com'})
+      .evaluate(function() {
+        return document.body.innerText;
       })
-      .then(done, done)
+      .end()
+      .then(function(text) {
+        assert(!!text.match('# Block everything...'), text);
+        done()
+      })
+      .catch(function(error) {
+        done(error)
+      })
     ;
   });
 
@@ -20,11 +27,19 @@ describe('robots.txt', function(done) {
     var browser = new Browser();
 
     browser
-      .visit('http://example.com/robots.txt')
-      .then(function() {
-        assert(!!browser.text().match('# Sitemap: '));
+      .goto(`http://${process.env.EXAMPLE_COM}/robots.txt`, {'Host':'example.com'})
+      .evaluate(function() {
+        return document.body.innerText;
       })
-      .then(done, done)
+      .end()
+      .then(function(text, result) {
+        console.dir(result, {colors:true});
+        assert(!!text.match('# Sitemap: '), text);
+        done()
+      })
+      .catch(function(error) {
+        done(error)
+      })
     ;
   });
 });

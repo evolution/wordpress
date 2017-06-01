@@ -1,32 +1,51 @@
 ---
-- name:           Install awstats
-  apt:            pkg=awstats state=present
-  sudo:           yes
+- name: Install awstats
+  apt:
+    pkg: awstats
+    state: present
+  become: true
 
-- name:           Use logfile synced down from remote
-  lineinfile:     regexp='^LogFile=' line='LogFile="/tmp/apache2-remote-access.log"' dest=/etc/awstats/awstats.conf
-  sudo:           yes
+- name: Use logfile synced down from remote
+  lineinfile:
+    regexp: '^LogFile='
+    line: 'LogFile="/tmp/apache2-remote-access.log"'
+    dest: /etc/awstats/awstats.conf
+  become: true
 
-- name:           Use combined log format
-  lineinfile:     regexp='^LogFormat=' line='LogFormat=1' dest=/etc/awstats/awstats.conf
-  sudo:           yes
+- name: Use combined log format
+  lineinfile:
+    regexp: '^LogFormat='
+    line: 'LogFormat=1'
+    dest: /etc/awstats/awstats.conf
+  become: true
 
-- name:           Set primary site domain
-  lineinfile:     regexp='^SiteDomain=' line='SiteDomain="{{ domain }}"' dest=/etc/awstats/awstats.conf
-  sudo:           yes
+- name: Set primary site domain
+  lineinfile:
+    regexp: '^SiteDomain='
+    line: 'SiteDomain="{{ domain }}"'
+    dest: /etc/awstats/awstats.conf
+  become: true
 
-- name:           Set host aliases
-  lineinfile:     regexp='^HostAliases=' line='HostAliases="localhost 127.0.0.1 REGEX[^.*\.{{ domain | replace(".", "\\.") }}$]' dest=/etc/awstats/awstats.conf
-  sudo:           yes
+- name: Set host aliases
+  lineinfile:
+    regexp: '^HostAliases='
+    line: 'HostAliases="localhost 127.0.0.1 REGEX[^.*\.{{ domain | replace(".", "\\.") }}$]'
+    dest: /etc/awstats/awstats.conf
+  become: true
 
-- name:           Enable Apache cgi module
-  apache2_module: name=cgi state=present
-  sudo:           yes
-  notify:         restart apache
+- name: Enable Apache cgi module
+  apache2_module:
+    name: cgi
+    state: present
+  become: true
+  notify: restart apache
 
-- name:           Update vhosts for awstats web ui
-  replace:        dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf regexp='^([ \t]+)(LogLevel warn)' replace='\1\2\n\n\1Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch\n\1Alias /awstatsclasses "/usr/share/awstats/lib/"\n\1Alias /awstats-icon "/usr/share/awstats/icon/"\n\1Alias /awstatscss "/usr/share/doc/awstats/examples/css"\n\1ScriptAlias /awstats/ /usr/lib/cgi-bin/'
+- name: Update vhosts for awstats web ui
+  replace:
+    dest: /etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
+    regexp: '^([ \t]+)(LogLevel warn)'
+    replace: '\1\2\n\n\1Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch\n\1Alias /awstatsclasses "/usr/share/awstats/lib/"\n\1Alias /awstats-icon "/usr/share/awstats/icon/"\n\1Alias /awstatscss "/usr/share/doc/awstats/examples/css"\n\1ScriptAlias /awstats/ /usr/lib/cgi-bin/'
   with_nested_dict: "{{ apache_vhosts }}" # see ansible/ansible#9563
-  when:           item.key_0 == stage
-  notify:         restart apache
-  sudo:           true
+  when: item.key_0 == stage
+  notify: restart apache
+  become: true

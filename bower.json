@@ -3,6 +3,7 @@
   "version": "1.6.2",
   "homepage": "https://github.com/evolution/wordpress",
   "authors": [
+    "Evan Kaufman <evan@digitalflophouse.com>",
     "Eric Clemmons <eric@smarterspam.com>"
   ],
   "description": "Libraries for a multi-staged WordPress workflow with Vagrant",

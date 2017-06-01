@@ -12,31 +12,28 @@ describe('firewall ports', function(done) {
       port_cmd = 'sudo iptables -L -n | grep :%d';
       done();
     } else {
-      exec('php -r "echo gethostbyname(\'local.example.com.\');"', {
-        cwd: process.cwd() + '/temp'
-      }, function(err, stdout, stderr) {
-        assert.ifError(err);
-        port_cmd = 'nc -z -w 1 ' + stdout.trim() + ' %d';
-        done();
-      });
+      port_cmd = `nc -z -w 1 ${process.env.EXAMPLE_COM} %d`;
+      done();
     }
   });
 
   describe('should be closed', function(done) {
     it('mysql', function(done) {
-      exec(util.format(port_cmd, '3306'), {
+      var formatted_cmd = util.format(port_cmd, '3306');
+      exec(formatted_cmd, {
         cwd: process.cwd() + '/temp'
       }, function(err, stdout, stderr) {
-        assert.ok(err);
+        assert.ok(err, formatted_cmd);
         done();
       });
     });
 
     it('apache backend', function(done) {
-      exec(util.format(port_cmd, '8080'), {
+      var formatted_cmd = util.format(port_cmd, '8080');
+      exec(formatted_cmd, {
         cwd: process.cwd() + '/temp'
       }, function(err, stdout, stderr) {
-        assert.ok(err);
+        assert.ok(err, formatted_cmd);
         done();
       });
     });

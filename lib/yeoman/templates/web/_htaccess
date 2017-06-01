@@ -3,13 +3,13 @@
   RewriteEngine On
   RewriteBase /
 
-  # Force <%= props.www ? '' : 'non-' %>www for production
-  RewriteCond %{HTTP_HOST} ^<%= props.www ? '' : 'www\\.' %><%= props.domain.replace('.', '\\.') %>$ [NC]
+  # Force <%- props.www ? '' : 'non-' %>www for production
+  RewriteCond %{HTTP_HOST} ^<%- props.www ? '' : 'www\\.' %><%- props.domain.replace('.', '\\.') %>$ [NC]
   RewriteCond %{HTTP:X-Forwarded-Proto} ^http(s)| [NC]
-  RewriteRule ^(.*)$ http%1://<%= props.www ? 'www.' : '' %><%= props.domain %>/$1 [L,R=301,NC]
+  RewriteRule ^(.*)$ http%1://<%- props.www ? 'www.' : '' %><%- props.domain %>/$1 [L,R=301,NC]
 
   # Prevent spidering of non-canonical URLs, such as `[*.]staging.*` and `production.*`.
-  RewriteCond %{HTTP_HOST} (^local|staging|^production)\.<%= props.domain.replace('.', '\\.') %>$ [NC]
+  RewriteCond %{HTTP_HOST} (^local|staging|^production)\.<%- props.domain.replace('.', '\\.') %>$ [NC]
   RewriteRule ^robots.txt$ no_robots.txt [L]
 
   ## SECURITY
@@ -41,13 +41,13 @@
   # Rules to help reduce spam
   RewriteCond %{REQUEST_METHOD} POST
   RewriteCond %{REQUEST_URI} ^(.*)wp-comments-post\.php*
-  RewriteCond %{HTTP_REFERER} !^(.*)<%= props.domain %>.*
+  RewriteCond %{HTTP_REFERER} !^(.*)<%- props.domain %>.*
   RewriteCond %{HTTP_REFERER} !^http://jetpack\.wordpress\.com/jetpack-comment/ [OR]
   RewriteCond %{HTTP_USER_AGENT} ^$
   RewriteRule ^(.*)$ - [F]
 </IfModule>
 # END Evolution WordPress
-<%= htaccessFile %>
+<%- htaccessFile %>
 <% if (!htaccessWpBlock) { %># BEGIN WordPress
 <IfModule mod_rewrite.c>
   RewriteEngine On

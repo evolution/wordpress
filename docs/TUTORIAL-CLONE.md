@@ -17,9 +17,9 @@ If you don't already have the site running locally (eg, someone else set it up),
 During generation of a new or existing site, the generator does this step for you. Manually installing dependencies is still quite simple, however:
 
 	bundle install
-	bower install
+	npm install
 
-Note that bower will automatically pull in non-breaking changes from the latest patch version of Evolution (eg, `v1.0.15` to `v1.0.16`).
+Note that npm's postinstall will automatically pull in non-breaking changes from the latest patch version of Evolution (eg, `v1.0.15` to `v1.0.16`).
 
 ### Bringing up local
 

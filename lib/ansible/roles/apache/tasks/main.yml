@@ -1,77 +1,96 @@
 ---
-- name:           Install Apache packages
-  apt:            pkg={{ item }} state=present
-  with_items:     "{{ apache_packages }}"
-  sudo:           yes
+- name: Install Apache packages
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items: "{{ apache_packages }}"
+  become: true
 
-- name:           Enable Apache modules
-  apache2_module: name={{ item }} state=present
-  with_items:     "{{ apache_modules }}"
-  sudo:           yes
-  notify:         restart apache
+- name: Enable Apache modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ apache_modules }}"
+  become: true
+  notify: restart apache
 
-- name:           Disable Apache modules
-  apache2_module: name={{ item }} state=absent
-  with_items:     "{{ apache_disabled_modules }}"
-  sudo:           yes
-  notify:         restart apache
+- name: Disable Apache modules
+  apache2_module:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ apache_disabled_modules }}"
+  become: true
+  notify: restart apache
 
-- name:           Register Apache major/minor version
-  shell:          "apache2 -v | grep -i apache | perl -pe 's|^.*apache/([0-9]+[.][0-9]+)[.].*$|$1|i'"
-  register:       apache_version
+- name: Register Apache major/minor version
+  shell: "apache2 -v | grep -i apache | perl -pe 's|^.*apache/([0-9]+[.][0-9]+)[.].*$|$1|i'"
+  register: apache_version
 
-- debug:          msg={{ apache_version.stdout }}
+- debug:
+    msg: "{{ apache_version.stdout }}"
 
-- name:           Configure apache log rotation
-  copy:           src=logrotate-apache dest=/etc/logrotate.d/apache2 owner=root group=root mode=644
-  sudo:           yes
+- name: Configure apache log rotation
+  copy:
+    src: logrotate-apache
+    dest: /etc/logrotate.d/apache2
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
 
-- name:           Configure Apache canonical server name (2.2)
-  template:       src=canonical dest=/etc/apache2/conf.d/canonical-servername.conf mode=0644
-  notify:         restart apache
-  when:           apache_version.stdout == '2.2'
-  sudo:           true
+- name: Configure Apache canonical server name
+  template:
+    src: canonical
+    dest: /etc/apache2/conf-available/canonical-servername.conf
+    mode: '0644'
+  when: apache_version.stdout == '2.4'
+  become: true
 
-- name:           Configure Apache canonical server name (2.4)
-  template:       src=canonical dest=/etc/apache2/conf-available/canonical-servername.conf mode=0644
-  when:           apache_version.stdout == '2.4'
-  sudo:           true
+- name: Enable canonical config
+  command: a2enconf canonical-servername
+  notify: restart apache
+  when: apache_version.stdout == '2.4'
+  become: true
 
-- name:           Enable canonical config (2.4)
-  command:        a2enconf canonical-servername
-  notify:         restart apache
-  when:           apache_version.stdout == '2.4'
-  sudo:           yes
+- name: Ensure Apache `Listen` is 80
+  lineinfile:
+    regexp: '^Listen'
+    line: 'Listen 80'
+    dest: /etc/apache2/ports.conf
+    backup: yes
+  notify: restart apache
+  become: true
 
-- name:           Ensure Apache `NameVirtualHost` is 80 (2.2)
-  lineinfile:     regexp='^NameVirtualHost' line='NameVirtualHost *:80' dest=/etc/apache2/ports.conf backup=yes
-  notify:         restart apache
-  when:           apache_version.stdout == '2.2'
-  sudo:           yes
+- name: Ensure existing Varnish installs won't cause port conflict on boot
+  lineinfile:
+    regexp: '^START='
+    line: 'START=no'
+    dest: /etc/default/varnish
+    backup: no
+  ignore_errors: true
+  become: true
 
-- name:           Ensure Apache `Listen` is 80
-  lineinfile:     regexp='^Listen' line='Listen 80' dest=/etc/apache2/ports.conf backup=yes
-  notify:         restart apache
-  sudo:           yes
+- name: Ensure pristine mpm_prefork directives
+  restore:
+    path: /etc/apache2/mods-available/mpm_prefork.conf
+    which: oldest
+    backup: no
+    fail_on_missing: no
+  when: apache_version.stdout == '2.4'
+  become: true
 
-- name:           Ensure existing Varnish installs won't cause port conflict on boot
-  lineinfile:     regexp='^START=' line='START=no' dest=/etc/default/varnish backup=no
-  ignore_errors:  true
-  sudo:           yes
+- name: Change ownership of /var/www to deploy
+  file:
+    path: /var/www
+    state: directory
+    owner: deploy
+    group: deploy
+  become: true
 
-- name:           Ensure pristine mpm_prefork directives
-  restore:        path=/etc/apache2/mods-available/mpm_prefork.conf which=oldest backup=no fail_on_missing=no
-  when:           apache_version.stdout == '2.4'
-  sudo:           yes
-
-- name:           Change ownership of /var/www to deploy
-  file:           path=/var/www state=directory owner=deploy group=deploy
-  sudo:           yes
-
-- shell:          (cd /etc/apache2/sites-enabled/ && ls -1 000-default*)
-  register:       apache_default_vhost
-  ignore_errors:  true
-  sudo:           yes
+- shell: (cd /etc/apache2/sites-enabled/ && ls -1 000-default*)
+  register: apache_default_vhost
+  ignore_errors: true
+  become: true
 
 - set_fact:
     wordpress__xmlrpc_allow: false
@@ -81,22 +100,27 @@
     wordpress__xmlrpc_whitelist: false
   when: wordpress__xmlrpc_whitelist is undefined
 
-- name:           Disable default apache site
-  command:        a2dissite {{ apache_default_vhost.stdout }} removes=/etc/apache2/sites-enabled/{{ apache_default_vhost.stdout }}
-  notify:         restart apache
-  when:           apache_default_vhost.stdout != ''
-  sudo:           yes
+- name: Disable default apache site
+  command: a2dissite {{ apache_default_vhost.stdout }}
+  args:
+    removes: /etc/apache2/sites-enabled/{{ apache_default_vhost.stdout }}
+  notify: restart apache
+  when: apache_default_vhost.stdout != ''
+  become: true
 
-- name:           Create apache vhosts
-  template:       src=virtualhost dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf mode=0644
+- name: Create apache vhosts
+  template:
+    src: virtualhost
+    dest: /etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
+    mode: '0644'
   with_nested_dict: "{{ apache_vhosts }}" # see ansible/ansible#9563
-  when:           item.key_0 == stage
-  notify:         restart apache
-  sudo:           true
+  when: item.key_0 == stage
+  notify: restart apache
+  become: true
 
-- name:           Enable apache vhosts
-  command:        a2ensite {{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
+- name: Enable apache vhosts
+  command: a2ensite {{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
   with_nested_dict: "{{ apache_vhosts }}"
-  when:           item.key_0 == stage
-  notify:         restart apache
-  sudo:           true
+  when: item.key_0 == stage
+  notify: restart apache
+  become: true

@@ -10,14 +10,14 @@
     - apache            # (Required) Web server (Soon: Nginx)
     - mysql             # (Required) Database server (Soon: Maria)
     - php               # (Required) PHP 5.3
-    - node              # (Required) Tools for deployment (e.g. `bower`)
+    - node              # (Required) Tools for deployment + dependencies (e.g. `npm`)
     - wp-cli            # (Required) CLI for managing WordPress
 
     # Optional Features
     <% if (props.ssl) { %>- pound             # (Optional) SSL support & decryption<% } %><% props.roles.map(function(role) { %>
-    <%= role.checked ? '-' : '#' %> <%= role.value %><% }) %>
-<% if (props.newrelic) { %>    - { role: newrelic, sudo: yes, when: stage == 'production' }        # (Optional) New Relic application/server monitoring
-<% } %><% if (props.datadog) { %>    - { role: Datadog.datadog, sudo: yes, when: stage == 'production' } # (Optional) Datadog monitoring support
+    <%- role.checked ? '-' : '#' %> <%- role.value %><% }) %>
+<% if (props.newrelic) { %>    - { role: newrelic, become: true, when: stage == 'production' }        # (Optional) New Relic application/server monitoring
+<% } %><% if (props.datadog) { %>    - { role: Datadog.datadog, become: true, when: stage == 'production' } # (Optional) Datadog monitoring support
 <% } %>    # /Optional Features
 
     - cleanup           # (Required) Generate init.d for installed evolution services

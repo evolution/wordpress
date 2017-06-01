@@ -1,6 +1,10 @@
 ---
-- name:           Disable allow_url_fopen
-  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
-  sudo:           yes
+- name: Disable allow_url_fopen
+  lineinfile:
+    dest: /etc/php5/apache2/php.ini
+    backup: yes
+    regexp: '^[;# ]*allow_url_fopen'
+    line: 'allow_url_fopen = Off'
+  become: true
 
-- include:        suhosin.yml
+- include: suhosin.yml

@@ -44,10 +44,7 @@
 {% endif %}
         Options FollowSymLinks
         AllowOverride All
-{% if apache_version.stdout == '2.2' %}
-        Order allow,deny
-        Allow from all
-{% elif apache_version.stdout == '2.4' %}
+{% if apache_version.stdout == '2.4' %}
         Require all granted
 {% endif %}
     </Directory>
@@ -153,7 +150,6 @@
         </IfModule>
 
         # Compress all output labeled with one of the following media types.
-    {% if apache_version.stdout != '2.2' %}
 
         #
         # (!) For Apache versions below version 2.3.7 you don't need to
@@ -163,7 +159,6 @@
         #
         # https://httpd.apache.org/docs/current/mod/mod_filter.html#addoutputfilterbytype
         <IfModule mod_filter.c>
-    {% endif %}
             AddOutputFilterByType DEFLATE "application/atom+xml" \
                                           "application/javascript" \
                                           "application/json" \
@@ -196,8 +191,7 @@
                                           "text/x-component" \
                                           "text/x-cross-domain-policy" \
                                           "text/xml"
-        {% if apache_version.stdout != '2.2' %}</IfModule>
-    {% endif %}
+        </IfModule>
 
         # Map the following filename extensions to the specified
         # encoding type in order to make Apache serve the file types

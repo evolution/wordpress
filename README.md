@@ -24,7 +24,9 @@ Evolution lets you generate an entirely versioned, multi-environment Wordpress s
 
 ## Project Status
 
-Evolution is _largely_ stable and usable at this point, but features are still being added and bugs being fixed. This documentation is also a work in progress.
+Evolution is stable and usable in a production environment, but features are still being added and bugs being fixed. Suggestions, bug reports, and pull requests are welcome.
+
+This and [futher documentation](./docs/) are a constant work in progress. Contributions to documentation are _always_ welcome.
 
 ## Quick Start
 
@@ -37,15 +39,15 @@ You will need:
 * [Vagrant](https://www.vagrantup.com/downloads.html) 1.8+
   * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 5+
   * [Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)
-* [npm](https://docs.npmjs.com/getting-started/installing-node)
+* [Node](https://nodejs.org/en/download/) 4.0+
 * [Bundler](http://bundler.io/)
-* [Ansible](http://docs.ansible.com/intro_installation.html) 1.6+
+* [Ansible](http://docs.ansible.com/intro_installation.html) 2.0+
 * [sshpass](https://gist.github.com/arunoda/7790979)
 
-You can then use npm to install Bower and the Yeoman generator:
+You can then use npm to install the Yeoman generator:
 
 ```
-npm install -g bower yo generator-evolve
+npm install -g yo generator-evolve
 ```
 
 ### Common Workflows
