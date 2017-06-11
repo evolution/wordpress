@@ -1,35 +1,44 @@
 ---
-- name:           Install PHP packages
-  apt:            pkg={{ item }}
-  with_items:     "{{ php_packages }}"
-  sudo:           yes
+# default to php5 when this var is not set
+- set_fact:
+    php__version_7: false
+  when: php__version_7 is undefined
 
-- name:           Install PECL packages
-  command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates={{ php_conf_path }}/{{ item if item is string else item.name }}.ini
-  with_items:     "{{ pecl_packages }}"
-  sudo:           yes
+- debug: var=php__version_7
 
-- name:           Enable PECL packages
-  lineinfile:     line="extension={{ item if item is string else item.name }}.so"
-                  dest="{{ php_conf_path }}/{{ item if item is string else item.name }}.ini"
-                  create=yes
-  with_items:     "{{ pecl_packages }}"
-  sudo:           yes
+- name: Register installed PHP major version
+  shell: "php --version | grep -i cli | perl -pe 's|^PHP ([0-9]+)[.].*$|$1|i'"
+  ignore_errors: true
+  register: php_major_version
 
-- name:           Calculate PHP memory_limit
-  command:        echo "{{ 256 if ansible_memtotal_mb > 2048 else 128 }}"
-  register:       calc_php_memory_limit
-  ignore_errors:  true
-  when:           php__memory_limit is undefined
+- debug: msg={{ php_major_version }}
 
-- name:           Update php.ini's date.timezone
-  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*date\.timezone' line='date.timezone = "America/Chicago"'
-  sudo:           yes
+# remove php7 as necessary before we install php5
+- include: php7-uninstall.yml
+  when: php_major_version.stdout == "7" and php__version_7 == false
+  sudo: yes
 
-- name:           Update php.ini's memory_limit
-  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*memory_limit' line='memory_limit = {{ calc_php_memory_limit.stdout if calc_php_memory_limit.stdout is defined else php__memory_limit }}M'
-  sudo:           yes
+# remove php5 as necessary before we install php7
+- include: php5-uninstall.yml
+  when: php_major_version.stdout == "5" and php__version_7 == true
+  sudo: yes
 
-- name:           Update php.ini's upload_max_filesize
-  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*upload_max_filesize' line='upload_max_filesize = 16M'
-  sudo:           yes
+- include: php5-install.yml
+  when: php__version_7 == false
+  sudo: yes
+
+- include: php7-install.yml
+  when: php__version_7 == true
+  sudo: yes
+
+- name: Register php_conf_path for subsequent roles
+  set_fact:
+    php_conf_path: "{{ php7_conf_path if php__version_7 == true else php5_conf_path }}"
+
+- debug: var=php_conf_path
+
+- name: Register php_mods_path for subsequent roles
+  set_fact:
+    php_mods_path: "{{ php7_mods_path if php__version_7 == true else php5_mods_path }}"
+
+- debug: var=php_mods_path

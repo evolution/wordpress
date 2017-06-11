@@ -1,6 +1,11 @@
 ---
 - name:           Disable allow_url_fopen
-  lineinfile:     dest=/etc/php5/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
+  lineinfile:     dest={{ php_conf_path }}/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
+  when:           php__version_7 == false
   sudo:           yes
 
 - include:        suhosin.yml
+  when:           php__version_7 == false
+
+# NOTE: Suhosin is pre-alpha for php7, so we'll just have to do without it for now
+# see: https://github.com/sektioneins/suhosin7

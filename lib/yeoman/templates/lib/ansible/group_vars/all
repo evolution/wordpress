@@ -15,6 +15,7 @@ mysql:
 <% if (props.datadog) { %>datadog_api_key: '<%= props.datadog %>'<% } %>
 
 # php__memory_limit:
+# php__version_7: false
 
 # apache__start_servers:
 # apache__min_spare_servers:

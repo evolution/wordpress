@@ -1,0 +1,15 @@
+---
+- name:           Uninstall PECL packages
+  command:        pecl uninstall {{ item if item is string else item.name + '-' + item.version }} removes={{ php5_mods_path }}/{{ item if item is string else item.name }}.ini
+  with_items:     "{{ pecl5_packages }}"
+  sudo:           yes
+
+- name:           Remove PECL ini files as necessary
+  file:           state=absent path="{{ php5_mods_path }}/{{ item if item is string else item.name }}.ini"
+  with_items:     "{{ pecl5_packages }}"
+  sudo:           yes
+
+- name:           Uninstall PHP packages
+  apt:            state=absent pkg={{ item }}
+  with_items:     "{{ php5_packages }}"
+  sudo:           yes
