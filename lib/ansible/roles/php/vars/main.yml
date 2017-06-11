@@ -1,8 +1,10 @@
 ---
-pecl_packages:
+pecl5_packages:
   - { name: 'scream', version: '0.1.0'}
 
-php_packages:
+pecl7_packages: []
+
+php5_packages:
   - libapache2-mod-php5
   - php-pear
   - php5
@@ -13,4 +15,19 @@ php_packages:
   - php5-mcrypt
   - php5-dev
 
-php_conf_path: '/etc/php5/mods-available'
+php7_packages:
+  - libapache2-mod-php7.1
+  - php-pear
+  - php7.1
+  - php7.1-cli
+  - php7.1-common
+  - php7.1-curl
+  - php7.1-gd
+  - php7.1-mcrypt
+  - php7.1-dev
+
+php5_conf_path: '/etc/php5'
+php7_conf_path: '/etc/php/7.1'
+
+php5_mods_path: '{{ php5_conf_path }}/mods-available'
+php7_mods_path: '{{ php7_conf_path }}/mods-available'

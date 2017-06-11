@@ -57,6 +57,7 @@ npm install -g bower yo generator-evolve
 * [Upgrading from an existing Genesis site](./docs/UPGRADE-FAQ.md)
 * [Importing a non Evolution site](./docs/TUTORIAL-IMPORT.md)
 * [Caveats for developing themes and plugins](./docs/REF-caveats-constants.md)
+* [Common variable overrides](./docs/REF-groupvar-overrides.md)
 
 ## Managing Remote Environments
 
