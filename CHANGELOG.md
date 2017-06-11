@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.6.3
+    - Optional PHP 7 support ([#167](https://github.com/evolution/wordpress/pull/167))
 - v1.6.2
     - Another 5.6 tweak ([#165](https://github.com/evolution/wordpress/pull/165))
 - v1.6.1
