@@ -47,3 +47,9 @@ mail__postmaster: no-reply@<%= props.domain %>
 # swap__path: /swapfile
 # swap__swappiness: 10
 # swap__vfs_cache_pressure: 50
+
+# snapshots__method: local
+# snapshots__credentials: ~
+# snapshots__container: /home/deploy/backup/production.<%= props.domain %>
+# snapshots__interval: 1d
+# snapshots__retention: { hours: ~, days: 1, weeks: 1, months: 1, years: 1 }
