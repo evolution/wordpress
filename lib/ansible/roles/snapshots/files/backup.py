@@ -162,6 +162,10 @@ class BackupManager:
         else:
             self.config['retention'] = self.validate_retention(self.config['retention'])
 
+        # default retention lag, as necessary
+        if not 'retention_lag' in self.config:
+            self.config['retention_lag'] = True
+
         # apply retention rules to list of backups
         if not self.arguments.simulate:
             # ...only if we've made a new backup
@@ -211,9 +215,14 @@ class BackupManager:
         '''
         Prune backups from the given dict, according to our retention policy
         '''
+        # determine the "now" for retention...
+        relative_now = datetime.now()
+        if self.config['retention_lag']:
+            relative_now = relative_now - timedelta(**self.interval_to_units(self.config['interval']))
+
         # convert our string timestamps into datetime objs, before providing them to grandfatherson
         backup_datetimes = [datetime.strptime(timestamp, self.date_format) for timestamp in backups_by_timestamp.keys()]
-        datetimes_to_delete = to_delete(backup_datetimes, firstweekday=SUNDAY, **self.config['retention'])
+        datetimes_to_delete = to_delete(backup_datetimes, firstweekday=SUNDAY, now=relative_now, **self.config['retention'])
         del backup_datetimes[:]
 
         # convert returned datetime objects back into string timestamps
@@ -328,7 +337,10 @@ class BackupManager:
             filename[current_date_key] = '%s-%s.%s' % (self.slug, current_date.strftime(self.date_format), self.backup_format)
 
             # simulate backup deletions
-            for datestamp in to_delete(existing.values(), now=current_date, firstweekday=SUNDAY, **self.config['retention']):
+            relative_now = current_date
+            if self.config['retention_lag']:
+                relative_now = relative_now - timedelta(**units)
+            for datestamp in to_delete(existing.values(), now=relative_now, firstweekday=SUNDAY, **self.config['retention']):
                 datestamp_key = str(datestamp)
                 if existing.has_key(datestamp_key):
                     del existing[datestamp_key]

@@ -53,3 +53,4 @@ mail__postmaster: no-reply@<%= props.domain %>
 # snapshots__container: /home/deploy/backup/production.<%= props.domain %>
 # snapshots__interval: 1d
 # snapshots__retention: { hours: ~, days: 1, weeks: 1, months: 1, years: 1 }
+# snapshots__retention_lag: true
