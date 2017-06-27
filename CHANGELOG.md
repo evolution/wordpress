@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.6.5
+    - One last fix for snapshots...
 - v1.6.4
     - Snapshot backup support ([#169](https://github.com/evolution/wordpress/pull/169))
 - v1.6.3
