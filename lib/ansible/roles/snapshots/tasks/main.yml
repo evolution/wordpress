@@ -50,6 +50,5 @@
     name: "evolution interval backups for {{stage}}"
     user: deploy
     job: "/usr/local/bin/snapshot-backup.py --quiet -c '{{ snapshots_config | to_json }}'"
-    disabled: true
   when: stage == "production" and snapshots_config is defined
   sudo: yes
