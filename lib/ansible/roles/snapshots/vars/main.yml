@@ -1,0 +1,8 @@
+---
+snapshots_packages:
+  - python-libcloud
+  - python-pip
+
+snapshots_pip_packages:
+  - grandfatherson
+  - tabulate

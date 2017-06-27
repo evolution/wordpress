@@ -1,0 +1,55 @@
+---
+- name: Install apt packages
+  apt: pkg={{ item }} state=present
+  with_items: "{{ snapshots_packages }}"
+  sudo: yes
+
+- name: Install pip packages
+  pip: name={{item}} state=present
+  with_items: "{{ snapshots_pip_packages }}"
+  sudo: yes
+
+- name: Configure backup parameters
+  set_fact:
+    snapshots_config:
+      stage: "{{ stage }}"
+      domain: "{{ domain }}"
+      dbname: "{{ mysql.name}}"
+      releasepath: "/var/www/{{domain}}/production/master"
+      method: "{{ snapshots__method | default() }}"
+      credentials: "{{ snapshots__credentials | default() }}"
+      interval: "{{ snapshots__interval | default() }}"
+      retention: "{{ snapshots__retention | default() }}"
+      retention_lag: "{{ snapshots__retention_lag | default() }}"
+  when: >
+    stage == "production" and (
+      snapshots__method is defined
+      or snapshots__credentials is defined
+      or snapshots__interval is defined
+      or snapshots__retention is defined
+      or snapshots__retention_lag is defined
+    )
+
+- name: Install backup script
+  copy: src=backup.py dest=/usr/local/bin/snapshot-backup.py owner=deploy group=deploy mode=0755
+  when: snapshots_config is defined
+  sudo: yes
+
+- name: Disable production backups
+  cron:
+  args:
+    name: "evolution interval backups for {{stage}}"
+    user: deploy
+    state: absent
+  when: snapshots_config is undefined and stage == "production"
+  sudo: yes
+
+- name: Set up production backups via user-level crontab
+  cron:
+  args:
+    name: "evolution interval backups for {{stage}}"
+    user: deploy
+    job: "/usr/local/bin/snapshot-backup.py --quiet -c '{{ snapshots_config | to_json }}'"
+    disabled: true
+  when: stage == "production" and snapshots_config is defined
+  sudo: yes
