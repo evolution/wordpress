@@ -247,6 +247,8 @@ class BackupManager:
         for key in retention.keys():
             if retention[key] is None:
                 retention[key] = 0
+            else:
+                retention[key] = int(retention[key])
 
         return retention
 
