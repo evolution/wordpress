@@ -1,5 +1,17 @@
 namespace :evolve do
   namespace :snapshot do
+    task :prepare_config, :vars do |task, args|
+      # group_vars = args[:vars]
+      config = Hash[args[:vars].select{|key, value| key.match(/^snapshots__/) }.map{|key, val| [key.match(/^snapshots__(.+)$/)[1] , val] } ]
+      config['stage'] = fetch(:stage)
+      config['domain'] = fetch(:domain)
+      config['dbname'] = args[:vars]['mysql']['name']
+      config['releasepath'] = fetch(:deploy_to)
+
+      require 'json'
+      set :snapshot_config, "'#{JSON.dump(config)}'"
+    end
+
     desc "Restore a backup to the remote"
     task :restore do |task|
       # need to retrieve a list of existing backups
@@ -12,14 +24,14 @@ namespace :evolve do
       units = ['hour', 'day', 'week', 'month', 'year']
 
       # load vars from group_vars, or default values
-      require 'yaml'
-      group_vars = YAML.load_file('lib/ansible/group_vars/all')
-      group_vars['snapshots__method'] = 'local' unless group_vars.key?('snapshots__method')
-      group_vars['snapshots__credentials'] = '' unless group_vars.key?('snapshots__credentials')
-      group_vars['snapshots__container'] = "/home/deploy/backup/production.#{fetch(:domain)}" unless group_vars.key?('snapshots__container')
-      group_vars['snapshots__interval'] = '1d' unless group_vars.key?('snapshots__interval')
-      group_vars['snapshots__retention'] = {'days'=>1, 'weeks'=>1, 'months'=>1, 'years'=>1} unless group_vars.key?('snapshots__retention')
-      group_vars['snapshots__retention_lag'] = true unless group_vars.key?('snapshots__retention_lag')
+      invoke "evolve:retrieve_groupvars"
+      group_vars = fetch(:group_vars)
+      group_vars['snapshots__method'] = group_vars.fetch('snapshots__method', 'local')
+      group_vars['snapshots__credentials'] = group_vars.fetch('snapshots__credentials', '')
+      group_vars['snapshots__container'] = group_vars.fetch('snapshots__container', "/home/deploy/backup/production.#{fetch(:domain)}")
+      group_vars['snapshots__interval'] = group_vars.fetch('snapshots__interval', '1d')
+      group_vars['snapshots__retention'] = group_vars.fetch('snapshots__retention', {'days'=>1, 'weeks'=>1, 'months'=>1, 'years'=>1})
+      group_vars['snapshots__retention_lag'] = group_vars.fetch('snapshots__retention_lag', true)
 
       # prompt for relevant values
       require 'inquirer'
@@ -72,16 +84,11 @@ namespace :evolve do
 
       group_vars['snapshots__retention_lag'] = lag_val[:lag_val]
 
-      # invoke backup script with --simulate and group_vars matching /^snapshots__/
-      require 'json'
-      config = Hash[group_vars.select{|key, value| key.match(/^snapshots__/) }.map{|key, val| [key.match(/^snapshots__(.+)$/)[1] , val] } ]
-      config['stage'] = fetch(:stage)
-      config['domain'] = fetch(:domain)
-      config['dbname'] = group_vars['mysql']['name']
-      config['releasepath'] = fetch(:deploy_to)
+      # invoke backup script with --simulate and relevant config
+      invoke "evolve:snapshot:prepare_config", group_vars
 
       on roles(:web) do |host|
-        execute "/usr/local/bin/snapshot-backup.py", "-vvv", "-s", "-c", "'#{JSON.dump(config)}'"
+        execute "/usr/local/bin/snapshot-backup.py", "-vvv", "-s", "-c", fetch(:snapshot_config)
       end
     end
 

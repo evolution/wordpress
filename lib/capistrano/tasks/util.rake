@@ -61,6 +61,11 @@ WARN
     end
   end
 
+  task :retrieve_groupvars do |task|
+    require 'yaml'
+    set :group_vars, YAML.load_file('lib/ansible/group_vars/all')
+  end
+
   task :log, :success, :message do |task, args|
     require 'etc'
     require 'socket'
