@@ -34,6 +34,8 @@ class BackupManager:
         parser.add_argument('-v','--verbose', action='count', help='increase verbosity')
         parser.add_argument('-q','--quiet', action='store_true', help='limit output to warnings/errors (ignores verbose)')
         parser.add_argument('-s','--simulate', action='store_true', help='simulate backup creation and retention for the past year')
+        parser.add_argument('-l','--list', action='store_true', help='list existing backups')
+        parser.add_argument('-r','--retrieve', help='retrieve backup with given filename')
         parser.add_argument('-c','--config', action='append', help='provide key=value pairs or JSON document', required=True)
         self.arguments = parser.parse_args()
 
@@ -120,6 +122,42 @@ class BackupManager:
         # a sane interval to make backups
         if not 'interval' in self.config:
             self.config['interval'] = '1d'
+
+        # list existing backups, and summarily exit
+        if self.arguments.list:
+            backups_available = []
+            if self.config['method'].lower() != 'local':
+                for backup in self.driver.list_container_objects(self.container):
+                    matched = re.match(self.backup_pattern, backup.name)
+                    if matched:
+                        backups_available.append(backup.name)
+            else:
+                for backup in os.listdir(self.config['container']):
+                    matched = re.match(self.backup_pattern, backup)
+                    if matched:
+                        backups_available.append(backup)
+
+            print("\n".join(backups_available))
+            sys.exit()
+
+        # retrieve given backup file, print its path, and summarily exit
+        if self.arguments.retrieve:
+            if self.config['method'].lower() != 'local':
+                backup_object = self.driver.get_object(self.container.name, self.arguments.retrieve)
+                working_dir = mkdtemp(prefix='evolution_restore')
+                download_success = self.driver.download_object(backup_object, working_dir)
+                if download_success:
+                    print(working_dir, backup_object.name)
+                else:
+                    raise RuntimeError('Failed to download object %s' % backup_object.name)
+            else:
+                backup_path = '%s/%s' % (self.config['container'], self.arguments.retrieve)
+                if os.path.exists(backup_path):
+                    working_dir = mkdtemp(prefix='evolution_restore')
+                    shutil.move(backup_path, working_dir)
+                else:
+                    raise RuntimeError('Failed to find backup %s' % backup_path)
+            sys.exit()
 
         # inventory existing backups (if any), where key is timestamp and value is libcloud object / local filename
         backups_by_timestamp = {}
