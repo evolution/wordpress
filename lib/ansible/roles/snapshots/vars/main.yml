@@ -6,3 +6,4 @@ snapshots_packages:
 snapshots_pip_packages:
   - grandfatherson
   - tabulate
+  - certifi

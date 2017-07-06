@@ -12,12 +12,17 @@ from tabulate import tabulate
 from tempfile import mkdtemp
 
 import json
+import libcloud.security
+import libcloud.utils
 import os
 import pipes
 import re
 import shutil
 import subprocess
 import sys
+
+libcloud.utils.SHOW_IN_DEVELOPMENT_WARNING = False
+libcloud.security.VERIFY_SSL_CERT = True
 
 class BackupManager:
     # static properties
@@ -113,8 +118,10 @@ class BackupManager:
 
                 if container_exists == False:
                     self.container = self.driver.create_container(container_name)
+                    self.announce_verbose('Created container: %s' % container_name)
                 else:
                     self.container = self.driver.get_container(container_name)
+                    self.announce_verbose('Found existing container: %s' % container_name)
             else:
                 if not os.path.exists(self.config['container']):
                     os.makedirs(self.config['container'], self.backup_mode)
