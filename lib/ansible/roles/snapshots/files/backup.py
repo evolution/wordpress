@@ -152,16 +152,19 @@ class BackupManager:
             if self.config['method'].lower() != 'local':
                 backup_object = self.driver.get_object(self.container.name, self.arguments.retrieve)
                 working_dir = mkdtemp(prefix='evolution_restore')
-                download_success = self.driver.download_object(backup_object, working_dir)
+                backup_dest = '%s/%s' % (working_dir, backup_object.name)
+                download_success = self.driver.download_object(backup_object, backup_dest)
                 if download_success:
-                    print(working_dir, backup_object.name)
+                    print(backup_dest)
                 else:
                     raise RuntimeError('Failed to download object %s' % backup_object.name)
             else:
                 backup_path = '%s/%s' % (self.config['container'], self.arguments.retrieve)
                 if os.path.exists(backup_path):
                     working_dir = mkdtemp(prefix='evolution_restore')
-                    shutil.move(backup_path, working_dir)
+                    backup_dest = '%s/%s' % (working_dir, self.arguments.retrieve)
+                    shutil.move(backup_path, backup_dest)
+                    print(backup_dest)
                 else:
                     raise RuntimeError('Failed to find backup %s' % backup_path)
             sys.exit()
