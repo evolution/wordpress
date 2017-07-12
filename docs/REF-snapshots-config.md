@@ -9,6 +9,8 @@
 
 ---
 
+> See also the snapshot-specific [cap tasks](./REF-cap-tasks.md).
+
 ### Local vs Cloud Storage
 
 Keeping backups on the local filesystem, while simpler to configure, does not make for a good disaster recovery scenario. To this end, Evolution now supports snapshots to a variety of cloud storage providers via [Apache Libcloud](https://libcloud.readthedocs.io/en/latest/).

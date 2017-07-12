@@ -3,6 +3,8 @@
 * [deploy](#deploy)
 * [wp:{command}[:subcommand[..]]](#wpcommandsubcommand)
 * [evolve:update](#evolveupdate)
+* [evolve:snapshot:simulate](#evolvesnapshotsimulate)
+* [evolve:snapshot:restore](#evolvesnapshotrestore)
 * [evolve:provision](#evolveprovision)
 * [evolve:ssh](#evolvessh)
 * [evolve:version](#evolveversion)
@@ -54,6 +56,46 @@ bundle exec cap staging evolve:update[major,themes]
 ```
 
 Note that **committing updates back to git requires a deploy key with write permissions**.
+
+### evolve:snapshot:simulate
+
+Invokes server-side [backup script](https://github.com/evolution/wordpress/blob/master/lib/ansible/roles/snapshots/files/backup.py) to simulate snapshot history for the past year, given an interactive choice of relevant configuration values:
+
+```
+bundle exec cap production evolve:snapshot:simulate
+? By what interval of time should we take snapshots? days
+? And we'll take a snapshot every how many days? 1
+? Retain how many hourly backups? 0
+? Retain how many daily backups? 1
+? Retain how many weekly backups? 1
+? Retain how many monthly backups? 1
+? Retain how many yearly backups? 1
+? Should backup retention lag one day behind? Yes
+
+! Simulating a backup every 1 days
+! Retention policy:
+! 	1 days
+! 	1 weeks
+! 	1 months
+! 	1 years
+! created on                  deleted on                  retained for       filename
+--------------------------  --------------------------  -----------------  -----------------------------------------------------
+2016-07-12 16:59:42.912563  2017-01-02 16:59:42.912563  174 days, 0:00:00  production.example.com-2016-07-12_16-59-42.912563.tgz
+```
+
+This is useful for estimating storage requirements, as you fine-tune your snapshotting configuration.
+
+### evolve:snapshot:restore
+
+Invokes aforementioned backup script, allowing you to select one from a list of existing production snapshots, and seamlessly restore it to your local or production stage:
+
+```
+bundle exec cap production evolve:snapshot:restore
+? Select which backup to restore production.example.com-2017-07-12_15-43-23.292826.tgz
+? To where should we restore this backup? production
+```
+
+Note that **this is destructive to the targeted stage**, and _will wipe out any existing database content or uploaded files_.
 
 ### evolve:provision
 
