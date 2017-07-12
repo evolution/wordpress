@@ -60,18 +60,50 @@ namespace :evolve do
       end
     end
 
+    task :import, :sql_file, :source_stage, :target_stage do |task, args|
+      source_stage = args[:source_stage].to_s
+      target_stage = args[:target_stage].to_s
+      # if crossing stages, invoke prepare task to build wp search-replace command
+      cross_stage = target_stage != source_stage
+      if cross_stage
+        invoke "evolve:db:prepare", source_stage, target_stage
+      # otherwise just invoke calc_wp_path task to...calculate working wp path
+      else
+        invoke "evolve:calc_wp_path", target_stage == 'local'
+      end
+      if target_stage == "local"
+        run_locally do
+          sql_file = args[:sql_file]
+          if sql_file.start_with?(Dir.pwd)
+            sql_file.sub!(Dir.pwd, '/vagrant')
+          end
+          execute :vagrant, :up
+          execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{sql_file}'"
+          if cross_stage
+            execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:working_wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
+          end
+        end
+      else
+        on release_roles(:db) do
+          within fetch(:working_wp_path) do
+            execute :wp, :db, :import, args[:sql_file], "--path=\"#{fetch(:working_wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
+            if cross_stage
+              execute :wp, :'search-replace', fetch(:wp_cmd)
+            end
+          end
+        end
+      end
+    end
+
     task :down do |task|
       begin
-        raise "Cannot sync db down from local!" if fetch(:stage) == 'local'
+        raise "Cannot sync db down from local!" if fetch(:stage).to_s == 'local'
 
         invoke "evolve:db:backup"
-        invoke "evolve:db:prepare", fetch(:stage), "local"
 
         run_locally do
           execute :gzip, "-d", fetch(:db_gzip_file)
-          execute :vagrant, :up
-          execute :vagrant, :ssh, :local,  "-c 'cd /vagrant && mysql -uroot -D \"#{fetch(:wp_config)['name']}_local\" < #{fetch(:db_backup_file)}'"
-          execute :vagrant, :ssh, :local, "-c 'cd #{fetch(:working_wp_path)} && wp search-replace #{fetch(:wp_cmd)}'"
+          invoke "evolve:db:import", fetch(:db_backup_file), fetch(:stage), "local"
           execute :rm, fetch(:db_backup_file)
         end
 
@@ -83,11 +115,10 @@ namespace :evolve do
 
     task :up do |task|
       begin
-        raise "Cannot sync db up to local!" if fetch(:stage) == 'local'
+        raise "Cannot sync db up to local!" if fetch(:stage).to_s == 'local'
 
         invoke "evolve:confirm", "You are about to destroy & override the \"#{fetch(:stage)}\" database!"
         invoke "evolve:db:backup", true
-        invoke "evolve:db:prepare", "local", fetch(:stage)
 
         run_locally do
           execute :vagrant, :up
@@ -99,10 +130,7 @@ namespace :evolve do
           upload! fetch(:db_gzip_file), "/tmp/#{fetch(:db_gzip_file)}"
           execute :gzip, "-d", "/tmp/#{fetch(:db_gzip_file)}"
 
-          within fetch(:working_wp_path) do
-            execute :wp, :db, :import, "/tmp/#{fetch(:db_backup_file)}", "--path=\"#{fetch(:working_wp_path)}\"", "--url=\"http://#{fetch(:stage)}.#{fetch(:domain)}/\""
-            execute :wp, :'search-replace', fetch(:wp_cmd)
-          end
+          invoke "evolve:db:import", "/tmp/#{fetch(:db_backup_file)}", "local", fetch(:stage)
 
           execute :rm, "/tmp/#{fetch(:db_backup_file)}"
         end

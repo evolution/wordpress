@@ -124,6 +124,7 @@ namespace :evolve do
         end
       end
     end
+    Rake::Task['evolve:permissions'].reenable
   end
 
   desc "Remove remote deployments"

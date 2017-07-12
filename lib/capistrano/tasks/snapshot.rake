@@ -1,7 +1,6 @@
 namespace :evolve do
   namespace :snapshot do
     task :prepare_config, :vars do |task, args|
-      # group_vars = args[:vars]
       config = Hash[args[:vars].select{|key, value| key.match(/^snapshots__/) }.map{|key, val| [key.match(/^snapshots__(.+)$/)[1] , val] } ]
       config['stage'] = fetch(:stage)
       config['domain'] = fetch(:domain)
@@ -14,8 +13,87 @@ namespace :evolve do
 
     desc "Restore a backup to the remote"
     task :restore do |task|
-      # need to retrieve a list of existing backups
-      # provide list and let user select one
+      slug_pattern = '[\w.-]+?-[\d_.-]+?[.][a-z0-9.]+'
+
+      # we expect that no backups will exist, except on production
+      raise "Cannot restore backups from #{fetch(:stage)}!" unless fetch(:stage).to_s == 'production'
+
+      invoke "evolve:retrieve_groupvars"
+      invoke "evolve:snapshot:prepare_config", fetch(:group_vars)
+
+      # retrieve a list of existing backups
+      backups = []
+      on roles(:web) do |host|
+        backups = capture(:python, "/usr/local/bin/snapshot-backup.py", "-l", "-q", "-c", fetch(:snapshot_config)).split
+      end
+      # ...or fail if no backups found
+      raise 'No existing backups to restore!' unless backups.count > 0 and backups.first.match(Regexp.new("^#{slug_pattern}$"))
+
+      # prompt for relevant values
+      require 'inquirer'
+
+      # prompt for WHICH backup to restore
+      restore_slug = Inquirer.prompt([{
+        :name    => :restore_slug,
+        :type    => :list,
+        :message => 'Select which backup to restore',
+        :choices => backups.sort.map{ |s| {:name => s, :value => s} },
+      }])
+      restore_slug = restore_slug[:restore_slug]
+
+      # prompt for WHERE to restore it
+      restore_stage = Inquirer.prompt([{
+        :name    => :restore_stage,
+        :type    => :list,
+        :message => 'To where should we restore this backup?',
+        :choices => ['production', 'local'].map{ |s| {:name => s, :value => s} },
+        :default => 'production',
+      }])
+      restore_stage = restore_stage[:restore_stage]
+
+      cross_stage = restore_stage != fetch(:stage).to_s
+
+      # retrieve tarball
+      restore_file = nil
+      on roles(:web) do |host|
+        restore_file = capture(:python, "/usr/local/bin/snapshot-backup.py", "-r", restore_slug, "-q", "-c", fetch(:snapshot_config))
+        raise "Failed to get a valid restore path: #{restore_file}" unless restore_file.match(Regexp.new("/#{slug_pattern}$"))
+
+        # download from remote stage, for import to local stage
+        if cross_stage
+          download! restore_file, "#{Dir.pwd}/#{restore_slug}"
+        end
+      end
+
+      # create and extract to a directory (on the control)
+      restore_dir = nil
+      if cross_stage
+        run_locally do
+          restore_dir = "#{Dir.pwd}/#{restore_slug.gsub(/[.][a-z.]+?$/, '')}"
+          execute :mkdir, '-p', restore_dir
+          execute :tar, 'xvzf', "#{Dir.pwd}/#{restore_slug}", '-C', restore_dir
+        end
+      # (or on the remote)
+      else
+        on roles(:web) do |host|
+          restore_dir = File.dirname(restore_file)
+          execute :tar, 'xvzf', restore_file, '-C', restore_dir
+        end
+      end
+
+      invoke "evolve:db:import", "#{restore_dir}/db.sql", fetch(:stage), restore_stage
+      invoke "evolve:files:import", fetch(:stage), restore_stage, "#{restore_dir}/uploads"
+
+      # clean up after ourselves
+      if cross_stage
+        run_locally do
+          execute :rm, '-rf', restore_dir, "#{Dir.pwd}/#{restore_slug}"
+        end
+      end
+      on roles(:web) do |host|
+        execute :rm, "-rf", File.dirname(restore_file)
+      end
+
     end
 
     desc "Prompt for and simulate a backup schedule"
