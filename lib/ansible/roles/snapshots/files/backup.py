@@ -163,7 +163,7 @@ class BackupManager:
                 if os.path.exists(backup_path):
                     working_dir = mkdtemp(prefix='evolution_restore')
                     backup_dest = '%s/%s' % (working_dir, self.arguments.retrieve)
-                    shutil.move(backup_path, backup_dest)
+                    shutil.copy(backup_path, backup_dest)
                     print(backup_dest)
                 else:
                     raise RuntimeError('Failed to find backup %s' % backup_path)
@@ -232,7 +232,7 @@ class BackupManager:
 
         # dump database to sql file
         verbosity = '--verbose' if self.arguments.verbose > 1 else None
-        self.call(['mysqldump', '--opt', verbosity, '--user=root', '--databases', '%s_%s' % (self.config['dbname'], self.config['stage']), '--result-file', '%s/tarball/db.sql' % working_dir])
+        self.call(['mysqldump', '--opt', verbosity, '--user=root', '--result-file', '%s/tarball/db.sql' % working_dir, '%s_%s' % (self.config['dbname'], self.config['stage'])])
 
         # rsync uploads to subdir
         uploads_src = '%s/current/web/wp-content/uploads' % self.config['releasepath']
