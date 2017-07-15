@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.7.0
+    - Snapshot enhancements and corresponding cap tasks ([#170](https://github.com/evolution/wordpress/pull/170))
 - v1.6.5
     - One last fix for snapshots...
 - v1.6.4
