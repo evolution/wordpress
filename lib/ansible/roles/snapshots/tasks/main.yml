@@ -1,14 +1,4 @@
 ---
-- name: Install apt packages
-  apt: pkg={{ item }} state=present
-  with_items: "{{ snapshots_packages }}"
-  sudo: yes
-
-- name: Install pip packages
-  pip: name={{item}} state=present
-  with_items: "{{ snapshots_pip_packages }}"
-  sudo: yes
-
 - name: Configure backup parameters
   set_fact:
     snapshots_config:
@@ -22,13 +12,23 @@
       retention: "{{ snapshots__retention | default() }}"
       retention_lag: "{{ snapshots__retention_lag | default() }}"
   when: >
-    stage == "production" and (
-      snapshots__method is defined
-      or snapshots__credentials is defined
-      or snapshots__interval is defined
-      or snapshots__retention is defined
-      or snapshots__retention_lag is defined
-    )
+    snapshots__method is defined
+    or snapshots__credentials is defined
+    or snapshots__interval is defined
+    or snapshots__retention is defined
+    or snapshots__retention_lag is defined
+
+- name: Install apt packages
+  apt: pkg={{ item }} state=present
+  with_items: "{{ snapshots_packages }}"
+  when: snapshots_config is defined
+  sudo: yes
+
+- name: Install pip packages
+  pip: name={{item}} state=latest
+  with_items: "{{ snapshots_pip_packages }}"
+  when: snapshots_config is defined
+  sudo: yes
 
 - name: Install backup script
   copy: src=backup.py dest=/usr/local/bin/snapshot-backup.py owner=deploy group=deploy mode=0755

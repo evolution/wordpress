@@ -12,12 +12,17 @@ from tabulate import tabulate
 from tempfile import mkdtemp
 
 import json
+import libcloud.security
+import libcloud.utils
 import os
 import pipes
 import re
 import shutil
 import subprocess
 import sys
+
+libcloud.utils.SHOW_IN_DEVELOPMENT_WARNING = False
+libcloud.security.VERIFY_SSL_CERT = True
 
 class BackupManager:
     # static properties
@@ -34,6 +39,9 @@ class BackupManager:
         parser.add_argument('-v','--verbose', action='count', help='increase verbosity')
         parser.add_argument('-q','--quiet', action='store_true', help='limit output to warnings/errors (ignores verbose)')
         parser.add_argument('-s','--simulate', action='store_true', help='simulate backup creation and retention for the past year')
+        parser.add_argument('-l','--list', action='store_true', help='list existing backups')
+        parser.add_argument('-r','--retrieve', help='retrieve backup with given filename')
+        parser.add_argument('-f','--force', action='store_true', help='force backup creation outside of interval')
         parser.add_argument('-c','--config', action='append', help='provide key=value pairs or JSON document', required=True)
         self.arguments = parser.parse_args()
 
@@ -111,8 +119,10 @@ class BackupManager:
 
                 if container_exists == False:
                     self.container = self.driver.create_container(container_name)
+                    self.announce_verbose('Created container: %s' % container_name)
                 else:
                     self.container = self.driver.get_container(container_name)
+                    self.announce_verbose('Found existing container: %s' % container_name)
             else:
                 if not os.path.exists(self.config['container']):
                     os.makedirs(self.config['container'], self.backup_mode)
@@ -121,11 +131,57 @@ class BackupManager:
         if not 'interval' in self.config:
             self.config['interval'] = '1d'
 
+        # list existing backups, and summarily exit
+        if self.arguments.list:
+            backups_available = []
+            if self.config['method'].lower() != 'local':
+                for backup in self.driver.list_container_objects(self.container):
+                    matched = re.match(self.backup_pattern, backup.name)
+                    if matched:
+                        backups_available.append(backup.name)
+            else:
+                for backup in os.listdir(self.config['container']):
+                    matched = re.match(self.backup_pattern, backup)
+                    if matched:
+                        backups_available.append(backup)
+
+            print("\n".join(backups_available))
+            sys.exit()
+
+        # retrieve given backup file, print its path, and summarily exit
+        if self.arguments.retrieve:
+            if self.config['method'].lower() != 'local':
+                backup_object = self.driver.get_object(self.container.name, self.arguments.retrieve)
+                working_dir = mkdtemp(prefix='evolution_restore')
+                backup_dest = '%s/%s' % (working_dir, backup_object.name)
+                download_success = self.driver.download_object(backup_object, backup_dest)
+                if download_success:
+                    print(backup_dest)
+                else:
+                    raise RuntimeError('Failed to download object %s' % backup_object.name)
+            else:
+                backup_path = '%s/%s' % (self.config['container'], self.arguments.retrieve)
+                if os.path.exists(backup_path):
+                    working_dir = mkdtemp(prefix='evolution_restore')
+                    backup_dest = '%s/%s' % (working_dir, self.arguments.retrieve)
+                    shutil.copy(backup_path, backup_dest)
+                    print(backup_dest)
+                else:
+                    raise RuntimeError('Failed to find backup %s' % backup_path)
+            sys.exit()
+
         # inventory existing backups (if any), where key is timestamp and value is libcloud object / local filename
         backups_by_timestamp = {}
         backup_now = False
 
-        if not self.arguments.simulate:
+        # force a backup, then summarily exit
+        if self.arguments.force:
+            self.announce('Forcing backup...')
+            self.make_backup(backups_by_timestamp)
+            self.announce_verbose('Created backup %s' % backups_by_timestamp.keys()[0])
+            sys.exit()
+        # otherwise proceed normally
+        elif not self.arguments.simulate:
             if self.config['method'].lower() != 'local':
                 for backup in self.driver.list_container_objects(self.container):
                     matched = re.match(self.backup_pattern, backup.name)
@@ -184,7 +240,7 @@ class BackupManager:
 
         # dump database to sql file
         verbosity = '--verbose' if self.arguments.verbose > 1 else None
-        self.call(['mysqldump', '--opt', verbosity, '--user=root', '--databases', '%s_%s' % (self.config['dbname'], self.config['stage']), '--result-file', '%s/tarball/db.sql' % working_dir])
+        self.call(['mysqldump', '--opt', verbosity, '--user=root', '--result-file', '%s/tarball/db.sql' % working_dir, '%s_%s' % (self.config['dbname'], self.config['stage'])])
 
         # rsync uploads to subdir
         uploads_src = '%s/current/web/wp-content/uploads' % self.config['releasepath']
@@ -247,6 +303,8 @@ class BackupManager:
         for key in retention.keys():
             if retention[key] is None:
                 retention[key] = 0
+            else:
+                retention[key] = int(retention[key])
 
         return retention
 
