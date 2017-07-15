@@ -4,6 +4,7 @@
 * [wp:{command}[:subcommand[..]]](#wpcommandsubcommand)
 * [evolve:update](#evolveupdate)
 * [evolve:snapshot:simulate](#evolvesnapshotsimulate)
+* [evolve:snapshot:force](#evolvesnapshotforce)
 * [evolve:snapshot:restore](#evolvesnapshotrestore)
 * [evolve:provision](#evolveprovision)
 * [evolve:ssh](#evolvessh)
@@ -84,6 +85,16 @@ bundle exec cap production evolve:snapshot:simulate
 ```
 
 This is useful for estimating storage requirements, as you fine-tune your snapshotting configuration.
+
+### evolve:snapshot:force
+
+Invokes said backup script, forcing a backup to be created outside of the snapshot interval, and skipping retention processing.
+
+```
+bundle exec cap production evolve:snapshot:force
+! Forcing backup...
+Created backup 2017-07-15_18-53-51.021091
+```
 
 ### evolve:snapshot:restore
 

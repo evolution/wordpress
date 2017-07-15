@@ -41,6 +41,7 @@ class BackupManager:
         parser.add_argument('-s','--simulate', action='store_true', help='simulate backup creation and retention for the past year')
         parser.add_argument('-l','--list', action='store_true', help='list existing backups')
         parser.add_argument('-r','--retrieve', help='retrieve backup with given filename')
+        parser.add_argument('-f','--force', action='store_true', help='force backup creation outside of interval')
         parser.add_argument('-c','--config', action='append', help='provide key=value pairs or JSON document', required=True)
         self.arguments = parser.parse_args()
 
@@ -173,7 +174,14 @@ class BackupManager:
         backups_by_timestamp = {}
         backup_now = False
 
-        if not self.arguments.simulate:
+        # force a backup, then summarily exit
+        if self.arguments.force:
+            self.announce('Forcing backup...')
+            self.make_backup(backups_by_timestamp)
+            self.announce_verbose('Created backup %s' % backups_by_timestamp.keys()[0])
+            sys.exit()
+        # otherwise proceed normally
+        elif not self.arguments.simulate:
             if self.config['method'].lower() != 'local':
                 for backup in self.driver.list_container_objects(self.container):
                     matched = re.match(self.backup_pattern, backup.name)

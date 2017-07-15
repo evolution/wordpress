@@ -15,6 +15,7 @@ Evolution lets you generate an entirely versioned, multi-environment Wordpress s
 * [Vagrant](https://www.vagrantup.com/) server for local development
 * Automated [Ansible](http://www.ansible.com/) provisioning
 * Automated [Capistrano](http://capistranorb.com/) deployment
+* Interval and on-demand backups to the cloud provider of your choice, and on-demand restore
 * Passwordless login over SSH
 * Secure HTTPS encryption
 * Server-side [Varnish](https://www.varnish-cache.org/) caching

@@ -11,6 +11,25 @@ namespace :evolve do
       set :snapshot_config, "'#{JSON.dump(config)}'"
     end
 
+    desc "Force creation of a backup"
+    task :force do |task|
+      raise "Cannot create backups for #{fetch(:stage)}!" unless fetch(:stage).to_s == 'production'
+
+      invoke "evolve:retrieve_groupvars"
+      group_vars = fetch(:group_vars)
+
+      unless ['snapshots__method', 'snapshots__credentials', 'snapshots__container', 'snapshots__interval', 'snapshots__retention', 'snapshots__retention_lag'].any? {|k| group_vars.key?(k)}
+        raise "Missing snapshot configuration group vars"
+      end
+
+      # invoke backup script with --force and relevant config
+      invoke "evolve:snapshot:prepare_config", group_vars
+
+      on roles(:web) do |host|
+        execute "/usr/local/bin/snapshot-backup.py", "-vvv", "-f", "-c", fetch(:snapshot_config)
+      end
+    end
+
     desc "Restore a backup to the remote"
     task :restore do |task|
       slug_pattern = '[\w.-]+?-[\d_.-]+?[.][a-z0-9.]+'
