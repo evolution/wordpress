@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.7.1
+    - Potential fix for varnish cache clearing issues ([#168](https://github.com/evolution/wordpress/pull/168))
 - v1.7.0
     - Snapshot enhancements and corresponding cap tasks ([#170](https://github.com/evolution/wordpress/pull/170))
 - v1.6.5
