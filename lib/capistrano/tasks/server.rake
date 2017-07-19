@@ -30,6 +30,25 @@ namespace :evolve do
     invoke "evolve:service", "version"
   end
 
+  namespace :cache do
+    task :clear, :url_pattern do |task, args|
+      # build url pattern, if given
+      url_match = ''
+      if args[:url_pattern]
+        # ensure any single quote literals are properly escaped
+        args[:url_pattern].gsub!(/'/) {|s| "\\'"}
+        url_match = " && req.url ~ #{args[:url_pattern]}"
+      end
+
+      on release_roles(:web) do
+        # forcibly ban any cache objects matching host (and optional url)
+        execute :sudo, :varnishadm, "-S", "/etc/varnish/secret", "'ban req.http.host ~ #{fetch(:domain)}#{url_match}'"
+        # restart the varnish service, to clean up any banned/invalidated cache objects
+        execute :sudo, :service, :varnish, :restart
+      end
+    end
+  end
+
   namespace :logs do
     namespace :apache do
       task :tail, :action do |task, args|
