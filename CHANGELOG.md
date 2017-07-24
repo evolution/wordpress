@@ -1,5 +1,8 @@
 # Changelog
 
+- v1.8.0
+    - Fix for pecl failures ([#136](https://github.com/evolution/wordpress/pull/136))
+    - Dropped support for ansible 1.x
 - v1.7.1
     - Potential fix for varnish cache clearing issues ([#168](https://github.com/evolution/wordpress/pull/168))
 - v1.7.0
