@@ -5,7 +5,7 @@
   sudo:           yes
 
 - name:           Install PECL packages
-  command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates={{ php5_mods_path }}/{{ item if item is string else item.name }}.ini
+  command:        pecl install {{ item if item is string else item.name + '-' + item.version }} creates="{{ php5_lib_path }}/*/{{ item if item is string else item.name }}.so"
   with_items:     "{{ pecl5_packages }}"
   sudo:           yes
 

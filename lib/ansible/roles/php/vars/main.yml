@@ -29,5 +29,8 @@ php7_packages:
 php5_conf_path: '/etc/php5'
 php7_conf_path: '/etc/php/7.1'
 
+php5_lib_path: '/usr/lib/php5'
+php7_lib_path: '/usr/lib/php'
+
 php5_mods_path: '{{ php5_conf_path }}/mods-available'
 php7_mods_path: '{{ php7_conf_path }}/mods-available'
