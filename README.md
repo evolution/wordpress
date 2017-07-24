@@ -40,7 +40,7 @@ You will need:
   * [Hostmanager for Vagrant](https://github.com/smdahlen/vagrant-hostmanager#installation)
 * [npm](https://docs.npmjs.com/getting-started/installing-node)
 * [Bundler](http://bundler.io/)
-* [Ansible](http://docs.ansible.com/intro_installation.html) 1.6+
+* [Ansible](http://docs.ansible.com/intro_installation.html) 2.0+
 * [sshpass](https://gist.github.com/arunoda/7790979)
 
 You can then use npm to install Bower and the Yeoman generator:
