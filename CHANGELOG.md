@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.8.1
+    - Fix a few PHP 7 upgrade bugs ([#171](https://github.com/evolution/wordpress/issues/171), [#172](https://github.com/evolution/wordpress/issues/172), and [#173](https://github.com/evolution/wordpress/issues/173))
 - v1.8.0
     - Fix for pecl failures ([#136](https://github.com/evolution/wordpress/pull/136))
     - Dropped support for ansible 1.x
