@@ -5,5 +5,4 @@ mysql_packages:
   - libapache2-mod-auth-mysql
   - mysql-server-5.6
   - mysql-server-core-5.6
-  - php5-mysql
   - python-mysqldb
