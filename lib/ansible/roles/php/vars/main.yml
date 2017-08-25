@@ -13,6 +13,7 @@ php5_packages:
   - php5-curl
   - php5-gd
   - php5-mcrypt
+  - php5-mysql
   - php5-dev
 
 php7_packages:
@@ -24,6 +25,13 @@ php7_packages:
   - php7.1-curl
   - php7.1-gd
   - php7.1-mcrypt
+  - php7.1-mysql
+  - php7.1-mbstring
+  - php7.1-bcmath
+  - php7.1-bz2
+  - php7.1-dba
+  - php7.1-soap
+  - php7.1-zip
   - php7.1-dev
 
 php5_conf_path: '/etc/php5'

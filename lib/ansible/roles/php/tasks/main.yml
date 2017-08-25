@@ -13,14 +13,22 @@
 
 - debug: msg={{ php_major_version }}
 
+- set_fact:
+    php_upgrade: '{{ php_major_version.stdout == "5" and php__version_7 == true }}'
+
+- set_fact:
+    php_downgrade: '{{ php_major_version.stdout == "7" and php__version_7 == false }}'
+
+- debug: msg='{{ "Upgrading" if php_upgrade else "Downgrading" if php_downgrade else "No change in" }} PHP major version'
+
 # remove php7 as necessary before we install php5
 - include: php7-uninstall.yml
-  when: php_major_version.stdout == "7" and php__version_7 == false
+  when: php_downgrade
   sudo: yes
 
 # remove php5 as necessary before we install php7
 - include: php5-uninstall.yml
-  when: php_major_version.stdout == "5" and php__version_7 == true
+  when: php_upgrade
   sudo: yes
 
 - include: php5-install.yml

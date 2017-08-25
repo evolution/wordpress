@@ -7,6 +7,12 @@
   apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
   sudo:           yes
 
+# if upgrading to 7 or downgrading to 5, remove & purge existing agent, let it install again with new php
+- name:           Remove and purge existing agent (when upgrading/downgrading PHP)
+  apt:            name=newrelic-php5 state=absent purge=yes
+  when:           php_downgrade == true or php_upgrade == true
+  sudo:           yes
+
 - name:           Install PHP agent and sys monitor
   apt:            name={{ item }} state=latest update_cache=yes
   sudo:           yes
