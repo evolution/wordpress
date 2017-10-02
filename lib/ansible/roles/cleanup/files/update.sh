@@ -159,10 +159,12 @@ if [ $WP_INSTALLED -eq 0 ]; then
     if [ -e "${DEPLOY_ROOT}/.git" ]; then
         # for local stage nfs mounts
         GIT_BRANCH=$(cd $DEPLOY_ROOT; git rev-parse --abbrev-ref HEAD)
+        GIT_COMMIT=$(cd $DEPLOY_ROOT; git rev-parse HEAD)
         GIT_ORIGIN=$(cd $DEPLOY_ROOT; git config --get remote.origin.url)
     else
         # for staging/prod deployments from a bare repo
         GIT_BRANCH=$(cd $DEPLOY_ROOT/..; basename $(pwd))
+        GIT_COMMIT=$(cd $DEPLOY_ROOT/; cat REVISION)
         GIT_ORIGIN=$(cd $DEPLOY_ROOT/../repo; git config --get remote.origin.url)
     fi
 
@@ -170,29 +172,53 @@ if [ $WP_INSTALLED -eq 0 ]; then
     rm -rf $CHECKOUT_ROOT
     vexec git clone --quiet -b $GIT_BRANCH $GIT_ORIGIN $CHECKOUT_ROOT
 
+    # work out of the checked out clone, for now
+    PPWD=$(pwd)
+    cd $CHECKOUT_ROOT
+
+    # for parity, checkout same commit as currently deployed release
+    vexec git checkout --quiet $GIT_COMMIT
+
     # copy any updates to be staged
     cp -a $DEPLOY_ROOT/bower.json $CHECKOUT_ROOT/bower.json
-    cp -a $DEPLOY_ROOT/web/wp-content/plugins/. $CHECKOUT_ROOT/web/wp-content/plugins/
-    cp -a $DEPLOY_ROOT/web/wp-content/themes/. $CHECKOUT_ROOT/web/wp-content/themes/
+    if [ -z "$SKIP_PLUGINS" ]; then
+        cp -a $DEPLOY_ROOT/web/wp-content/plugins/. $CHECKOUT_ROOT/web/wp-content/plugins/
+    fi
+    if [ -z "$SKIP_THEMES" ]; then
+        cp -a $DEPLOY_ROOT/web/wp-content/themes/. $CHECKOUT_ROOT/web/wp-content/themes/
+    fi
 
     # stage that ish
-    (\
-        cd $CHECKOUT_ROOT ;\
-        git add -A ./bower.json ;\
-        git add -A ./web/wp-content/plugins/ ;\
-        git add -A ./web/wp-content/themes/ \
-    )
+    git add -A ./bower.json
+    git add -A ./web/wp-content/plugins/
+    git add -A ./web/wp-content/themes/
 
-    # commit and push any staged changes
-    if (cd $CHECKOUT_ROOT ; git diff-index --quiet HEAD --); then
-        rm -rf $CHECKOUT_ROOT
+    # if no changes staged, we're done...
+    if (git diff-index --quiet HEAD --); then
+        cd $PPWD; rm -rf $CHECKOUT_ROOT
+    # otherwise...
     else
-        (\
-            cd $CHECKOUT_ROOT ;\
-            vexec git commit -m "Automatic ${MAJORITY//--/} wordpress update at $(date)" ;\
-            vexec git push --quiet origin $GIT_BRANCH 2> >(grep -v "^remote:" 1>&2) \
-        )
-        vecho "${GREEN}Update committed and pushed${RESET}"
+        # capture changes to an external diff file
+        git diff --cached > ../$GIT_COMMIT.diff
+        # blow away changes (staged or unstaged) and checkout the branch head
+        git reset --quiet --hard; git clean --quiet -fd; vexec git checkout --quiet $GIT_BRANCH
+        # apply diff
+        mv ../$GIT_COMMIT.diff ./; git apply --index $GIT_COMMIT.diff; rm $GIT_COMMIT.diff
+
+        # if no changes applied, do nothing...
+        if (git diff-index --quiet HEAD --); then
+            :
+        # otherwise...
+        else
+            # commit and push as normal
+            vexec git commit -m "Automatic ${MAJORITY//--/} wordpress update at $(date)"
+            vexec git push --quiet origin $GIT_BRANCH 2> >(grep -v "^remote:" 1>&2)
+
+            vecho "${GREEN}Update committed and pushed${RESET}"
+        fi
+
+        # cleanup
+        cd $PPWD; rm -rf $CHECKOUT_ROOT
     fi
 else
     vecho "${RED}Wordpress is not installed${RESET}"
