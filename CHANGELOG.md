@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.9.1
+    - Added php7 xml package ([#177](https://github.com/evolution/wordpress/pull/177))
 - v1.9.0
     - Fix an auto-update bug ([#175](https://github.com/evolution/wordpress/pull/175))
 - v1.8.1
