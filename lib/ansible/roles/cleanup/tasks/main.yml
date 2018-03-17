@@ -1,4 +1,13 @@
 ---
+- set_fact:
+    custom__packages: []
+  when: custom__packages is undefined
+
+- name:         Install custom packages
+  apt:          pkg={{ item }} state=present
+  with_items:   "{{ custom__packages }}"
+  sudo:         yes
+
 - name:         Ensure logrotate runs hourly
   command:      mv /etc/cron.daily/logrotate /etc/cron.hourly/logrotate
   args:

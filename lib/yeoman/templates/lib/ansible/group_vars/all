@@ -12,6 +12,9 @@ mysql:
   password:     <%= props.DB_PASSWORD %>
   host:         <%= props.DB_HOST %>
 
+# custom__packages:
+#   - "extra-apt-package"
+
 <% if (props.datadog) { %>datadog_api_key: '<%= props.datadog %>'<% } %>
 
 # php__memory_limit:
