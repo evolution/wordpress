@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.10.0
+    - Added custom apt package installation ([#179](https://github.com/evolution/wordpress/pull/179))
 - v1.9.1
     - Added php7 xml package ([#177](https://github.com/evolution/wordpress/pull/177))
 - v1.9.0
