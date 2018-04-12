@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.10.1
+    - Fixed `cache:clear` cap task
 - v1.10.0
     - Added custom apt package installation ([#179](https://github.com/evolution/wordpress/pull/179))
 - v1.9.1
