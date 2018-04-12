@@ -42,7 +42,7 @@ namespace :evolve do
 
       on release_roles(:web) do
         # forcibly ban any cache objects matching host (and optional url)
-        execute :sudo, :varnishadm, "-S", "/etc/varnish/secret", "'ban req.http.host ~ #{fetch(:domain)}#{url_match}'"
+        execute :sudo, :varnishadm, "-T", "127.0.0.1:6082", "-S", "/etc/varnish/secret", "'ban req.http.host ~ #{fetch(:domain)}#{url_match}'"
         # restart the varnish service, to clean up any banned/invalidated cache objects
         execute :sudo, :service, :varnish, :restart
       end
