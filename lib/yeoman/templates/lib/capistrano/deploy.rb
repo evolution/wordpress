@@ -16,6 +16,7 @@ set :deploy_to,     "/var/www/#{fetch(:domain)}/#{fetch(:stage)}/#{fetch(:branch
 set :linked_dirs,   %w{web/wp-content/uploads}
 set :wp_path,       "#{release_path}/web/wp"
 set :www,           <%= props.www ? 'true' : 'false' %>
+set :git_strategy,  Capistrano::Git::SubmoduleStrategy
 
 namespace :deploy do
   after :updated, :bower_install do

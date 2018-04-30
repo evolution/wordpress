@@ -7,6 +7,9 @@ require 'capistrano/setup'
 # Includes default deployment tasks
 require 'capistrano/deploy'
 
+# Load git submodules as necessary
+require 'capistrano/git-submodule-strategy'
+
 # Includes tasks from other gems included in your Gemfile
 #
 # For documentation on these, see for example:
