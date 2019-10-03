@@ -1,5 +1,7 @@
 # Changelog
 
+- v1.10.2
+    - Compatibility updates for python 3 and ansible latest (2.8.5 as of this writing)
 - v1.10.1
     - Fixed `cache:clear` cap task
 - v1.10.0
