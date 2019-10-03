@@ -19,21 +19,19 @@
     or snapshots__retention_lag is defined
 
 - name: Install apt packages
-  apt: pkg={{ item }} state=present
-  with_items: "{{ snapshots_packages }}"
+  apt: pkg={{ snapshots_packages }} state=present
   when: snapshots_config is defined
-  sudo: yes
+  become: true
 
 - name: Install pip packages
-  pip: name={{item}} state=latest
-  with_items: "{{ snapshots_pip_packages }}"
+  pip: name={{ snapshots_pip_packages }} state=latest
   when: snapshots_config is defined
-  sudo: yes
+  become: true
 
 - name: Install backup script
   copy: src=backup.py dest=/usr/local/bin/snapshot-backup.py owner=deploy group=deploy mode=0755
   when: snapshots_config is defined
-  sudo: yes
+  become: true
 
 - name: Disable production backups
   cron:
@@ -42,7 +40,7 @@
     user: deploy
     state: absent
   when: snapshots_config is undefined and stage == "production"
-  sudo: yes
+  become: true
 
 - name: Set up production backups via user-level crontab
   cron:
@@ -51,4 +49,4 @@
     user: deploy
     job: "/usr/local/bin/snapshot-backup.py --quiet -c '{{ snapshots_config | to_json }}'"
   when: stage == "production" and snapshots_config is defined
-  sudo: yes
+  become: true

@@ -1,12 +1,11 @@
 ---
 - name:           Install Varnish packages
-  apt:            pkg={{ item }} state=present
-  with_items:     "{{ varnish_packages }}"
-  sudo:           yes
+  apt:            pkg={{ varnish_packages }} state=present
+  become: true
 
 - name:           Create Varnish directory structure
   file:           path={{ item }} state=directory mode=0644
-  sudo:           yes
+  become: true
   with_items:
     - /etc/varnish
     - /etc/varnish/conf.d
@@ -15,7 +14,7 @@
 
 - name:           Copy Varnish configuration files
   copy:           src=etc-varnish/{{ item }} dest=/etc/varnish/{{ item }} mode=0644
-  sudo:           yes
+  become: true
   with_items:
     - conf.d/fetch/wordpress.vcl
     - conf.d/receive/wordpress.vcl
@@ -25,7 +24,7 @@
 
 - name:           Copy Varnish script
   copy:           src=etc-default-varnish dest=/etc/default/varnish mode=0644
-  sudo:           yes
+  become: true
   notify:
     - restart apache
     - restart varnish
@@ -36,16 +35,16 @@
 - name:           Disable apache module "rpaf" (if installed)
   command:        a2dismod rpaf
   when:           rpaf_load.stat.exists
-  sudo:           yes
+  become: true
   notify:         restart apache
 
 - name:           Configure apache module "remoteip"
   copy:           src=remoteip.conf dest=/etc/apache2/mods-available/remoteip.conf mode=0644
-  sudo:           yes
+  become: true
 
 - name:           Enable apache module "remoteip"
   command:        a2enmod remoteip
-  sudo:           yes
+  become: true
   notify:         restart apache
 
 - name:           Change Apache NameVirtualHost 80 => 8080 (2.2)
@@ -54,14 +53,14 @@
     - restart apache
     - restart varnish
   when:           apache_version.stdout == '2.2'
-  sudo:           yes
+  become: true
 
 - name:           Change Apache Listen 80 => 8080
   lineinfile:     regexp='^Listen' line='Listen 8080' dest=/etc/apache2/ports.conf backup=yes
   notify:
     - restart apache
     - restart varnish
-  sudo:           yes
+  become: true
 
 - name:           Change VirtualHosts from 80 => 8080
   lineinfile:     regexp='^<VirtualHost \*:80>' line='<VirtualHost *:8080>' dest=/etc/apache2/sites-available/{{ "%03d" | format(item.key_1) }}-{{ item.value }}.{{ domain }}.conf
@@ -70,4 +69,4 @@
   notify:
     - restart apache
     - restart varnish
-  sudo:           true
+  become: true

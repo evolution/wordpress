@@ -24,20 +24,20 @@
 # remove php7 as necessary before we install php5
 - include: php7-uninstall.yml
   when: php_downgrade
-  sudo: yes
+  become: true
 
 # remove php5 as necessary before we install php7
 - include: php5-uninstall.yml
   when: php_upgrade
-  sudo: yes
+  become: true
 
 - include: php5-install.yml
   when: php__version_7 == false
-  sudo: yes
+  become: true
 
 - include: php7-install.yml
   when: php__version_7 == true
-  sudo: yes
+  become: true
 
 - name: Register php_conf_path for subsequent roles
   set_fact:

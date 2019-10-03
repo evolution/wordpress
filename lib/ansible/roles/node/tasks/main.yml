@@ -1,13 +1,13 @@
 ---
 - name:           Add Node apt-repository
   apt_repository: repo='ppa:chris-lea/node.js' state=present update_cache=yes
-  sudo:           yes
+  become: true
 
 - name:           Install node
   apt:            pkg=nodejs state=present
-  sudo:           yes
+  become: true
 
 - name:           Install global node modules
   command:        npm install -g {{ item }}
   with_items:     "{{ node_modules }}"
-  sudo:           yes
+  become: true

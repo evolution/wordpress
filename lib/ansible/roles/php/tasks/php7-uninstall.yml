@@ -2,18 +2,17 @@
 - name:           Uninstall PECL packages
   command:        pecl uninstall {{ item if item is string else item.name + '-' + item.version }} removes={{ php7_mods_path }}/{{ item if item is string else item.name }}.ini
   with_items:     "{{ pecl7_packages }}"
-  sudo:           yes
+  become: true
 
 - name:           Remove PECL ini files as necessary
   file:           state=absent path="{{ php7_mods_path }}/{{ item if item is string else item.name }}.ini"
   with_items:     "{{ pecl7_packages }}"
-  sudo:           yes
+  become: true
 
 - name:           Uninstall PHP packages
-  apt:            state=absent pkg={{ item }}
-  with_items:     "{{ php7_packages }}"
-  sudo:           yes
+  apt:            state=absent pkg={{ php7_packages }}
+  become: true
 
 - name:           Remove PHP7 ppa
   apt_repository: repo="ppa:ondrej/php" state=absent update_cache=yes
-  sudo:           yes
+  become: true

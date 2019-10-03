@@ -4,8 +4,8 @@
 
 - name:         Copy latest wp-cli to remote
   copy:         src=/tmp/wp-cli dest=/usr/local/bin/wp force=yes mode=0755 owner=deploy group=deploy
-  sudo:         yes
+  become: true
 
 - name:         Ensure deploy can both write and execute wp-cli
   file:         path=/usr/local/bin group=deploy mode=0775
-  sudo:         yes
+  become: true

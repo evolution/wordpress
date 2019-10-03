@@ -2,7 +2,7 @@
 - name:           Disable allow_url_fopen
   lineinfile:     dest={{ php_conf_path }}/apache2/php.ini backup=yes regexp='^[;# ]*allow_url_fopen' line='allow_url_fopen = Off'
   when:           php__version_7 == false
-  sudo:           yes
+  become: true
 
 - include:        suhosin.yml
   when:           php__version_7 == false

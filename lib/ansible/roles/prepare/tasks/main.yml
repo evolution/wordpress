@@ -9,5 +9,5 @@
 
 - name:         Stop any existing evolution services
   service:      name=evolution-wordpress state=stopped
-  sudo:         yes
+  become: true
   when:         evo_init.stat.exists == True
