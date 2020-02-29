@@ -18,7 +18,7 @@ GEM
     net-ssh (2.9.1)
     rainbow (2.2.2)
       rake
-    rake (10.3.2)
+    rake (13.0.1)
     sshkit (1.5.1)
       colorize
       net-scp (>= 1.1.2)
